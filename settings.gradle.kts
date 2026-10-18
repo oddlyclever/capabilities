@@ -1,0 +1,35 @@
+// Not `capabilities`: a consumer that includes this build often has a `:capabilities` project of its own, and
+// IntelliJ names modules after the root project.
+rootProject.name = "oddlyclever-capabilities"
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+// No mavenLocal(): everything must resolve from public repositories, so a build that passes here passes for anyone.
+pluginManagement {
+    repositories {
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositories {
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
+        mavenCentral()
+    }
+}
+
+// One `include(":<module>")` per module, each a standalone Kotlin Multiplatform library published as
+// `com.oddlyclever:<module>`. A module that drops a standard target says which, and why, beside its line.
