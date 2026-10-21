@@ -44,3 +44,6 @@ include(":kartog-track")
 include(":kartog-geojson")
 // JVM only: kartog-headless bundles Skia native libraries for servers. Devices use kartog-static.
 include(":kartog-headless")
+
+// WebP encoding with metadata, on every target.
+include(":webp")
