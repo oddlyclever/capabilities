@@ -14,7 +14,6 @@ import com.coderwise.libs.mapview.geojson.FeatureCollection
 import com.coderwise.libs.mapview.geojson.GeoJson
 import com.coderwise.libs.mapview.geojson.GeoJsonStyle
 import com.coderwise.libs.mapview.geojson.parseGeoJson
-import com.oddlyclever.kartog.TileClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
@@ -39,22 +38,21 @@ fun MapOverlayScope.GeoJsonLayer(
 }
 
 /**
- * GeoJSON fetched from [url] through the app's [client] and drawn on a `KartogMap`, in its overlay. Nothing is drawn
- * until it arrives, or if it cannot be fetched or is not GeoJSON. [cacheKey] names it to the client's cache.
+ * GeoJSON fetched from [url] with the app's [load] and drawn on a `KartogMap`, in its overlay. Nothing is drawn until
+ * it arrives, or if [load] returns null or the text is not GeoJSON. It is fetched again only when [url] changes.
  */
 @Composable
 fun MapOverlayScope.RemoteGeoJsonLayer(
     url: String,
-    client: TileClient,
-    cacheKey: String = "geojson/$url",
+    load: suspend (url: String) -> ByteArray?,
     style: GeoJsonStyle = GeoJsonStyle(),
     minZoom: Float = 0f,
     touchWidth: Dp = 24.dp,
     onFeatureClick: ((Feature) -> Unit)? = null,
 ) {
     var data by remember(url) { mutableStateOf<FeatureCollection?>(null) }
-    LaunchedEffect(url, client, cacheKey) {
-        data = client.fetch(url, cacheKey)?.let { bytes -> withContext(Dispatchers.Default) { parseOrNull(bytes.decodeToString()) } }
+    LaunchedEffect(url) {
+        data = load(url)?.let { bytes -> withContext(Dispatchers.Default) { parseOrNull(bytes.decodeToString()) } }
     }
     val loaded = data ?: return
     GeoJson(loaded, style = style, minZoom = minZoom, touchWidth = touchWidth, onFeatureClick = onFeatureClick)

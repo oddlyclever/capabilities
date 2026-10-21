@@ -14,8 +14,7 @@ import kotlin.test.assertTrue
 
 /**
  * Pins the root's map helpers: the visible bounds hold what is on screen, turned or not and across the antimeridian,
- * a bounds box answers containment the way a map shows it, and a tile client is asked with a key naming source and
- * tile.
+ * a bounds box answers containment the way a map shows it, and a tile client is asked for a source and a tile.
  */
 class MapStateTest {
 
@@ -47,11 +46,11 @@ class MapStateTest {
     }
 
     @Test
-    fun aTileClientIsAskedWithASourceKeyedCacheKey() = runTest {
-        var asked: Pair<String, String>? = null
-        val client = TileClient { url, cacheKey -> asked = url to cacheKey; ByteArray(1) }
+    fun aTileClientIsAskedForTheSourceAndTile() = runTest {
+        var asked: String? = null
+        val client = TileClient { source, key -> asked = source.url(key); ByteArray(1) }
         val source = TileSource(id = "streets", urlTemplate = "https://tiles.example.com/{z}/{x}/{y}.pbf")
         source.fetch(client, TileKey(3, 2, 1))
-        assertEquals("https://tiles.example.com/3/2/1.pbf" to "streets/3/2/1", asked, "url and cache key")
+        assertEquals("https://tiles.example.com/3/2/1.pbf", asked, "the client builds the URL from the source and tile")
     }
 }

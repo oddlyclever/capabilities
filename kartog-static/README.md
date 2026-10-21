@@ -1,6 +1,6 @@
 # kartog-static
 
-Maps drawn without a composition for [kartog](../kartog): to an image for a share sheet, a notification or an upload, to a `Painter` that scales like a vector image, or as a `StaticMapImage` in a layout. Encoded as PNG or WebP. On a server, [kartog-headless](../kartog-headless) wraps it in one call.
+Maps drawn without a composition for [kartog](../kartog): to an image for a share sheet, a notification or an upload; to a `Painter` that scales like a vector image; or as a `StaticMapImage` in a layout. Encoded as PNG or WebP. On a server, [kartog-headless](../kartog-headless) wraps it in one call.
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 
@@ -10,11 +10,27 @@ Maps drawn without a composition for [kartog](../kartog): to an image for a shar
 implementation("com.oddlyclever:kartog-static:0.0.3")
 ```
 
-It depends on `kartog` alone. Layers come from the module that draws them, `kartog-vector` or `kartog-raster`, so an app takes only the one it uses. There is no dependency-injection container.
+It depends on `kartog` alone. Layers come from the module that draws them, `staticVectorLayer` in kartog-vector or `staticRasterLayer` in kartog-raster, so an app takes only the one it uses. There is no dependency-injection container.
 
 The Kotlin package is `com.oddlyclever.kartog.staticmap`, not `.static`: `static` is a Java keyword, and Android generates Java classes in a library's package.
 
-## Use
+## A map in a layout
+
+```kotlin
+StaticMapImage(
+    layers = listOf(staticVectorLayer(streets.zoomRange) { key -> streets.fetch(client, key) }),
+    modifier = Modifier.fillMaxWidth().aspectRatio(3f / 2f),
+    fit = route,                                   // or position = CameraPosition(center, zoom)
+    contentDescription = "Map of the route",
+    placeholder = { Shimmer() },
+) { projection ->
+    drawTrack(track, projection)                   // from kartog-track
+}
+```
+
+A map that does not move, for a card, a list row or a thumbnail. It renders at the size it is laid out and again when that changes, framed on `position`, or fitted to `fit` inside `padding`. `placeholder` fills the space until the tiles arrive. It is drawn as a `StaticMapPainter`, so it stays sharp if the layout scales it.
+
+## A map as an image
 
 ```kotlin
 val size = IntSize(600, 400)
@@ -22,27 +38,43 @@ val density = Density(2f)
 val image: ImageBitmap = renderMap(
     size = size,
     density = density,
-    position = fit(track.map { it.position }, size, density, padding = 24.dp),
-    layers = listOf(staticVectorLayer(streets.zoomRange, KartogStyles.Light) { key -> http.get(streets.url(key)) }),
+    position = fit(route, size, density, padding = 24.dp),
+    layers = listOf(staticVectorLayer(streets.zoomRange, KartogStyles.Light) { key -> streets.fetch(client, key) }),
+    background = KartogStyles.Light.background,
 ) { projection ->
-    drawTrack(track, projection)          // from kartog-track
+    drawTrack(track, projection)
 }
-val png: ByteArray = image.encodeToPng()
+val webp: ByteArray = image.encodeToWebp()
 ```
 
 - **The image matches the live map.** Tiles are laid out on the grid map-view would use for the position, turned to its bearing, magnified past each layer's last level, and drawn by the same renderers. A tile a layer lacks is drawn from its nearest ancestor, up to five levels up; where there is none, `background` shows.
 - **Every tile is fetched at once**, so rendering takes as long as the slowest tile, not the sum of them.
-- **The overlay is drawn upright** through a `StaticProjection`, which places a coordinate where it falls on the image and gives the metres a pixel covers. Anything can be drawn there: map-view-geojson's `drawGeoJson` with an adapter, pins, text.
-- **Tracks** are drawn with kartog-track's `drawTrack`, through the projection.
-- **`StaticMapImage`** is a map in a layout that does not move: a card, a thumbnail. It renders at the size it is laid out, for a given position or fitted to points, and shows a placeholder until the tiles arrive.
-- **`prepareMap`** fetches the tiles once and returns a `PreparedMap` that draws at any size. As a `StaticMapPainter` in an `Image`, it scales like a vector image: roads and outlines stay sharp. Raster tiles in it are bitmaps and blur when enlarged.
-- **Labels are not drawn yet.** map-view draws place and road names only inside a composition; drawing them here waits on a change to map-view.
-- **Encoding:** `encodeToPng()` everywhere, lossless, and `encodeToWebp(quality)` for a smaller image to send.
+- **The overlay is drawn upright** through a `StaticProjection`: `project(point)` places a coordinate on the image, `metresPerPixel` turns a distance into a radius, and `bearing` turns a heading onto the image. To draw over an image rendered earlier, build a `StaticProjection(position, size, density)` with the same values.
+- **Names are not drawn yet.** map-view draws place and road names only inside a composition; drawing them here waits on a change to map-view.
+
+## A map that scales like a vector image
+
+```kotlin
+val map = prepareMap(size, density, position, layers)          // fetches the tiles once
+Image(StaticMapPainter(map) { drawTrack(track, it) }, contentDescription = null, Modifier.size(1200.dp, 800.dp))
+val thumbnail = map.toImageBitmap()                             // the same map as a bitmap
+```
+
+`prepareMap` fetches and decodes the tiles and returns a `PreparedMap` that draws at any size. As a `StaticMapPainter`, its intrinsic size is the size it was prepared for, and drawn larger it scales as a whole, roads, outlines and overlay included, the way an `ImageVector` does. Raster tiles in it are bitmaps and blur when enlarged. `renderMap` is `prepareMap` followed by `toImageBitmap`.
+
+## Encoding
+
+| Call | What it gives |
+|---|---|
+| `image.encodeToPng()` | lossless, larger; shown everywhere |
+| `image.encodeToWebp(quality = 90)` | lossy, several times smaller than PNG; 90 keeps thin roads sharp |
+
+Encoding uses Skia on the JVM, iOS and the web, and Android's own encoder on Android. Neither writes metadata such as a GPS position; that waits on a WebP capability that bundles libwebp.
 
 ## On a server
 
-`renderMap` runs on the JVM with no display, drawing through Skia into memory. It has been run on headless Linux, arm64 and x64, with three things in place:
+`renderMap` runs on the JVM with no display, drawing through Skia into memory. kartog-headless packages it for servers with Skia's native libraries included. Run directly, a server needs:
 
 - **Java 21,** since map-view's classes are built for it.
-- **Skia's native library for the server's platform** on the classpath: `org.jetbrains.skiko:skiko-awt-runtime-linux-x64` or `-linux-arm64`, at the Skiko version Compose brings.
-- **The system libraries that library links against,** even though nothing is shown on a screen: `libGL.so.1`, `libX11.so.6` and `libEGL.so.1`. On Debian or Ubuntu they are the packages `libgl1`, `libx11-6` and `libegl1`. Without them the first render fails with `LibraryLoadException: Failed to load library … libskiko-linux-….so`.
+- **Skia's native library for its platform** on the classpath: `org.jetbrains.skiko:skiko-awt-runtime-linux-x64` or `-linux-arm64`, at the Skiko version Compose brings.
+- **The system libraries that library links against,** even though nothing is shown on a screen: `libGL.so.1`, `libX11.so.6` and `libEGL.so.1`. On Debian or Ubuntu they are the packages `libgl1`, `libx11-6` and `libegl1`. Without them the first render fails with a `LibraryLoadException` naming the missing library.

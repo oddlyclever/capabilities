@@ -1,18 +1,25 @@
 package com.oddlyclever.kartog
 
+import com.coderwise.libs.mapview.TileKey
+
 /**
  * How kartog's layers get tile bytes: the app's HTTP client, keys and cache, behind one call.
  *
- * kartog fetches nothing itself. A layer asks for a URL built from its [TileSource], with a [cacheKey] naming the tile
- * by source and position, so a cache keyed on it never confuses two sources. What happens next (headers, keys, a disk
- * cache, offline modes) is the app's; map-view-cache's `cached` and `FileTileStore` are one way to do the caching.
+ * kartog fetches nothing itself. A layer asks for the tile at [key] from [source]; the app builds the URL with
+ * `source.url(key)`, adds whatever headers it needs, and caches as it likes. map-view-cache's stores are keyed the same
+ * way, by source and tile, so they go in front with no translation:
+ *
+ * ```
+ * val client = TileClient { source, key ->
+ *     cached(store, source.id, CacheMode.CacheFirst) { k -> http.get(source.url(k)).body<ByteArray>() }(key)
+ * }
+ * ```
  *
  * Return null for a tile that is not there or could not be fetched: the map shows the nearest ancestor instead.
  */
 fun interface TileClient {
-    suspend fun fetch(url: String, cacheKey: String): ByteArray?
+    suspend fun fetch(source: TileSource, key: TileKey): ByteArray?
 }
 
-/** The bytes of the tile at [key] from this source, through [client], keyed as `<id>/<z>/<x>/<y>`. */
-suspend fun TileSource.fetch(client: TileClient, key: com.coderwise.libs.mapview.TileKey): ByteArray? =
-    client.fetch(url(key), "$id/${key.z}/${key.x}/${key.y}")
+/** The bytes of the tile at [key] from this source, through [client]. */
+suspend fun TileSource.fetch(client: TileClient, key: TileKey): ByteArray? = client.fetch(this, key)
