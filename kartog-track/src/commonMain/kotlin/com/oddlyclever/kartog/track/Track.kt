@@ -75,13 +75,19 @@ data class TrackStyle(
     val endColor: Color = Color(0xFFDC2626),
     val waypointColor: Color = Color(0xFF2563EB),
     val endMarkerRadius: Dp = 6.dp,
+    /**
+     * Whether the start and end are marked. Off for a track still being recorded, whose end is the user's position
+     * and already has a marker of its own. Waypoints are marked either way.
+     */
+    val markEnds: Boolean = true,
 )
 
 /**
  * A recorded track drawn through [projection], on a live map ([Track]) or over a map image: the line, the speed along it, an accuracy circle and a heading marker at
  * the last fix, and markers at its ends and at [waypoints].
  *
- * **Only the ends and the waypoints are marked, never the track's own points.** A dense track marked point by point
+ * **Only the ends and the waypoints are marked, never the track's own points**, and the ends not at all with
+ * [TrackStyle.markEnds] off. A dense track marked point by point
  * becomes a band of rings that hides the line. The start is [TrackStyle.startColor] and the end
  * [TrackStyle.endColor]; when they would overlap, as on a loop, one marker shows both, the end with the start inside
  * it. Ends are drawn last, so nothing covers them.
@@ -177,6 +183,7 @@ private fun DrawScope.drawEnds(line: List<Offset>, waypoints: List<Offset>, styl
         return
     }
     for (point in waypoints) drawCircle(style.waypointColor, 4.dp.toPx(), point)
+    if (!style.markEnds) return
     val start = line.first()
     val end = line.last()
     if (hypot(start.x - end.x, start.y - end.y) < radius * 2) {

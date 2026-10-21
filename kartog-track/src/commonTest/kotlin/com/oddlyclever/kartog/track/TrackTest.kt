@@ -16,7 +16,7 @@ import kotlin.test.assertEquals
 
 /**
  * Pins how a track is marked: its start and end in their own colours, a loop's two ends as one marker with the start
- * inside the end, and an accuracy circle drawn only when the last fix carries one.
+ * inside the end, ends left unmarked when asked, and an accuracy circle drawn only when the last fix carries one.
  */
 class TrackTest {
 
@@ -43,6 +43,14 @@ class TrackTest {
         val image = draw(listOf(TrackPoint(here), TrackPoint(LatLon(70.0, 140.0)), TrackPoint(here)), plain)
         assertEquals(plain.startColor.toArgb(), image.pixel(100, 50), "a loop's start shows inside its end")
         assertEquals(plain.endColor.toArgb(), image.pixel(105, 50), "and the end shows round it")
+    }
+
+    @Test
+    fun endsCanBeLeftUnmarked() = runTest {
+        awaitSkia()
+        val image = draw(listOf(TrackPoint(LatLon(20.0, 20.0)), TrackPoint(LatLon(60.0, 150.0))), plain.copy(markEnds = false))
+        assertEquals(0, image.pixel(20, 20), "no start marker while recording")
+        assertEquals(0, image.pixel(150, 60), "no end marker on the user's position")
     }
 
     @Test

@@ -51,6 +51,7 @@ A `TrackPoint(position, speed, accuracy, heading)` is a recorded fix: a position
 | `heading`, `markerColor` | `HeadingMarker.Cone` | the marker at the last fix: `Cone` (a translucent wedge), `Arrow`, `Dot` or `None` |
 | `showAccuracy`, `accuracyColor` | on | the accuracy circle at the last fix, when it carries an accuracy |
 | `startColor`, `endColor`, `waypointColor`, `endMarkerRadius` | green, red, blue, 6 dp | the markers at the ends and at waypoints |
+| `markEnds` | on | off for a track still being recorded, whose end is the user's position and has its own marker |
 
 - **Only the ends and waypoints are marked, never the track's own points.** A dense track marked point by point becomes a band of rings that hides the line.
 - **A loop shows one marker for both ends:** when start and end would overlap, the end is drawn as a ring with the start inside it.
