@@ -10,7 +10,9 @@ A module that cannot support one of these says which and why, in its own README 
 
 ## Modules
 
-None yet. Modules arrive here one at a time as each is ready for public use, and are listed here as they do.
+| Module | What it does |
+|---|---|
+| [`kartog`](kartog) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the base of the kartog family, which its extensions build on. In development. |
 
 ## How the modules are shaped
 
@@ -57,7 +59,7 @@ The app keeps depending on the same coordinates, and Gradle builds them from you
 
 `check` compiles every target and runs every module's tests. A single module is `./gradlew :<module>:check`.
 
-The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on, and the modules compile for JDK 17. Building the iOS targets needs a Mac with Xcode.
+The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Modules compile for JDK 17 unless a dependency needs newer; kartog compiles for 21 because map-view does. Building the iOS targets needs a Mac with Xcode.
 
 ## License
 

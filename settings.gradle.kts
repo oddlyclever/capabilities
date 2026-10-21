@@ -33,3 +33,6 @@ dependencyResolutionManagement {
 
 // One `include(":<module>")` per module, each a standalone Kotlin Multiplatform library published as
 // `com.oddlyclever:<module>`. A module that drops a standard target says which, and why, beside its line.
+
+// kartog: maps on map-view. The base every kartog-<part> extension builds on.
+include(":kartog")

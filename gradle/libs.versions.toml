@@ -19,7 +19,24 @@ compose-multiplatform = "1.12.1"
 # root build.gradle.kts for why).
 webpack = "5.111.1"
 
+# map-view, the tiled map :kartog builds on. Its family is released in lockstep, so one version covers every
+# artifact of it. It is 0.x and its types are part of kartog's public API, so a bump is a deliberate change.
+mapView = "0.1.4"
+
+[libraries]
 # Libraries are added with the modules that need them, each with a comment naming that module and why.
+
+# :kartog exposes these as api: MapCameraState, TileKey and MapState are kartog's own vocabulary.
+mapview-base = { module = "com.coderwise.libs:map-view", version.ref = "mapView" }
+mapview-tiles-core = { module = "com.coderwise.libs:map-view-tiles", version.ref = "mapView" }
+
+# Compose at the plugin's version. :kartog declares these because map-view 0.1.4 was built against Compose 1.12.0,
+# and without them its api dependency resolves Compose a patch behind the compiler plugin.
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
