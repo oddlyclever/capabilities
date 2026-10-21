@@ -56,10 +56,6 @@ kotlin {
                 // exposes Compose as api in turn, which is where this module's Compose comes from.
                 api(libs.mapview.base)
                 api(libs.mapview.tiles.core)
-                // Raises map-view's Compose 1.12.0 to the version the compiler plugin here expects.
-                api(libs.compose.runtime)
-                api(libs.compose.foundation)
-                api(libs.compose.ui)
             }
         }
         commonTest {
@@ -98,7 +94,7 @@ mavenPublishing {
 
     pom {
         name = "kartog"
-        description = "Maps for Compose Multiplatform on map-view: tile sources, camera helpers and shapes on the map, shared by the kartog extensions."
+        description = "Maps for Compose Multiplatform on map-view: tile sources and camera helpers, the base the kartog extensions build on."
         inceptionYear = "2026"
         url = "https://github.com/oddlyclever/capabilities"
         licenses {

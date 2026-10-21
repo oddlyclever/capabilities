@@ -1,10 +1,10 @@
 # kartog
 
-Maps for Compose Multiplatform, built on [map-view](https://github.com/coderwise/libs-mobile). map-view draws the map: tiles, the camera, gestures, vector tiles and their labels. kartog adds what an app needs around it. It comes as a family: this base, and extensions an app takes only when it uses them.
+Maps for Compose Multiplatform, built on [map-view](https://github.com/coderwise/libs-mobile). map-view draws the map and carries most of what a map screen needs: tiles, the camera, gestures, vector tiles and their labels, a tile cache, GeoJSON, and the controls around a map. kartog adds what it leaves out. It comes as a family: this base, and extensions an app takes only when it uses them.
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 
-**In development.** This base holds tile sources so far. Camera helpers, shapes on the map and the extensions are still to come.
+**In development.** This base holds tile sources and camera helpers so far; the extensions are still to come.
 
 ## Install
 
@@ -19,6 +19,8 @@ kotlin {
 ```
 
 kartog exposes map-view and map-view-tiles as `api`, so their types (`MapView`, `MapCameraState`, `TileKey`, `MapState`) are available without declaring them. There is no dependency-injection container: everything is constructed directly.
+
+On the JVM, kartog needs Java 21, because map-view's own classes do.
 
 ## Tile sources
 
@@ -42,10 +44,29 @@ val ground = rememberTileState(key = streets, zoomRange = streets.zoomRange) { k
 - **Use the source as the tile state's key.** Two sources are equal when they would fetch the same tiles, so switching to a different source starts fresh slots and leaves nothing of the old one on screen.
 - **Pass the source's `zoomRange` on to the tile state.** Past its last level the map magnifies the deepest tile instead of asking for one the source does not have.
 
+`url(key)` builds the same URL as map-view-cache's `tileUrl`, so a source and that cache can be used together. kartog does not depend on map-view-cache, which brings a file system library with it.
+
+## Camera helpers
+
+`fit` finds the camera that shows a set of points on a map of a given size, as close in as they allow:
+
+```kotlin
+val position = fit(track, size = mapSize, density = LocalDensity.current, padding = 24.dp, bearing = camera.bearing)
+camera.moveTo(position)        // at once
+camera.flyTo(position)         // animated, then turned to the position's bearing
+```
+
+- **It respects the bearing.** A long north-south track on a map with east up is fitted across the screen, not down it.
+- **It crosses the antimeridian the short way.** Points either side of 180° are framed over the Pacific, not stretched across the world.
+- **A single point sits at `maxZoom`**, street level by default, so it still shows the streets around it.
+- **A map with no room inside its padding**, such as one not yet measured, gets the farthest zoom rather than an error.
+
+`zoomIn()` and `zoomOut()` animate one level about the middle of the map. `screenPosition(point, size, density)` and `isOnScreen(point, size, density, margin)` answer where a point falls with the bearing taken into account, for code outside an overlay; inside one, map-view's own `project()` does the same. For a scale bar, map-view's `MapCameraState.metersPerDp` gives the ground a dp covers.
+
 ## The kartog family
 
 | Module | What it adds |
 |---|---|
-| `kartog` | This base: tile sources, and the parts every extension shares |
+| `kartog` | This base: tile sources and camera helpers |
 
-The extensions arrive here as they are built.
+The extensions arrive here as they are built. For a tile cache, GeoJSON, and controls such as course-up, a compass and a scale bar, use map-view's own `map-view-cache`, `map-view-geojson` and `map-view-controls`.
