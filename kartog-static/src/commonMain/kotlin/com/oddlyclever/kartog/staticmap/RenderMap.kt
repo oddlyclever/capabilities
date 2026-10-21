@@ -8,7 +8,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
@@ -18,6 +20,7 @@ import com.coderwise.libs.mapview.MapCameraState
 import com.coderwise.libs.mapview.TileKey
 import com.coderwise.libs.mapview.onTileGrid
 import com.oddlyclever.kartog.CameraPosition
+import com.oddlyclever.kartog.MapProjection
 import com.oddlyclever.kartog.StaticLayer
 import com.oddlyclever.kartog.StaticTile
 import com.oddlyclever.kartog.screenPosition
@@ -37,9 +40,10 @@ import kotlin.math.pow
  * [layers] are drawn in order, each on the tile grid map-view would use for [position], turned to its bearing and
  * magnified past each layer's last level. A tile a layer does not have is drawn from its nearest ancestor, up to five
  * levels up, as on a live map; where there is none, [background] shows. [overlay] is drawn last, upright, through a
- * [StaticProjection] that places a coordinate where it falls on the image: a track ([drawTrack]), pins, shapes.
+ * [StaticProjection] that places a coordinate where it falls on the image: a track, pins, shapes.
  *
- * Every layer's tiles are fetched at once, so the time it takes is the slowest tile's, not the sum.
+ * Every layer's tiles are fetched at once, so the time it takes is the slowest tile's, not the sum. To draw the same
+ * map at more than one size, or as a [StaticMapPainter] that scales like a vector image, use [prepareMap].
  *
  * @throws IllegalArgumentException when [size] is empty.
  */
@@ -50,41 +54,89 @@ suspend fun renderMap(
     layers: List<StaticLayer>,
     background: Color = Color.Transparent,
     overlay: DrawScope.(StaticProjection) -> Unit = {},
-): ImageBitmap = coroutineScope {
-    require(size.width > 0 && size.height > 0) { "A map image needs a size; got $size." }
-    val placed = layers.map { layer -> async { place(layer, size, density, position) } }.awaitAll()
-    val image = ImageBitmap(size.width, size.height)
-    val canvas = Canvas(image)
-    val zoom = floor(position.zoom).toInt()
-    CanvasDrawScope().draw(density, LayoutDirection.Ltr, canvas, Size(size.width.toFloat(), size.height.toFloat())) {
-        drawRect(background)
-        translate(size.width / 2f, size.height / 2f) {
-            // The map turns the other way to put the bearing at the top, as map-view's camera does.
-            rotate(-position.bearing, pivot = Offset.Zero) {
-                for (tiles in placed) for (tile in tiles) drawTile(tile, density, zoom)
+): ImageBitmap = prepareMap(size, density, position, layers, background).toImageBitmap(overlay)
+
+/**
+ * A map with its tiles fetched and decoded, ready to draw: into an image ([toImageBitmap]), or into any draw scope at
+ * any size ([draw], [StaticMapPainter]). [size] is the size it was laid out for; drawn at another, it scales as a
+ * whole, lines and all, like a vector image. Raster tiles in it are bitmaps and blur when it is drawn larger.
+ */
+class PreparedMap internal constructor(
+    val size: IntSize,
+    val density: Density,
+    val position: CameraPosition,
+    private val placed: List<List<Placed>>,
+    private val background: Color,
+) {
+    /** Where a coordinate falls on this map, at its laid-out [size]. */
+    val projection: StaticProjection = StaticProjection(position, size, density)
+
+    /** Draws the map, then [overlay] through [projection], to fill this scope's size. */
+    fun DrawScope.draw(overlay: DrawScope.(StaticProjection) -> Unit = {}) {
+        val scaleX = this.size.width / this@PreparedMap.size.width
+        val scaleY = this.size.height / this@PreparedMap.size.height
+        scale(scaleX, scaleY, pivot = Offset.Zero) {
+            clipRect(0f, 0f, this@PreparedMap.size.width.toFloat(), this@PreparedMap.size.height.toFloat()) {
+                drawRect(background, size = Size(this@PreparedMap.size.width.toFloat(), this@PreparedMap.size.height.toFloat()))
+                val zoom = floor(position.zoom).toInt()
+                translate(this@PreparedMap.size.width / 2f, this@PreparedMap.size.height / 2f) {
+                    // The map turns the other way to put the bearing at the top, as map-view's camera does.
+                    rotate(-position.bearing, pivot = Offset.Zero) {
+                        for (tiles in placed) for (tile in tiles) drawTile(tile, this@PreparedMap.density, zoom)
+                    }
+                }
+                overlay(projection)
             }
         }
-        overlay(StaticProjection(position, size, density))
     }
-    image
+
+    /** This map as an image at its laid-out [size], with [overlay] drawn over it. */
+    fun toImageBitmap(overlay: DrawScope.(StaticProjection) -> Unit = {}): ImageBitmap {
+        val image = ImageBitmap(size.width, size.height)
+        CanvasDrawScope().draw(density, LayoutDirection.Ltr, Canvas(image), Size(size.width.toFloat(), size.height.toFloat())) {
+            draw(overlay)
+        }
+        return image
+    }
+}
+
+/**
+ * Fetches and decodes every tile [layers] need to draw a map of [size] pixels at [position], all at once, and returns
+ * the map ready to draw. See [renderMap] for how the tiles are laid out.
+ *
+ * @throws IllegalArgumentException when [size] is empty.
+ */
+suspend fun prepareMap(
+    size: IntSize,
+    density: Density,
+    position: CameraPosition,
+    layers: List<StaticLayer>,
+    background: Color = Color.Transparent,
+): PreparedMap = coroutineScope {
+    require(size.width > 0 && size.height > 0) { "A map image needs a size; got $size." }
+    val placed = layers.map { layer -> async { place(layer, size, density, position) } }.awaitAll()
+    PreparedMap(size, density, position, placed, background)
 }
 
 /**
  * Where a coordinate falls on a map image, for drawing over it. Built by [renderMap] for its overlay; build one
  * yourself to draw over an image rendered earlier with the same [position], [size] and [density].
  */
-class StaticProjection(val position: CameraPosition, val size: IntSize, val density: Density) {
+class StaticProjection(val position: CameraPosition, val size: IntSize, val density: Density) : MapProjection {
     private val camera = MapCameraState(position.center, position.zoom, position.bearing)
 
     /** Where [point] falls on the image, in pixels from its top left, with the bearing taken into account. */
-    fun project(point: LatLon): Offset = camera.screenPosition(point, size, density)
+    override fun project(point: LatLon): Offset = camera.screenPosition(point, size, density)
 
     /** How many metres of ground a pixel covers at the middle of the image, for drawing a distance as a radius. */
-    val metresPerPixel: Double get() = camera.metersPerDp / density.density
+    override val metresPerPixel: Double get() = camera.metersPerDp / density.density
+
+    /** The bearing the image was drawn at. */
+    override val bearing: Float get() = position.bearing
 }
 
 /** A tile ready to draw, where it goes in the turned frame centred on the camera, and how big. */
-private class Placed(val tile: StaticTile, val src: Rect, val left: Float, val top: Float, val side: Float)
+internal class Placed(val tile: StaticTile, val src: Rect, val left: Float, val top: Float, val side: Float)
 
 /** Each tile of [layer] covering the image, fetched together, with ancestors standing in for tiles it lacks. */
 private suspend fun place(layer: StaticLayer, size: IntSize, density: Density, position: CameraPosition): List<Placed> =

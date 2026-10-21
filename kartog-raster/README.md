@@ -1,6 +1,12 @@
 # kartog-raster
 
-Raster tiles for [kartog](../kartog): tile bytes decoded to images off the main thread, and a raster slot that fades each tile in as it arrives.
+Raster tiles for [kartog](../kartog): a raster basemap for `KartogMap`, tile bytes decoded to images off the main thread, and a raster slot that fades each tile in as it arrives.
+
+```kotlin
+KartogMap(state, layers = listOf(rasterBasemap(imagery, client)))
+```
+
+`staticRasterLayer` is the same for kartog-static.
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 

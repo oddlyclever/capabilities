@@ -12,10 +12,13 @@ A module that cannot support one of these says which and why, in its own README 
 
 | Module | What it does |
 |---|---|
-| [`kartog`](kartog) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the base of the kartog family, which its extensions build on. In development. |
+| [`kartog`](kartog) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the map, its state, markers, polylines and controls. The root of the kartog family. |
 | [`kartog-vector`](kartog-vector) | Light and dark styles for map-view's vector tiles, and vector tiles drawn to images on GPUs that cannot draw their paths. |
-| [`kartog-raster`](kartog-raster) | Raster tiles for kartog: decoded off the main thread, and faded in as they arrive. |
-| [`kartog-static`](kartog-static) | Maps drawn to images without a composition, on a device or a server, with a recorded track, encoded as PNG or WebP. |
+| [`kartog-raster`](kartog-raster) | Raster basemaps for kartog: decoded off the main thread, and faded in as they arrive. |
+| [`kartog-geojson`](kartog-geojson) | GeoJSON on a kartog map, from text or a URL. |
+| [`kartog-track`](kartog-track) | Recorded tracks and the user's position, on a live map and on images. |
+| [`kartog-static`](kartog-static) | Maps drawn without a composition: to images, or to a painter that scales like a vector image; PNG or WebP. |
+| [`kartog-headless`](kartog-headless) | Map images on a server in one call, WebP or PNG. **JVM only**: it bundles Skia's native libraries for servers. |
 
 ## How the modules are shaped
 

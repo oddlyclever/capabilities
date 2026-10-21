@@ -40,3 +40,7 @@ include(":kartog")
 include(":kartog-raster")
 include(":kartog-vector")
 include(":kartog-static")
+include(":kartog-track")
+include(":kartog-geojson")
+// JVM only: kartog-headless bundles Skia native libraries for servers. Devices use kartog-static.
+include(":kartog-headless")

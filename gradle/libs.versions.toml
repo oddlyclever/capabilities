@@ -23,6 +23,9 @@ webpack = "5.111.1"
 # artifact of it. It is 0.x and its types are part of kartog's public API, so a bump is a deliberate change.
 mapView = "0.2.0"
 kotlinxCoroutines = "1.11.0"
+# Skia's native libraries, which :kartog-headless bundles so a server needs no Compose desktop setup. Must be the
+# Skiko version Compose Multiplatform brings (Compose 1.12.1 brings 0.150.1); move it with every Compose bump.
+skiko = "0.150.1"
 
 [libraries]
 # Libraries are added with the modules that need them, each with a comment naming that module and why.
@@ -30,18 +33,28 @@ kotlinxCoroutines = "1.11.0"
 # :kartog exposes these as api: MapCameraState, TileKey and MapState are kartog's own vocabulary.
 mapview-base = { module = "com.coderwise.libs:map-view", version.ref = "mapView" }
 mapview-tiles-core = { module = "com.coderwise.libs:map-view-tiles", version.ref = "mapView" }
+# :kartog exposes these as api: its map draws the compass, scale bar, zoom buttons and attribution from them.
+mapview-controls = { module = "com.coderwise.libs:map-view-controls", version.ref = "mapView" }
 # :kartog-vector exposes the vector tiles it styles and rasterizes, and the raster slot that draws a rasterized tile.
 mapview-tiles-vector = { module = "com.coderwise.libs:map-view-tiles-vector", version.ref = "mapView" }
 # :kartog-raster exposes the raster slot its fading slot wraps; :kartog-vector, as above.
 mapview-tiles-raster = { module = "com.coderwise.libs:map-view-tiles-raster", version.ref = "mapView" }
+# :kartog-geojson exposes map-view's GeoJSON model, style and overlay.
+mapview-geojson = { module = "com.coderwise.libs:map-view-geojson", version.ref = "mapView" }
 
-# :kartog-raster and :kartog-vector decode and rasterize tiles on Dispatchers.Default, off the main thread.
+# :kartog's map state, and :kartog-raster and :kartog-vector, which decode and rasterize tiles on Dispatchers.Default.
 # The version map-view 0.2.0 is built with.
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
-# runTest, for the suspending decode and rasterize functions in :kartog-raster and :kartog-vector.
+# runTest, for the suspending functions the kartog modules test.
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+
+# :kartog-headless, at runtime only: Skia for the server platforms, and macOS for running it on a developer's machine.
+skiko-runtime-linux-x64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-linux-x64", version.ref = "skiko" }
+skiko-runtime-linux-arm64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-linux-arm64", version.ref = "skiko" }
+skiko-runtime-macos-arm64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-macos-arm64", version.ref = "skiko" }
+skiko-runtime-macos-x64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-macos-x64", version.ref = "skiko" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

@@ -1,6 +1,6 @@
 # kartog-static
 
-Maps drawn to images, without a composition, for [kartog](../kartog): on a device for a share sheet or a notification, or on a server for an email. Layers at a camera position, a recorded track drawn over them, and the image encoded as PNG or WebP.
+Maps drawn without a composition for [kartog](../kartog): to an image for a share sheet, a notification or an upload, to a `Painter` that scales like a vector image, or as a `StaticMapImage` in a layout. Encoded as PNG or WebP. On a server, [kartog-headless](../kartog-headless) wraps it in one call.
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 
@@ -25,7 +25,7 @@ val image: ImageBitmap = renderMap(
     position = fit(track.map { it.position }, size, density, padding = 24.dp),
     layers = listOf(staticVectorLayer(streets.zoomRange, KartogStyles.Light) { key -> http.get(streets.url(key)) }),
 ) { projection ->
-    drawTrack(track, projection)
+    drawTrack(track, projection)          // from kartog-track
 }
 val png: ByteArray = image.encodeToPng()
 ```
@@ -33,10 +33,9 @@ val png: ByteArray = image.encodeToPng()
 - **The image matches the live map.** Tiles are laid out on the grid map-view would use for the position, turned to its bearing, magnified past each layer's last level, and drawn by the same renderers. A tile a layer lacks is drawn from its nearest ancestor, up to five levels up; where there is none, `background` shows.
 - **Every tile is fetched at once**, so rendering takes as long as the slowest tile, not the sum of them.
 - **The overlay is drawn upright** through a `StaticProjection`, which places a coordinate where it falls on the image and gives the metres a pixel covers. Anything can be drawn there: map-view-geojson's `drawGeoJson` with an adapter, pins, text.
-- **`drawTrack`** draws recorded telemetry:
-  - A line coloured by speed: a gradient from slow to fast, dots that strengthen toward the end, or both, solid or dotted.
-  - An accuracy circle and a heading marker (cone, arrow or dot) at the last fix, when it carries them.
-  - Markers at the start, the end and any waypoints. The track's own points are never marked; a loop's ends show as one marker.
+- **Tracks** are drawn with kartog-track's `drawTrack`, through the projection.
+- **`StaticMapImage`** is a map in a layout that does not move: a card, a thumbnail. It renders at the size it is laid out, for a given position or fitted to points, and shows a placeholder until the tiles arrive.
+- **`prepareMap`** fetches the tiles once and returns a `PreparedMap` that draws at any size. As a `StaticMapPainter` in an `Image`, it scales like a vector image: roads and outlines stay sharp. Raster tiles in it are bitmaps and blur when enlarged.
 - **Labels are not drawn yet.** map-view draws place and road names only inside a composition; drawing them here waits on a change to map-view.
 - **Encoding:** `encodeToPng()` everywhere, lossless, and `encodeToWebp(quality)` for a smaller image to send.
 

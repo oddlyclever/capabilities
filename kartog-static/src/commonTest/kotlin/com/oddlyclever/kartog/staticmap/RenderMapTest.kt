@@ -1,6 +1,10 @@
 package com.oddlyclever.kartog.staticmap
 
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.decodeToImageBitmap
 import androidx.compose.ui.graphics.toArgb
@@ -20,7 +24,7 @@ import kotlin.test.assertTrue
 
 /**
  * Pins kartog-static: that a rendered map is covered by its layers' tiles, falls back to ancestors as a live map does
- * and to the background where there are none; that a track marks its ends, and a loop's ends as one; and that the
+ * and to the background where there are none; that a prepared map scales as a whole, overlay included; and that the
  * image encodes as PNG and WebP.
  */
 class RenderMapTest {
@@ -72,31 +76,17 @@ class RenderMapTest {
     }
 
     @Test
-    fun aTrackMarksItsStartAndEnd() = runTest {
+    fun aPreparedMapScalesAsAWhole() = runTest {
         awaitSkia()
-        val track = listOf(TrackPoint(LatLon(43.64, -79.40)), TrackPoint(LatLon(43.66, -79.36)))
-        val style = TrackStyle(line = LineStyle.None, speed = SpeedStyle.None)
-        var start = androidx.compose.ui.geometry.Offset.Zero
-        var end = androidx.compose.ui.geometry.Offset.Zero
-        val image = renderMap(size, density, toronto, emptyList()) { projection ->
-            start = projection.project(track.first().position)
-            end = projection.project(track.last().position)
-            drawTrack(track, projection, style)
+        val map = prepareMap(size, density, toronto, listOf(solid(0..19, Color.Red)), background = Color.Blue)
+        // Drawn at twice its size, through the painter, with a dot at the projected centre.
+        val image = ImageBitmap(size.width * 2, size.height * 2)
+        val painter = StaticMapPainter(map) { projection -> drawCircle(Color.Green, radius = 3f, center = projection.project(toronto.center)) }
+        CanvasDrawScope().draw(density, LayoutDirection.Ltr, Canvas(image), Size(image.width.toFloat(), image.height.toFloat())) {
+            with(painter) { draw(this@draw.size) }
         }
-        assertEquals(style.startColor.toArgb(), image.pixel(start.x.toInt(), start.y.toInt()), "start at $start")
-        assertEquals(style.endColor.toArgb(), image.pixel(end.x.toInt(), end.y.toInt()), "end at $end")
-    }
-
-    @Test
-    fun aLoopMarksBothEndsInOne() = runTest {
-        awaitSkia()
-        val here = LatLon(43.65, -79.38)
-        val loop = listOf(TrackPoint(here), TrackPoint(LatLon(43.66, -79.37)), TrackPoint(here))
-        val style = TrackStyle(line = LineStyle.None, speed = SpeedStyle.None)
-        val image = renderMap(size, density, toronto, emptyList()) { drawTrack(loop, it, style) }
-        // The end is drawn as a ring with the start inside it: the middle shows the start's colour.
-        assertEquals(style.startColor.toArgb(), image.pixel(100, 60), "a loop's start shows inside its end")
-        assertEquals(style.endColor.toArgb(), image.pixel(100 + 5, 60), "and the end shows round it, between the inner dot (3.3 px) and the ring edge (7 px)")
+        assertEquals(Color.Red.toArgb(), image.pixel(10, 10), "tiles fill the scaled image")
+        assertEquals(Color.Green.toArgb(), image.pixel(200, 120), "the overlay scales with the map: centre at (200, 120)")
     }
 
     @Test

@@ -56,11 +56,15 @@ kotlin {
                 // exposes Compose as api in turn, which is where this module's Compose comes from.
                 api(libs.mapview.base)
                 api(libs.mapview.tiles.core)
+                api(libs.mapview.controls)
+                // The map state's interaction settle and bounds tracking run on coroutines and flows.
+                implementation(libs.kotlinx.coroutines.core)
             }
         }
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

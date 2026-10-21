@@ -1,4 +1,4 @@
-package com.oddlyclever.kartog.staticmap
+package com.oddlyclever.kartog.track
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.coderwise.libs.mapview.LatLon
+import com.oddlyclever.kartog.MapProjection
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -77,7 +78,7 @@ data class TrackStyle(
 )
 
 /**
- * A recorded track drawn over a map image: the line, the speed along it, an accuracy circle and a heading marker at
+ * A recorded track drawn through [projection], on a live map ([Track]) or over a map image: the line, the speed along it, an accuracy circle and a heading marker at
  * the last fix, and markers at its ends and at [waypoints].
  *
  * **Only the ends and the waypoints are marked, never the track's own points.** A dense track marked point by point
@@ -92,7 +93,7 @@ data class TrackStyle(
  */
 fun DrawScope.drawTrack(
     points: List<TrackPoint>,
-    projection: StaticProjection,
+    projection: MapProjection,
     style: TrackStyle = TrackStyle(),
     waypoints: List<LatLon> = emptyList(),
 ) {
@@ -129,14 +130,14 @@ fun DrawScope.drawTrack(
 
     val heading = last?.heading
     if (heading != null && style.heading != HeadingMarker.None) {
-        drawHeading(at.last(), heading + projection.position.bearing.let { -it }, style)
+        drawHeading(at.last(), heading - projection.bearing, style)
     }
 
     drawEnds(at, waypoints.map { projection.project(it) }, style)
 }
 
 /** The heading marker at [centre], [degrees] clockwise from the top of the image. */
-private fun DrawScope.drawHeading(centre: Offset, degrees: Float, style: TrackStyle) {
+internal fun DrawScope.drawHeading(centre: Offset, degrees: Float, style: TrackStyle) {
     val radians = (degrees - 90.0) * PI / 180.0
     fun ahead(distance: Float, turn: Double = 0.0) =
         Offset(centre.x + distance * cos(radians + turn).toFloat(), centre.y + distance * sin(radians + turn).toFloat())

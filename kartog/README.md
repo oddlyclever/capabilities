@@ -4,7 +4,7 @@ Maps for Compose Multiplatform, built on [map-view](https://github.com/coderwise
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 
-**In development.** This base holds tile sources, camera helpers, and the layer interface static maps are drawn through.
+**In development.** Not yet released.
 
 ## Install
 
@@ -21,6 +21,41 @@ kotlin {
 kartog exposes map-view and map-view-tiles as `api`, so their types (`MapView`, `MapCameraState`, `TileKey`, `MapState`) are available without declaring them. There is no dependency-injection container: everything is constructed directly.
 
 On the JVM, kartog needs Java 21, because map-view's own classes do.
+
+## The map
+
+```kotlin
+val state = rememberKartogMapState(center = LatLon(43.65, -79.38), zoom = 13f)
+
+KartogMap(
+    state = state,
+    modifier = Modifier.fillMaxSize(),
+    layers = listOf(vectorBasemap(streets, client)),          // from kartog-vector
+    markers = places.map { MapMarker(it.id, it.position, Alignment.BottomCenter, it.name) { Pin() } },
+    polylines = listOf(MapPolyline("route", route, Color(0xFF7C3AED))),
+    ornaments = MapOrnaments(zoomButtons = true, orientationToggle = true),
+    onMarkerClick = { open(it.id) },
+) {
+    Track(recorded, state)                                    // from kartog-track
+}
+```
+
+- **Layers** are drawn in order and come from the modules that draw them: `vectorBasemap` in kartog-vector, `rasterBasemap` in kartog-raster. Each brings its source's attribution, which the map shows.
+- **The overlay** draws anything placed by coordinate over the lines and under the markers: a track, the user's position, GeoJSON.
+- **Markers** are any composable, anchored at a coordinate, the same size at every zoom; the default is a ringed dot. **Polylines** are drawn the same width at every zoom and can be tapped.
+- **Ornaments** are map-view's controls, each switched on or off and placed in a corner: the compass tape (tap for north-up), a north-up/course-up toggle, the scale bar, zoom buttons and attribution.
+- **Gestures** are map-view's: pan, pinch, fling, double-tap, double-tap-and-drag, the mouse wheel, and two-finger turning, which `MapGestures` can switch off.
+
+`KartogMapState` is everything the app reads or drives:
+
+- **The camera:** `center`, `zoom`, `bearing`; `moveTo`, `animateTo`, `zoomIn`, `zoomOut`; map-view's own `camera` for anything else.
+- **`isInteracting`:** true while the user has hold of the map and for two seconds after, so an app that follows the user's position does not snap the map back the moment a pan ends.
+- **`orientation` and `heading`:** in course-up the map turns so the heading is at the top, and the user cannot turn it.
+- **`visibleBounds`:** what the map shows, kept current as it moves or is resized, for querying what is on screen.
+
+## Tile clients
+
+kartog fetches nothing. A `TileClient` is the app's HTTP client, keys and cache behind one call: `fetch(url, cacheKey)`, returning the bytes or null. Layers ask it for a tile's URL with a cache key naming the source and tile, `streets/14/4823/6160`. map-view-cache's `cached` and `FileTileStore` are one way to cache.
 
 ## Tile sources
 
@@ -67,9 +102,12 @@ camera.flyTo(position)         // animated, then turned to the position's bearin
 
 | Module | What it adds |
 |---|---|
-| `kartog` | This base: tile sources and camera helpers |
-| [`kartog-vector`](../kartog-vector) | Light and dark vector styles, and vector tiles drawn to images on GPUs that cannot draw their paths |
-| [`kartog-raster`](../kartog-raster) | Raster tiles decoded off the main thread, and a slot that fades each tile in |
-| [`kartog-static`](../kartog-static) | Maps drawn to images without a composition, with a recorded track, encoded as PNG or WebP |
+| `kartog` | This root: the map, its state, markers, polylines, ornaments, tile sources and clients, camera helpers |
+| [`kartog-vector`](../kartog-vector) | A vector basemap; light and dark styles; vector tiles drawn as images on GPUs that cannot draw their paths |
+| [`kartog-raster`](../kartog-raster) | A raster basemap, decoded off the main thread and faded in |
+| [`kartog-geojson`](../kartog-geojson) | GeoJSON on the map, from text or a URL |
+| [`kartog-track`](../kartog-track) | Recorded tracks and the user's position, live and on images |
+| [`kartog-static`](../kartog-static) | Maps drawn to images or to a painter that scales like a vector image, encoded as PNG or WebP |
+| [`kartog-headless`](../kartog-headless) | Map images on a server, JVM only, in one call |
 
-`StaticLayer` and `StaticTile`, in this base, are how the vector and raster modules supply layers to `kartog-static` without it depending on either. For a tile cache, GeoJSON, and controls such as course-up, a compass and a scale bar, use map-view's own `map-view-cache`, `map-view-geojson` and `map-view-controls`.
+`StaticLayer`, `StaticTile` and `MapProjection`, in this root, are how the other modules work together without depending on each other.

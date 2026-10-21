@@ -1,6 +1,12 @@
 # kartog-vector
 
-Vector tiles for [kartog](../kartog): light and dark styles for map-view's vector renderer, and vector tiles drawn to images on devices whose GPU driver cannot be trusted with their paths.
+Vector tiles for [kartog](../kartog): a vector basemap for `KartogMap`, light and dark styles for map-view's vector renderer, and vector tiles drawn to images on devices whose GPU driver cannot be trusted with their paths.
+
+```kotlin
+KartogMap(state, layers = listOf(vectorBasemap(streets, client)))
+```
+
+`vectorBasemap` draws the ground and then the names over every tile, in the style given or the one `VectorStyleProvider` provides (light by default), and switches to images by itself on a device that needs it. `staticVectorLayer` is the same for kartog-static.
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 
