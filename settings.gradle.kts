@@ -36,3 +36,6 @@ dependencyResolutionManagement {
 
 // kartog: maps on map-view. The base every kartog-<part> extension builds on.
 include(":kartog")
+
+include(":kartog-raster")
+include(":kartog-vector")

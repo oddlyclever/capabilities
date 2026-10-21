@@ -22,6 +22,7 @@ webpack = "5.111.1"
 # map-view, the tiled map :kartog builds on. Its family is released in lockstep, so one version covers every
 # artifact of it. It is 0.x and its types are part of kartog's public API, so a bump is a deliberate change.
 mapView = "0.2.0"
+kotlinxCoroutines = "1.11.0"
 
 [libraries]
 # Libraries are added with the modules that need them, each with a comment naming that module and why.
@@ -29,6 +30,16 @@ mapView = "0.2.0"
 # :kartog exposes these as api: MapCameraState, TileKey and MapState are kartog's own vocabulary.
 mapview-base = { module = "com.coderwise.libs:map-view", version.ref = "mapView" }
 mapview-tiles-core = { module = "com.coderwise.libs:map-view-tiles", version.ref = "mapView" }
+# :kartog-vector exposes the vector tiles it styles and rasterizes, and the raster slot that draws a rasterized tile.
+mapview-tiles-vector = { module = "com.coderwise.libs:map-view-tiles-vector", version.ref = "mapView" }
+# :kartog-raster exposes the raster slot its fading slot wraps; :kartog-vector, as above.
+mapview-tiles-raster = { module = "com.coderwise.libs:map-view-tiles-raster", version.ref = "mapView" }
+
+# :kartog-raster and :kartog-vector decode and rasterize tiles on Dispatchers.Default, off the main thread.
+# The version map-view 0.2.0 is built with.
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+# runTest, for the suspending decode and rasterize functions in :kartog-raster and :kartog-vector.
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 

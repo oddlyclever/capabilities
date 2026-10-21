@@ -68,5 +68,7 @@ camera.flyTo(position)         // animated, then turned to the position's bearin
 | Module | What it adds |
 |---|---|
 | `kartog` | This base: tile sources and camera helpers |
+| [`kartog-vector`](../kartog-vector) | Light and dark vector styles, and vector tiles drawn to images on GPUs that cannot draw their paths |
+| [`kartog-raster`](../kartog-raster) | Raster tiles decoded off the main thread, and a slot that fades each tile in |
 
-The extensions arrive here as they are built. For a tile cache, GeoJSON, and controls such as course-up, a compass and a scale bar, use map-view's own `map-view-cache`, `map-view-geojson` and `map-view-controls`.
+Static map images come next. For a tile cache, GeoJSON, and controls such as course-up, a compass and a scale bar, use map-view's own `map-view-cache`, `map-view-geojson` and `map-view-controls`.
