@@ -4,7 +4,7 @@ Maps for Compose Multiplatform, built on [map-view](https://github.com/coderwise
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 
-**In development.** This base holds tile sources and camera helpers so far; the extensions are still to come.
+**In development.** This base holds tile sources, camera helpers, and the layer interface static maps are drawn through.
 
 ## Install
 
@@ -70,5 +70,6 @@ camera.flyTo(position)         // animated, then turned to the position's bearin
 | `kartog` | This base: tile sources and camera helpers |
 | [`kartog-vector`](../kartog-vector) | Light and dark vector styles, and vector tiles drawn to images on GPUs that cannot draw their paths |
 | [`kartog-raster`](../kartog-raster) | Raster tiles decoded off the main thread, and a slot that fades each tile in |
+| [`kartog-static`](../kartog-static) | Maps drawn to images without a composition, with a recorded track, encoded as PNG or WebP |
 
-Static map images come next. For a tile cache, GeoJSON, and controls such as course-up, a compass and a scale bar, use map-view's own `map-view-cache`, `map-view-geojson` and `map-view-controls`.
+`StaticLayer` and `StaticTile`, in this base, are how the vector and raster modules supply layers to `kartog-static` without it depending on either. For a tile cache, GeoJSON, and controls such as course-up, a compass and a scale bar, use map-view's own `map-view-cache`, `map-view-geojson` and `map-view-controls`.

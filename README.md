@@ -15,6 +15,7 @@ A module that cannot support one of these says which and why, in its own README 
 | [`kartog`](kartog) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the base of the kartog family, which its extensions build on. In development. |
 | [`kartog-vector`](kartog-vector) | Light and dark styles for map-view's vector tiles, and vector tiles drawn to images on GPUs that cannot draw their paths. |
 | [`kartog-raster`](kartog-raster) | Raster tiles for kartog: decoded off the main thread, and faded in as they arrive. |
+| [`kartog-static`](kartog-static) | Maps drawn to images without a composition, on a device or a server, with a recorded track, encoded as PNG or WebP. |
 
 ## How the modules are shaped
 

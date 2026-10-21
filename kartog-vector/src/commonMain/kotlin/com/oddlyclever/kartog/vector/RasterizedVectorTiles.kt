@@ -73,10 +73,10 @@ private val WHOLE_TILE = Rect(0f, 0f, 1f, 1f)
  * The layers map-view's style paints, as map-view's vector slot decodes them. Copied, because map-view keeps its
  * list internal; a layer missing here is simply not drawn in the image.
  */
-private val DRAWN_LAYERS = setOf(
+internal val DRAWN_LAYERS = setOf(
     "landcover", "landuse", "park", "water", "waterway", "aeroway", "building", "boundary",
     "transportation", "transportation_casing",
 )
 
 /** What each layer is styled by: `class` for most, `admin_level` for boundaries. */
-private val CLASS_LAYERS = VectorStyle.CLASS_AWARE_LAYERS
+internal val CLASS_LAYERS = VectorStyle.CLASS_AWARE_LAYERS

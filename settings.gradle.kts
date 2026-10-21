@@ -39,3 +39,4 @@ include(":kartog")
 
 include(":kartog-raster")
 include(":kartog-vector")
+include(":kartog-static")
