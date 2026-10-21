@@ -69,7 +69,7 @@ val thumbnail = map.toImageBitmap()                             // the same map 
 | `image.encodeToPng()` | lossless, larger; shown everywhere |
 | `image.encodeToWebp(quality = 90)` | lossy, several times smaller than PNG; 90 keeps thin roads sharp |
 
-Encoding uses Skia on the JVM, iOS and the web, and Android's own encoder on Android. Neither writes metadata such as a GPS position; that waits on a WebP capability that bundles libwebp.
+Encoding uses Skia on the JVM, iOS and the web, and Android's own `Bitmap.compress` on Android. **On Android, WebP through `Bitmap.compress` has been seen to fail silently on some API 30+ devices**, so an app that must get a WebP out every time should encode with a bundled libwebp until kartog moves onto one; PNG is not affected. Neither encoder writes metadata such as a GPS position; both wait on a WebP capability that bundles libwebp.
 
 ## On a server
 
