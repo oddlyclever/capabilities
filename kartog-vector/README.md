@@ -18,7 +18,7 @@ It exposes `kartog`, map-view-tiles-vector and map-view-tiles-raster as `api`. T
 KartogMap(state, layers = listOf(vectorBasemap(streets, client)))
 ```
 
-`vectorBasemap(source, client, style = null, labels = true, rasterize = vectorTilesNeedRasterizing())` fetches each tile through the client, decodes it off the main thread with map-view's decoder, and draws it with map-view's renderer: the ground first, then place and road names in a layer of their own, so every name sits over every tile. Tiles are decoded once, as they arrive, and a tile the source lacks is drawn from its nearest ancestor.
+`vectorBasemap(source, client, style = null, labels = true, rasterize = false)` fetches each tile through the client, decodes it off the main thread with map-view's decoder, and draws it with map-view's renderer: the ground first, then place and road names in a layer of their own, so every name sits over every tile. Tiles are decoded once, as they arrive, and a tile the source lacks is drawn from its nearest ancestor.
 
 The source is expected to use the OpenMapTiles schema, as map-view's style is written for it: `water`, `landcover`, `landuse`, `park`, `building`, `transportation` and the rest.
 
@@ -37,14 +37,26 @@ VectorStyleProvider(systemVectorStyle()) {
 - **Build a recoloured style once and keep it.** A style is compared by its lookups, and `recolored` makes new ones on every call, so a style rebuilt inside a composition looks new on every frame and throws away the decoded tiles. `KartogStyles` holds the built ones; keep your own in a top-level `val`.
 - **Not yet:** dashed footpaths, and tunnels and bridges drawn apart from other roads. map-view's road paint sees only a road's class; both are requests to map-view.
 
-## When the GPU cannot draw the paths
+## Drawing tiles as images
 
-Some GPU drivers crash the app when Compose draws complex paths. On the Pixel 10 (Tensor G5, PowerVR DXT-48-1536), drawing a street grid with `drawPath` on Vulkan kills the render thread with a segmentation fault.
+Tiles are drawn as paths on the GPU, through whatever renderer the platform uses, on every device. An app that has a reason to keep tile paths off the GPU can ask for images instead:
 
-- **`vectorTilesNeedRasterizing()`** is true only on Android devices known to have the fault, and false on every other target. A device forced onto the OpenGL renderer (`debug.hwui.renderer=skiagl`) does not have it, so is false too.
-- **`vectorBasemap` handles it by itself.** On such a device it draws each tile's ground to an image on the CPU and shows it with a raster slot. Names are still drawn from the decoded tile, since text does not go through the path renderer.
+```kotlin
+// On Android, for instance: only on devices where this app has seen the GPU driver crash.
+val rasterize = Build.MODEL.startsWith("Pixel 10")
+KartogMap(state, layers = listOf(vectorBasemap(streets, client, rasterize = rasterize)))
+```
+
+- **`vectorBasemap(…, rasterize = true)`** draws each tile's ground to an image on the CPU and shows it with a raster slot. Names are still drawn from the decoded tile, since text does not go through the path renderer.
+- **Which devices get it is the app's decision.** kartog keeps no list of devices.
 - **`rasterizeVectorTile(bytes, zoom, density, style)`** is the step on its own: a tile drawn to an `ImageBitmap` at the size a tile is shown, 256 dp. It costs tens of milliseconds a tile, so call it from a tile state's load, off the main thread.
-- **An image is a picture.** Zoomed past its level, it magnifies like any raster tile, where a vector tile stays sharp. That is the price of not crashing.
+- **An image is a picture.** Zoomed past its level, it magnifies like any raster tile, where a vector tile stays sharp.
+
+### Why the option exists
+
+kartog used to switch to images by itself on the Pixel 10 family (Tensor G5, PowerVR DXT-48-1536). There, an earlier map renderer drawing a street grid with Compose's `drawPath` on Vulkan had crashed the render thread with a segmentation fault. When map-view's own vector drawing was tried on a Pixel 10 Pro XL on Android 17, the fault did not reproduce. That test covered dense street grids at zooms 13 to 20, about 70 fast pans and 22 zooms, and 1,500 frames without a fatal signal. So kartog dropped the device rule and draws on the GPU everywhere.
+
+Keep `rasterize` in mind if a GPU driver fault on complex paths appears on some device. It is the way around one without waiting for a driver update.
 
 ## On an image
 

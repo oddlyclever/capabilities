@@ -17,21 +17,8 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.ceil
 
 /**
- * Whether this device should draw vector tiles as images rather than as paths.
- *
- * Some GPU drivers crash the app when Compose draws complex paths on them: on the Pixel 10 (Tensor G5, PowerVR
- * DXT-48-1536) drawing a street grid with `drawPath` on Vulkan kills the render thread with a segmentation fault.
- * On such a device, decode with [rasterizeVectorTile] and show the result with a raster slot; everywhere else,
- * map-view's vector slot is sharper and cheaper.
- *
- * True only on Android devices known to have the fault, and false on every other target. A device forced onto the
- * OpenGL renderer (`debug.hwui.renderer=skiagl`) does not have it, so is false too.
- */
-expect fun vectorTilesNeedRasterizing(): Boolean
-
-/**
- * A vector tile drawn to an image, for devices where drawing its paths on the GPU is not safe
- * ([vectorTilesNeedRasterizing]).
+ * A vector tile drawn to an image, for an app that would rather not draw tile paths on the GPU: one that has seen a
+ * GPU driver crash drawing complex paths on some device, for instance.
  *
  * The tile is drawn by map-view's own renderer in [style], on the CPU, at the size a tile is shown at: 256 dp at
  * [density]. [zoom] is the level the tile was cut at, which decides the road widths it is drawn with. Labels are not

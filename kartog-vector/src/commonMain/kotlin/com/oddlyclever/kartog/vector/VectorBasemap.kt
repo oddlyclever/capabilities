@@ -29,16 +29,17 @@ import kotlin.math.floor
  * A vector basemap for a `KartogMap`: [source]'s tiles fetched through [client], drawn by map-view in [style], with
  * place and road names over them.
  *
- * [style] defaults to the one provided by [VectorStyleProvider], else the light style. On a device whose GPU driver
- * cannot draw the paths ([vectorTilesNeedRasterizing]), the ground is drawn to images on the CPU instead; names are
- * still drawn from the decoded tile, since text does not go through the path renderer.
+ * [style] defaults to the one provided by [VectorStyleProvider], else the light style. Tiles are drawn as paths on the
+ * GPU, through whatever renderer the platform uses. With [rasterize], the ground is drawn to images on the CPU
+ * instead ([rasterizeVectorTile]), for an app that has a reason to keep tile paths off the GPU; names are still drawn
+ * from the decoded tile, since text does not go through the path renderer.
  */
 fun vectorBasemap(
     source: TileSource,
     client: TileClient,
     style: VectorStyle? = null,
     labels: Boolean = true,
-    rasterize: Boolean = vectorTilesNeedRasterizing(),
+    rasterize: Boolean = false,
 ): KartogLayer = KartogLayer { state ->
     val resolved = style ?: LocalVectorStyle.current
     val density = LocalDensity.current.density
