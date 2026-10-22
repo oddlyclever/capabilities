@@ -1,10 +1,10 @@
 package com.oddlyclever.kartog.staticmap
 
 import androidx.compose.ui.graphics.ImageBitmap
-import com.oddlyclever.webp.RgbaPixels
-import com.oddlyclever.webp.WebpException
-import com.oddlyclever.webp.WebpMetadata
-import com.oddlyclever.webp.encodeToWebp as encodePixelsToWebp
+import com.oddlyclever.media.webp.RgbaPixels
+import com.oddlyclever.media.webp.WebpException
+import com.oddlyclever.media.webp.WebpMetadata
+import com.oddlyclever.media.webp.encodeToWebp as encodePixelsToWebp
 
 /**
  * This image as PNG bytes, for a file, an upload or an email attachment. Lossless, so a map's thin lines and small
@@ -18,7 +18,7 @@ expect fun ImageBitmap.encodeToPng(): ByteArray
  * This image as lossy WebP bytes at [quality], 0 to 100: a fraction of the PNG's size, for an image that is sent or
  * saved. [metadata], such as the place the map shows, is written into the file as EXIF.
  *
- * Encoded by the webp library: with libwebp built in on Android and iOS, so the output does not depend on the
+ * Encoded by media-webp: with libwebp built in on Android and iOS, so the output does not depend on the
  * device's own encoder, and with Skia on the JVM and the web.
  *
  * @throws WebpException when the encoder refuses the image.
@@ -30,7 +30,7 @@ fun ImageBitmap.encodeToWebp(quality: Int = MAP_WEBP_QUALITY, metadata: WebpMeta
 /** High enough that roads and labels keep their edges; WebP's artefacts show first on thin lines. */
 const val MAP_WEBP_QUALITY = 90
 
-/** This image's pixels as the webp library takes them: R, G, B, A bytes with straight alpha. */
+/** This image's pixels as media-webp takes them: R, G, B, A bytes with straight alpha. */
 private fun ImageBitmap.toRgbaPixels(): RgbaPixels {
     // Compose reads pixels as straight-alpha ARGB on every platform.
     val argb = IntArray(width * height)

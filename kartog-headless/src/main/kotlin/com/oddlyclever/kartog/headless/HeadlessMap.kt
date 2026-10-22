@@ -68,7 +68,7 @@ class HeadlessLineStyle(
  * `libegl1`. Skia's own native library comes with this module, for Linux and macOS on x64 and arm64.
  *
  * @throws IllegalArgumentException when there is no coordinate to fit, or the size is empty.
- * @throws com.oddlyclever.webp.WebpException when the WebP encoder refuses the image.
+ * @throws com.oddlyclever.media.webp.WebpException when the WebP encoder refuses the image.
  */
 suspend fun renderMapImage(
     width: Int,

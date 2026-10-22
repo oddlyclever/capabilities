@@ -15,7 +15,7 @@ import com.coderwise.libs.mapview.TileKey
 import com.oddlyclever.kartog.CameraPosition
 import com.oddlyclever.kartog.StaticLayer
 import com.oddlyclever.kartog.StaticTile
-import com.oddlyclever.webp.WebpMetadata
+import com.oddlyclever.media.webp.WebpMetadata
 import kotlinx.coroutines.test.runTest
 import kotlin.math.abs
 import kotlin.test.Test

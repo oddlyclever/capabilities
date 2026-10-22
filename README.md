@@ -20,7 +20,7 @@ A module that cannot support one of these says which and why, in its own README 
 | [`kartog-static`](kartog-static) | Maps drawn without a composition: to images, or to a painter that scales like a vector image; PNG or WebP. |
 | [`kartog-headless`](kartog-headless) | Map images on a server in one call, WebP or PNG. **JVM only**: it bundles Skia's native libraries for servers. |
 | [`platform`](platform) | What must exist once in a process: on Android, the application context and the activity in front, captured at start-up so no library has to ask for them; and `OsFamily`. |
-| [`webp`](webp) | WebP encoding, lossy or lossless, with GPS position and capture time in the file; the same call on every target, with libwebp built in on Android and iOS. |
+| [`media-webp`](media-webp) | WebP encoding, lossy or lossless, with GPS position and capture time in the file; the same call on every target, with libwebp built in on Android and iOS. |
 
 ## How the modules are shaped
 
@@ -71,6 +71,6 @@ The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gr
 
 ## License
 
-Apache License 2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). A module derived from third-party work names its origin in its own README; `webp` carries libwebp, under its own BSD licence.
+Apache License 2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). A module derived from third-party work names its origin in its own README; `media-webp` carries libwebp, under its own BSD licence.
 
 Maintained by [@bpappin](https://github.com/bpappin).

@@ -54,5 +54,5 @@ call.respondBytes(webp, ContentType("image", "webp"))
 - **Tiles may be images or vector tiles.** PNG, JPEG and WebP are told apart from vector tiles by their bytes, so one tile server of either kind works with no setting. Vector tiles are drawn in `style`. A tile `tiles` cannot supply is drawn from its nearest ancestor.
 - **Markers:** the first point of the first line is the start, in green, and the last point of the last line the end, in red; on a loop they show as one marker. `points` are waypoints, in blue. The lines' own points are never marked.
 - **WebP or PNG.** Some desktop mail clients do not show WebP, so ask for `ImageFormat.Png` where the image goes into an email.
-- **It refuses** an image with no coordinates or an empty size, with an `IllegalArgumentException`. A WebP the encoder cannot produce is a `WebpException`, from the [webp](../webp) library that encodes it.
+- **It refuses** an image with no coordinates or an empty size, with an `IllegalArgumentException`. A WebP the encoder cannot produce is a `WebpException`, from the [media-webp](../media-webp) library that encodes it.
 - **Rendering is all in memory** and safe to run concurrently; tiles for one image are fetched at once.
