@@ -9,8 +9,6 @@ import org.jetbrains.skia.Image
 // not visible from common code.
 actual fun ImageBitmap.encodeToPng(): ByteArray = encode(EncodedImageFormat.PNG, 100)
 
-actual fun ImageBitmap.encodeToWebp(quality: Int): ByteArray = encode(EncodedImageFormat.WEBP, quality.coerceIn(0, 100))
-
 private fun ImageBitmap.encode(format: EncodedImageFormat, quality: Int): ByteArray =
     checkNotNull(Image.makeFromBitmap(asSkiaBitmap()).encodeToData(format, quality)) {
         "Skia could not encode the image as $format."

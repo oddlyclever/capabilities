@@ -15,6 +15,7 @@ import com.coderwise.libs.mapview.TileKey
 import com.oddlyclever.kartog.CameraPosition
 import com.oddlyclever.kartog.StaticLayer
 import com.oddlyclever.kartog.StaticTile
+import com.oddlyclever.webp.WebpMetadata
 import kotlinx.coroutines.test.runTest
 import kotlin.math.abs
 import kotlin.test.Test
@@ -105,6 +106,29 @@ class RenderMapTest {
         val webp = renderMap(size, density, toronto, listOf(solid(0..19, Color.Red))).encodeToWebp()
         assertEquals("RIFF", webp.copyOfRange(0, 4).decodeToString(), "RIFF container")
         assertEquals("WEBP", webp.copyOfRange(8, 12).decodeToString(), "WebP payload")
+    }
+
+    @Test
+    fun aTranslucentImageKeepsItsColourInWebp() = runTest {
+        awaitSkia()
+        // Half-transparent red: straight alpha keeps it red; premultiplied pixels handed over as straight would darken it.
+        val image = ImageBitmap(32, 32)
+        CanvasDrawScope().draw(density, LayoutDirection.Ltr, Canvas(image), Size(32f, 32f)) {
+            drawRect(Color.Red.copy(alpha = 0.5f))
+        }
+        val decoded = image.encodeToWebp().decodeToImageBitmap().pixel(16, 16)
+        val alpha = decoded ushr 24
+        val red = (decoded shr 16) and 0xff
+        assertTrue(abs(alpha - 128) <= 2, "alpha $alpha")
+        assertTrue(red >= 240, "red $red: the colour was darkened")
+    }
+
+    @Test
+    fun webpCarriesMetadata() = runTest {
+        awaitSkia()
+        val webp = renderMap(size, density, toronto, listOf(solid(0..19, Color.Red))).encodeToWebp(metadata = WebpMetadata(software = "Acme"))
+        assertTrue("EXIF" in webp.decodeToString(), "an EXIF chunk")
+        assertTrue("Acme" in webp.decodeToString(), "the software tag")
     }
 
     @Test

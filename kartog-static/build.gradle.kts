@@ -55,6 +55,8 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":kartog"))
+                // WebP encoding, with libwebp built in on Android and iOS; api, since encodeToWebp takes its metadata.
+                api(project(":webp"))
                 implementation(libs.kotlinx.coroutines.core)
             }
         }

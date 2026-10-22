@@ -10,7 +10,7 @@ Maps drawn without a composition for [kartog](../kartog): to an image for a shar
 implementation("com.oddlyclever:kartog-static:0.0.3")
 ```
 
-It depends on `kartog` alone. Layers come from the module that draws them, `staticVectorLayer` in kartog-vector or `staticRasterLayer` in kartog-raster, so an app takes only the one it uses. There is no dependency-injection container.
+It depends on `kartog`, and on [`webp`](../webp) for encoding. Layers come from the module that draws them, `staticVectorLayer` in kartog-vector or `staticRasterLayer` in kartog-raster, so an app takes only the one it uses. There is no dependency-injection container.
 
 The Kotlin package is `com.oddlyclever.kartog.staticmap`, not `.static`: `static` is a Java keyword, and Android generates Java classes in a library's package.
 
@@ -67,9 +67,16 @@ val thumbnail = map.toImageBitmap()                             // the same map 
 | Call | What it gives |
 |---|---|
 | `image.encodeToPng()` | lossless, larger; shown everywhere |
-| `image.encodeToWebp(quality = 90)` | lossy, several times smaller than PNG; 90 keeps thin roads sharp |
+| `image.encodeToWebp(quality = MAP_WEBP_QUALITY, metadata = null)` | lossy, several times smaller than PNG; 90 keeps thin roads sharp |
 
-Encoding uses Skia on the JVM, iOS and the web, and Android's own `Bitmap.compress` on Android. **On Android, WebP through `Bitmap.compress` has been seen to fail silently on some API 30+ devices**, so an app that must get a WebP out every time should encode with a bundled libwebp until kartog moves onto one; PNG is not affected. Neither encoder writes metadata such as a GPS position; both wait on a WebP capability that bundles libwebp.
+- **WebP is encoded by the [webp](../webp) library:** libwebp built in on Android and iOS, so the output does not depend on the device's own encoder, and Skia on the JVM and the web. A failure throws a `WebpException`; it never returns an empty file.
+- **Metadata goes into the file.** Pass a `WebpMetadata` to record where the map is, when it was made and what made it, as EXIF:
+
+```kotlin
+val webp = image.encodeToWebp(metadata = WebpMetadata(location = GpsLocation(center.lat, center.lon), software = "Acme"))
+```
+
+- **PNG** is encoded by Skia on the JVM, iOS and the web, and by `Bitmap.compress` on Android, and carries no metadata.
 
 ## On a server
 

@@ -17,7 +17,7 @@ import com.oddlyclever.kartog.StaticLayer
 import com.oddlyclever.kartog.StaticTile
 import com.oddlyclever.kartog.fit
 import com.oddlyclever.kartog.raster.staticRasterLayer
-import com.oddlyclever.kartog.staticmap.DEFAULT_WEBP_QUALITY
+import com.oddlyclever.kartog.staticmap.MAP_WEBP_QUALITY
 import com.oddlyclever.kartog.staticmap.StaticProjection
 import com.oddlyclever.kartog.staticmap.encodeToPng
 import com.oddlyclever.kartog.staticmap.encodeToWebp
@@ -68,6 +68,7 @@ class HeadlessLineStyle(
  * `libegl1`. Skia's own native library comes with this module, for Linux and macOS on x64 and arm64.
  *
  * @throws IllegalArgumentException when there is no coordinate to fit, or the size is empty.
+ * @throws com.oddlyclever.webp.WebpException when the WebP encoder refuses the image.
  */
 suspend fun renderMapImage(
     width: Int,
@@ -77,7 +78,7 @@ suspend fun renderMapImage(
     tiles: suspend (TileKey) -> ByteArray?,
     scale: Float = 1f,
     format: ImageFormat = ImageFormat.Webp,
-    quality: Int = DEFAULT_WEBP_QUALITY,
+    quality: Int = MAP_WEBP_QUALITY,
     style: VectorStyle = KartogStyles.Light,
     zoomRange: IntRange = DEFAULT_ZOOM_RANGE,
     padding: Dp = 48.dp,
