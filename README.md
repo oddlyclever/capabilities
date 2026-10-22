@@ -20,6 +20,7 @@ A module that cannot support one of these says which and why, in its own README 
 | [`kartog-static`](kartog-static) | Maps drawn without a composition: to images, or to a painter that scales like a vector image; PNG or WebP. |
 | [`kartog-headless`](kartog-headless) | Map images on a server in one call, WebP or PNG. **JVM only**: it bundles Skia's native libraries for servers. |
 | [`platform`](platform) | What must exist once in a process: on Android, the application context and the activity in front, captured at start-up so no library has to ask for them; and `OsFamily`. |
+| [`media-image`](media-image) | Images downsized and encoded for an upload or a file, as WebP, JPEG or PNG, with the same call on every target. |
 | [`media-webp`](media-webp) | WebP encoding, lossy or lossless, with GPS position and capture time in the file; the same call on every target, with libwebp built in on Android and iOS. |
 
 ## How the modules are shaped

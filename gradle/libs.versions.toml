@@ -23,10 +23,12 @@ webpack = "5.111.1"
 # artifact of it. It is 0.x and its types are part of kartog's public API, so a bump is a deliberate change.
 mapView = "0.2.0"
 kotlinxCoroutines = "1.11.0"
+# :media-image's web target: the DOM, for <img> and <canvas>.
+kotlinxBrowser = "0.5.0"
 # Skia's native libraries, which :kartog-headless bundles so a server needs no Compose desktop setup. Must be the
 # Skiko version Compose Multiplatform brings (Compose 1.12.1 brings 0.150.1); move it with every Compose bump.
 skiko = "0.150.1"
-# :media-webp's Android device tests, which run the common tests against its JNI library on an emulator or device.
+# :media-webp's and :media-image's Android device tests, which run the common tests against its JNI library on an emulator or device.
 androidx-test-ext = "1.3.0"
 androidx-test-runner = "1.7.0"
 # :platform: ComponentActivity for ActivityProvider, and App Startup for the initializer.
@@ -65,16 +67,19 @@ androidx-startup-runtime = { module = "androidx.startup:startup-runtime", versio
 # :platform's device test launches an activity with ActivityScenario.
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 
+# :media-image decodes and resizes on the web with <img> and <canvas>.
+kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinxBrowser" }
+
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 # :media-webp encodes through Skia on the JVM and the web, whose WebP encoder is libwebp. The classes only; an app brings
 # the native library for its platform, as Compose does.
 skiko = { module = "org.jetbrains.skiko:skiko", version.ref = "skiko" }
-# :media-webp's web tests: Skia's WebAssembly, which a Compose app's build would otherwise unpack.
+# :media-webp's and :media-image's web tests: Skia's WebAssembly, which a Compose app's build would otherwise unpack.
 skiko-wasm-runtime = { module = "org.jetbrains.skiko:skiko-js-wasm-runtime", version.ref = "skiko" }
 
 # :kartog-headless, at runtime only: Skia for the server platforms, and macOS for running it on a developer's machine.
-# :media-webp's JVM tests, for the machine they run on.
+# :media-webp's and :media-image's JVM tests, for the machine they run on.
 skiko-runtime-linux-x64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-linux-x64", version.ref = "skiko" }
 skiko-runtime-linux-arm64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-linux-arm64", version.ref = "skiko" }
 skiko-runtime-macos-arm64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-macos-arm64", version.ref = "skiko" }

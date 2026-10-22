@@ -50,3 +50,6 @@ include(":media-webp")
 
 // The application context and the activity in front, captured once at process start; and OsFamily.
 include(":platform")
+
+// Images downsized and encoded for an upload or a file.
+include(":media-image")
