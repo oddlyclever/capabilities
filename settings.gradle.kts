@@ -47,3 +47,6 @@ include(":kartog-headless")
 
 // WebP encoding with metadata, on every target.
 include(":webp")
+
+// The application context and the activity in front, captured once at process start; and OsFamily.
+include(":platform")
