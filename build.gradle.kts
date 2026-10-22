@@ -5,6 +5,8 @@ import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
 import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
+import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnPlugin
+import org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootExtension
 
 plugins {
     alias(libs.plugins.multiplatformLibrary) apply false
@@ -22,6 +24,16 @@ plugins {
 rootProject.plugins.withType<YarnPlugin> {
     rootProject.the<YarnRootExtension>().apply {
         lockFileDirectory = project.rootDir.resolve("gradle/kotlin-js-store")
+        yarnLockMismatchReport = org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport.WARNING
+        reportNewYarnLock = false
+        yarnLockAutoReplace = true
+    }
+}
+
+// The wasmJs npm dependencies' lock, beside the JS one rather than in a kotlin-js-store at the repository root.
+rootProject.plugins.withType<WasmYarnPlugin> {
+    rootProject.the<WasmYarnRootExtension>().apply {
+        lockFileDirectory = project.rootDir.resolve("gradle/kotlin-js-store/wasm")
         yarnLockMismatchReport = org.jetbrains.kotlin.gradle.targets.js.yarn.YarnLockMismatchReport.WARNING
         reportNewYarnLock = false
         yarnLockAutoReplace = true

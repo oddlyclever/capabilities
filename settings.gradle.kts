@@ -53,3 +53,6 @@ include(":platform")
 
 // Images downsized and encoded for an upload or a file.
 include(":media-image")
+
+// Uber H3 hexagonal grid indexing behind one String-cell API, on every standard target.
+include(":h3spatial")

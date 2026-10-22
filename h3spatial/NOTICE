@@ -1,0 +1,40 @@
+H3 Spatial Capability
+Copyright 2026 Oddly Clever, a division of Rattlebox Software Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+these files except in compliance with the License. A copy of the License is
+included in the LICENSE file alongside this notice, and is also available at
+http://www.apache.org/licenses/LICENSE-2.0
+
+--------------------------------------------------------------------------------
+Third-party work: H3 (Uber Technologies, Inc.)
+--------------------------------------------------------------------------------
+
+This product includes software from H3, a hexagonal hierarchical geospatial
+indexing system (https://github.com/uber/h3). H3's own NOTICE reads:
+
+    Copyright 2017-2021 Uber Technologies, Inc.
+
+H3 is licensed under the Apache License, Version 2.0; a copy is in the LICENSE
+file alongside this notice.
+
+The H3 C library is vendored, unmodified, under native/h3lib, and the iOS static
+libraries and cinterop header under src/iosMain/cinterop are built from it. Those
+files retain Uber's copyright notices in their headers. The upstream release tag
+and commit are recorded in native/PROVENANCE. The static libraries are embedded
+in this library's published iOS artifacts, so this NOTICE and the LICENSE are
+included in every published jar under META-INF.
+
+src/commonTest/kotlin/UberH3Fixtures.kt is derived from H3's own test input
+files (tests/inputfiles) at that same release, and is used only by this
+library's tests. It is modified: a subset of the rows is selected and reformatted
+into Kotlin source by native/generate-agreement-fixtures.py.
+
+The JVM target depends on com.uber:h3, the Android target on com.uber:h3-android
+(both from https://github.com/uber/h3-java), and the JS and wasmJs targets on the
+h3-js package. None of them is redistributed here.
+
+--------------------------------------------------------------------------------
+
+Uber Technologies, Inc. does not endorse this work, and no endorsement is
+implied. Its name is used only to identify the origin of the third-party work.

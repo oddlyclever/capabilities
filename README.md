@@ -12,6 +12,7 @@ A module that cannot support one of these says which and why, in its own README 
 
 | Module | What it does |
 |---|---|
+| [`h3spatial`](h3spatial) | Uber's H3 hexagonal grid behind one `String`-cell API: indexing, traversal, hierarchy and GeoJSON, with the same answers on every target. |
 | [`kartog`](kartog) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the map, its state, markers, polylines and controls. The root of the kartog family. |
 | [`kartog-vector`](kartog-vector) | Light and dark styles for map-view's vector tiles, and vector tiles drawn to images on GPUs that cannot draw their paths. |
 | [`kartog-raster`](kartog-raster) | Raster basemaps for kartog: decoded off the main thread, and faded in as they arrive. |
