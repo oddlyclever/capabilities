@@ -10,7 +10,7 @@ import android.os.Build
  */
 actual fun vectorTilesNeedRasterizing(): Boolean {
     // The OpenGL renderer does not have the fault; only Vulkan does.
-    if (System.getProperty("debug.hwui.renderer") == "skiagl") return false
+    if (hwuiRenderer == "skiagl") return false
     val model = Build.MODEL.orEmpty().lowercase()
     val board = Build.BOARD.orEmpty().lowercase()
     val hardware = Build.HARDWARE.orEmpty().lowercase()
@@ -18,4 +18,16 @@ actual fun vectorTilesNeedRasterizing(): Boolean {
     val product = Build.PRODUCT.orEmpty().lowercase()
     return "pixel 10" in model || "laguna" in board || "laguna" in hardware ||
         "franklin" in device || "franklin" in product
+}
+
+/**
+ * The renderer forced with `adb shell setprop debug.hwui.renderer`, or null. That is an Android system property, not
+ * a Java one, so `System.getProperty` never sees it, and the API that reads it is hidden from apps; `getprop` is the
+ * supported way to read it. Read once, since the renderer cannot change while the app runs.
+ */
+private val hwuiRenderer: String? by lazy {
+    runCatching {
+        val process = ProcessBuilder("getprop", "debug.hwui.renderer").redirectErrorStream(true).start()
+        process.inputStream.bufferedReader().use { it.readText() }.trim().also { process.waitFor() }
+    }.getOrNull()?.takeIf { it.isNotEmpty() }
 }
