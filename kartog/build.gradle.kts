@@ -67,6 +67,13 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
+        // Compose UI tests for the ornaments, on the desktop with Skia's native library for this machine.
+        jvmTest {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation(libs.compose.ui.test)
+            }
+        }
     }
 
     // Workaround for KLIB uniqueName clashes across modules in the same repo.

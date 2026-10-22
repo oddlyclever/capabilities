@@ -3,7 +3,6 @@ package com.oddlyclever.kartog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
@@ -26,14 +25,15 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.coderwise.libs.mapview.LatLon
 import com.coderwise.libs.mapview.MapOverlayScope
 import com.coderwise.libs.mapview.MapState
 import com.coderwise.libs.mapview.MapView
 import com.coderwise.libs.mapview.Polyline
 import com.coderwise.libs.mapview.TileKey
-import com.coderwise.libs.mapview.controls.Attribution
 import com.coderwise.libs.mapview.controls.CompassTape
 import com.coderwise.libs.mapview.controls.CourseUp
 import com.coderwise.libs.mapview.controls.ScaleBar
@@ -51,6 +51,10 @@ import com.coderwise.libs.mapview.mapGestures
  *
  * Everything the app reads or drives is on [state]: the camera, whether the user has hold of the map, north-up or
  * course-up, and the visible bounds, which this keeps current as the map moves or is resized.
+ *
+ * The credits of the layers' sources are shown as [MapOrnaments.attributionStyle] says, collapsing to an "i" by
+ * default. [onAttributionClick] runs when they are tapped, to open the page behind them, such as
+ * openstreetmap.org/copyright.
  */
 @Composable
 fun KartogMap(
@@ -63,6 +67,7 @@ fun KartogMap(
     ornaments: MapOrnaments = MapOrnaments(),
     onTap: ((LatLon) -> Unit)? = null,
     onMarkerClick: ((MapMarker) -> Unit)? = null,
+    onAttributionClick: (() -> Unit)? = null,
     overlay: @Composable MapOverlayScope.() -> Unit = {},
 ) {
     val placed = layers.map { layer -> key(layer) { layer.place(state) } }
@@ -116,7 +121,7 @@ fun KartogMap(
                 }
             }
         }
-        Ornaments(state, ornaments, placed.mapNotNull { it.attribution }.distinct())
+        Ornaments(state, ornaments, placed.mapNotNull { it.attribution }.distinct(), onAttributionClick)
     }
 }
 
@@ -145,6 +150,10 @@ data class MapOrnaments(
     /** The credits the layers' sources ask for. Leave it on wherever a source's licence requires attribution. */
     val attribution: Boolean = true,
     val attributionAlignment: Alignment = Alignment.BottomEnd,
+    /** In full throughout, or in full when the map appears and then behind an "i". */
+    val attributionStyle: AttributionStyle = AttributionStyle.Collapsible,
+    /** The credits' text size. Small is fine as long as it stays readable; 9 sp is about as small as reads. */
+    val attributionTextSize: TextUnit = 9.sp,
     /** How far the ornaments sit from the map's edges, to clear an app bar or a sheet. */
     val padding: Dp = 8.dp,
 )
@@ -202,7 +211,7 @@ class PlacedLayer(
 )
 
 @Composable
-private fun BoxScope.Ornaments(state: KartogMapState, ornaments: MapOrnaments, credits: List<String>) {
+private fun BoxScope.Ornaments(state: KartogMapState, ornaments: MapOrnaments, credits: List<String>, onAttributionClick: (() -> Unit)?) {
     val edge = Modifier.padding(ornaments.padding)
     if (ornaments.compass) {
         CompassTape(
@@ -231,6 +240,13 @@ private fun BoxScope.Ornaments(state: KartogMapState, ornaments: MapOrnaments, c
     if (ornaments.scaleBar) ScaleBar(state.camera, edge.align(ornaments.scaleBarAlignment), units = ornaments.scaleUnits)
     if (ornaments.zoomButtons) ZoomButtons(state.camera, edge.align(ornaments.zoomButtonsAlignment))
     if (ornaments.attribution && credits.isNotEmpty()) {
-        Column(edge.align(ornaments.attributionAlignment)) { Attribution(credits.joinToString(" · ")) }
+        MapAttribution(
+            credits.joinToString(" · "),
+            state.camera,
+            ornaments.attributionStyle,
+            ornaments.attributionTextSize,
+            onAttributionClick,
+            edge.align(ornaments.attributionAlignment),
+        )
     }
 }

@@ -91,7 +91,11 @@ Drawn bottom to top: the `layers` in order, the `polylines`, the `overlay`, the 
 | `scaleBar`, `scaleBarAlignment`, `scaleUnits` | on, bottom start, metric | map-view's scale bar |
 | `zoomButtons`, `zoomButtonsAlignment` | off, centre end | map-view's zoom buttons |
 | `attribution`, `attributionAlignment` | on, bottom end | the credits the layers' sources ask for; leave it on wherever a licence requires attribution |
+| `attributionStyle` | `Collapsible` | `Collapsible` shows the credits when the map appears, then shrinks them to an "i"; `Full` keeps them in full |
+| `attributionTextSize` | 9 sp | the credits' text size |
 | `padding` | 8 dp | how far ornaments sit from the edges, to clear an app bar or a sheet |
+
+**Attribution, small and out of the way.** A map's credits clutter a small screen, so by default they are shown in full when the map appears and shrink to an "i" after five seconds or at the user's first pan, zoom or turn, whichever comes first. Tapping the "i" shows them again, by the same rule. That is the form OpenStreetMap's attribution guidelines allow for an interactive map: visible on first display, then collapsed, and there for anyone who looks for it. Hiding the credits from the start is not allowed, and their text must stay readable; 9 sp is about as small as reads. Pass `onAttributionClick` to `KartogMap` to open the page behind them, such as `https://www.openstreetmap.org/copyright`, for instance with Compose's `LocalUriHandler`.
 
 ## KartogMapState
 

@@ -86,6 +86,9 @@ kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.re
 uber-h3 = { module = "com.uber:h3", version.ref = "uberH3" }
 uber-h3-android = { module = "com.uber:h3-android", version.ref = "uberH3" }
 
+# :kartog's Compose UI tests of its map ornaments, at the Compose Multiplatform version.
+compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose-multiplatform" }
+
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 # :media-webp encodes through Skia on the JVM and the web, whose WebP encoder is libwebp. The classes only; an app brings
