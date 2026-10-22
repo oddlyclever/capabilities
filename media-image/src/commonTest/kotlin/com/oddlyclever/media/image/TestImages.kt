@@ -20,3 +20,12 @@ expect suspend fun notAnImage(): String
  * reports both as the same error.
  */
 expect val tellsUnreadableFromUndecodable: Boolean
+
+/** An opaque image as encoded bytes, JPEG or PNG: its left half red and its right half blue, so a turn shows which way it went. */
+expect suspend fun twoToneImage(width: Int, height: Int, jpeg: Boolean): ByteArray
+
+/** Writes [bytes] where this platform's [ImageProcessor] reads from, and returns what to pass it as the source. */
+expect suspend fun writeSource(bytes: ByteArray, jpeg: Boolean): String
+
+/** The ARGB colour at ([x], [y]) of an encoded image, or null on a platform with no decoder these tests can call. */
+expect fun pixelAt(encoded: ByteArray, x: Int, y: Int): Int?

@@ -56,6 +56,7 @@ val webp: ByteArray = bitmap.encodeToWebp(                  // Android Bitmap, i
 - **Written in Kotlin, the same on every target.** The EXIF and the WebP container around it are built in common code rather than by libwebp's mux library, so the JVM and the web, whose encoder has no mux, write the same metadata as Android and iOS.
 - **Only the fields that are set are written,** so a reader finds nothing it would have to second-guess.
 - **A file with metadata is an extended WebP:** a `VP8X` header, the image data, then the `EXIF` chunk, before any `XMP `. The EXIF payload starts with its TIFF header, with no `Exif\0\0` prefix, as the WebP container specification has it. The tests check every tag by reading it back, and it has been checked against Pillow's reader.
+- **`metadata.toExif()`** gives the same tags as a bare EXIF block, for writing into another container, such as a JPEG's APP1 segment or a PNG's `eXIf` chunk. media-image uses it to keep a photo's metadata in every format.
 - **`withWebpMetadata`** rewrites only the container, so it adds metadata to a WebP from a server, from Skia, or from a camera, and `WebpMetadata()` with nothing set removes it.
 
 ## How each target encodes

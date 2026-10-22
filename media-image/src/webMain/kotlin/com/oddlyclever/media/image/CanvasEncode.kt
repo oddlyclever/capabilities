@@ -12,3 +12,9 @@ import org.w3c.files.Blob
  * canvas; the caller converts that to a failure.
  */
 internal expect suspend fun HTMLCanvasElement.encodeToBlob(type: String, quality: Double): Blob?
+
+/**
+ * The bytes at [uri], fetched as the page would fetch them, or null when they cannot be had. `fetch`'s Kotlin binding
+ * also differs between js and wasmJs.
+ */
+internal expect suspend fun fetchBytes(uri: String): ByteArray?

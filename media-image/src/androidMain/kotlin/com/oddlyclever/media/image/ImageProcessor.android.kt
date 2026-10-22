@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
+import androidx.exifinterface.media.ExifInterface
+import com.oddlyclever.media.webp.GpsLocation
 import com.oddlyclever.media.webp.encodeToWebp
 import com.oddlyclever.platform.AppContext
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +20,8 @@ import kotlin.math.max
 
 /**
  * Decodes with `BitmapFactory`, subsampling a large image as it decodes so a 50-megapixel photo never sits in memory
- * whole, and encodes WebP with media-webp and JPEG and PNG with `Bitmap.compress`.
+ * whole, and encodes WebP with media-webp and JPEG and PNG with `Bitmap.compress`. The EXIF is read with ExifInterface,
+ * which also reads HEIC, for the orientation the decoder ignores and for the metadata kept when asked.
  *
  * [context] opens `content://` URIs; it defaults to the application context the platform library captured.
  */
@@ -44,6 +47,7 @@ actual class ImageProcessor(private val context: Context) {
         format: ImageFormat,
         maxDimension: Int,
         quality: Int,
+        keepMetadata: Boolean,
     ): Result<ProcessedImage> = withContext(Dispatchers.IO) {
         // The whole body is guarded: decode and native encode can throw (OOM in
         // particular), and previously those propagated to the caller on Android while
@@ -88,13 +92,24 @@ actual class ImageProcessor(private val context: Context) {
             val sampledBitmap = inputStream2.use { BitmapFactory.decodeStream(it, null, options) }
                 ?: return@withContext Result.failure(ImageProcessingException.DecodeFailed(uri))
 
-            // 4. Scale precisely
-            val finalBitmap = if (sampledBitmap.width > maxDimension || sampledBitmap.height > maxDimension) {
-                val scale = maxDimension.toFloat() / max(sampledBitmap.width, sampledBitmap.height).toFloat()
-                val matrix = Matrix().apply { postScale(scale, scale) }
-                val scaled = Bitmap.createBitmap(sampledBitmap, 0, 0, sampledBitmap.width, sampledBitmap.height, matrix, true)
-                if (scaled != sampledBitmap) sampledBitmap.recycle()
-                scaled
+            // 4. Scale precisely, and stand the photo upright in the same pass: BitmapFactory ignores the EXIF
+            // orientation, so a photo taken with the phone held sideways decodes sideways.
+            val exif = openSafeInputStream(parsedUri)?.use { readExif(it) } ?: SourceExif()
+            val scale = if (sampledBitmap.width > maxDimension || sampledBitmap.height > maxDimension) {
+                maxDimension.toFloat() / max(sampledBitmap.width, sampledBitmap.height).toFloat()
+            } else {
+                1f
+            }
+            val finalBitmap = if (scale != 1f || exif.orientation != 1) {
+                val t = uprightTransform(exif.orientation, 0f, 0f)
+                // createBitmap places the turned image at the origin itself, so only the linear part is needed.
+                val matrix = Matrix().apply {
+                    setValues(floatArrayOf(t[0], t[1], 0f, t[3], t[4], 0f, 0f, 0f, 1f))
+                    preScale(scale, scale)
+                }
+                val turned = Bitmap.createBitmap(sampledBitmap, 0, 0, sampledBitmap.width, sampledBitmap.height, matrix, true)
+                if (turned != sampledBitmap) sampledBitmap.recycle()
+                turned
             } else {
                 sampledBitmap
             }
@@ -124,7 +139,7 @@ actual class ImageProcessor(private val context: Context) {
 
             Result.success(
                 ProcessedImage(
-                    bytes = bytes,
+                    bytes = embedMetadata(bytes, format, if (keepMetadata) exif.metadata else null),
                     contentType = format.contentType,
                     width = width,
                     height = height,
@@ -134,6 +149,28 @@ actual class ImageProcessor(private val context: Context) {
             Log.e(TAG, "Image processing failed for $uri as ${format.contentType}", e)
             Result.failure(ImageProcessingException.EncodeFailed(format, e))
         }
+    }
+
+    /** The orientation, location and capture time ExifInterface finds; it reads JPEG, PNG, WebP and HEIC. */
+    private fun readExif(stream: InputStream): SourceExif = try {
+        val exif = ExifInterface(stream)
+        val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        val location = exif.latLong?.let { (latitude, longitude) ->
+            val altitude = if (exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE) != null) exif.getAltitude(0.0) else null
+            if (latitude in -90.0..90.0 && longitude in -180.0..180.0) GpsLocation(latitude, longitude, altitude) else null
+        }
+        val gpsSeconds = exif.getAttribute(ExifInterface.TAG_GPS_TIMESTAMP)?.split(':')?.mapNotNull { it.toDoubleOrNull() }
+            ?.takeIf { it.size == 3 }?.let { (h, m, s) -> h * 3600 + m * 60 + s }
+        val capturedAt = exactCaptureTime(
+            original = exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL),
+            offset = exif.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL),
+            gpsDate = exif.getAttribute(ExifInterface.TAG_GPS_DATESTAMP),
+            gpsSeconds = gpsSeconds,
+        )
+        SourceExif(orientation.takeIf { it in 1..8 } ?: 1, location, capturedAt)
+    } catch (e: Exception) {
+        Log.w(TAG, "Could not read the image's EXIF; treating it as upright with none", e)
+        SourceExif()
     }
 
     private fun Bitmap.compressToBytes(format: Bitmap.CompressFormat, quality: Int): ByteArray? {

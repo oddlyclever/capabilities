@@ -33,6 +33,7 @@ actual class ImageProcessor {
         format: ImageFormat,
         maxDimension: Int,
         quality: Int,
+        keepMetadata: Boolean,
     ): Result<ProcessedImage> {
         val image = loadImage(uri)
             ?: return Result.failure(ImageProcessingException.SourceUnreadable(uri))
@@ -61,7 +62,11 @@ actual class ImageProcessor {
             return Result.failure(ImageProcessingException.AlphaNotRepresentable(format))
         }
 
-        if (format == ImageFormat.Webp) return encodeWebp(context, width, height, quality)
+        // The browser has already stood the photo upright: <img> applies the EXIF orientation. Only the metadata
+        // needs the source's own bytes, so they are read only when it is kept.
+        val metadata = if (keepMetadata) fetchBytes(uri)?.let { SourceExifReader.read(it).metadata } else null
+
+        if (format == ImageFormat.Webp) return encodeWebp(context, width, height, quality).map { it.copy(bytes = embedMetadata(it.bytes, format, metadata)) }
 
         val blob = canvas.encode(format, quality)
             ?: return Result.failure(ImageProcessingException.EncodeFailed(format))
@@ -80,7 +85,7 @@ actual class ImageProcessor {
 
         return Result.success(
             ProcessedImage(
-                bytes = bytes,
+                bytes = embedMetadata(bytes, format, metadata),
                 contentType = format.contentType,
                 width = width,
                 height = height,

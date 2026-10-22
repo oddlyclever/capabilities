@@ -21,7 +21,8 @@ import kotlin.math.roundToInt
 
 /**
  * Decodes, resizes and encodes JPEG and PNG with Skia, and WebP with media-webp. Skia reads JPEG, PNG, WebP, GIF and
- * BMP, so a WebP can be resized as well as written.
+ * BMP, so a WebP can be resized as well as written. Skia stands a photo upright as it decodes it, from its EXIF
+ * orientation; the EXIF is read here only for the metadata kept when asked.
  *
  * Skia's native library must be on the classpath at run time, as it is in a Compose desktop app; see the README.
  */
@@ -32,6 +33,7 @@ actual class ImageProcessor {
         format: ImageFormat,
         maxDimension: Int,
         quality: Int,
+        keepMetadata: Boolean,
     ): Result<ProcessedImage> = withContext(Dispatchers.IO) {
         val file = try {
             if (uri.startsWith("file://")) File(URI(uri)) else File(uri)
@@ -89,7 +91,8 @@ actual class ImageProcessor {
                 return@withContext Result.failure(ImageProcessingException.EncodeFailed(format))
             }
 
-            Result.success(ProcessedImage(bytes = bytes, contentType = format.contentType, width = width, height = height))
+            val withMetadata = embedMetadata(bytes, format, if (keepMetadata) SourceExifReader.read(encoded).metadata else null)
+            Result.success(ProcessedImage(bytes = withMetadata, contentType = format.contentType, width = width, height = height))
         } finally {
             image.close()
         }

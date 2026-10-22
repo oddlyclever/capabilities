@@ -64,6 +64,8 @@ kotlin {
             dependencies {
                 // The application context, so ImageProcessor() needs none passed in.
                 implementation(project(":platform"))
+                // A photo's orientation, location and capture time, from JPEG, PNG, WebP and HEIC.
+                implementation(libs.androidx.exifinterface)
             }
         }
         jvmMain {

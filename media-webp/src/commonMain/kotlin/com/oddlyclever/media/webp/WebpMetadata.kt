@@ -53,3 +53,10 @@ class GpsLocation(val latitude: Double, val longitude: Double, val altitude: Dou
 
     override fun toString(): String = "GpsLocation(latitude=$latitude, longitude=$longitude, altitude=$altitude)"
 }
+
+/**
+ * This metadata as an EXIF block: the TIFF structure [withWebpMetadata] puts in a WebP's `EXIF` chunk, with no
+ * `Exif\0\0` prefix. For writing the same tags into another container, such as a JPEG's APP1 segment (which wants
+ * the prefix in front of it) or a PNG's `eXIf` chunk. Empty metadata gives an EXIF block with no tags.
+ */
+fun WebpMetadata.toExif(): ByteArray = Exif.write(this)

@@ -42,6 +42,8 @@ androidx-test-runner = "1.7.0"
 androidx-activity = "1.13.0"
 androidx-startup = "1.2.0"
 androidx-test-core = "1.7.0"
+# :media-image reads a photo's EXIF on Android, HEIC included: its orientation, location and capture time.
+androidx-exifinterface = "1.4.2"
 
 [libraries]
 # Libraries are added with the modules that need them, each with a comment naming that module and why.
@@ -74,6 +76,8 @@ androidx-startup-runtime = { module = "androidx.startup:startup-runtime", versio
 # :platform's device test launches an activity with ActivityScenario.
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 
+# :media-image's Android EXIF reader.
+androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "androidx-exifinterface" }
 # :media-image decodes and resizes on the web with <img> and <canvas>.
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinxBrowser" }
 

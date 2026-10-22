@@ -99,6 +99,10 @@ sealed class ImageProcessingException(
  * WebP is encoded by media-webp on every target, with libwebp built in on Android and iOS, so its output does not
  * depend on the device. JPEG and PNG use each platform's own encoder. Images are only ever made smaller, never larger.
  *
+ * A photo is stood upright: one whose EXIF says the camera was held sideways comes out the way it is shown, with its
+ * width and height swapped where that turns it a quarter. The EXIF itself is not copied, so the result carries no
+ * metadata unless asked for with `keepMetadata`.
+ *
  * Construct it directly. On Android it reads the application context from `AppContext`, which the platform library
  * captures at start-up, so there is nothing to pass and no dependency-injection container is needed.
  */
@@ -118,12 +122,17 @@ expect class ImageProcessor() {
      * @param format The encoding target.
      * @param maxDimension Maximum edge size in pixels.
      * @param quality Compression quality (0-100). Ignored for [ImageFormat.Png], which is lossless.
+     * @param keepMetadata Whether to write the source's location and capture time into the result, as EXIF, in every
+     *   format. Off by default: a photo's location is personal, and most images are uploaded to be seen by others.
+     *   Only a capture time the source records exactly is kept, one with its offset from UTC or a GPS time stamp;
+     *   nothing else of the source's EXIF is.
      */
     suspend fun compressImage(
         uri: String,
         format: ImageFormat = ImageFormat.Webp,
         maxDimension: Int = 2048,
         quality: Int = 80,
+        keepMetadata: Boolean = false,
     ): Result<ProcessedImage>
 }
 
@@ -135,19 +144,20 @@ expect class ImageProcessor() {
  * those failures are properties of the platform or the image rather than transient.
  *
  * The default order prefers WebP and keeps PNG last as the alpha-safe backstop. If every
- * candidate fails, the last failure is returned.
+ * candidate fails, the last failure is returned. [keepMetadata] is passed to each attempt; see [ImageProcessor.compressImage].
  */
 suspend fun ImageProcessor.compressImageWithFallback(
     uri: String,
     candidates: List<ImageFormat> = listOf(ImageFormat.Webp, ImageFormat.Jpeg, ImageFormat.Png),
     maxDimension: Int = 2048,
     quality: Int = 80,
+    keepMetadata: Boolean = false,
 ): Result<ProcessedImage> {
     require(candidates.isNotEmpty()) { "candidates must not be empty" }
 
     var last: Result<ProcessedImage>? = null
     for (format in candidates) {
-        val result = compressImage(uri, format, maxDimension, quality)
+        val result = compressImage(uri, format, maxDimension, quality, keepMetadata)
         if (result.isSuccess) return result
         last = result
 
