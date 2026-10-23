@@ -64,8 +64,10 @@ fun KartogMap(
     polylines: List<MapPolyline> = emptyList(),
     gestures: MapGestures = MapGestures(),
     ornaments: MapOrnaments = MapOrnaments(),
+    limits: CameraLimits = CameraLimits(),
     onTap: ((LatLon) -> Unit)? = null,
     onMarkerClick: ((MapMarker) -> Unit)? = null,
+    onAttributionClick: (() -> Unit)? = null,
     overlay: @Composable MapOverlayScope.() -> Unit = {},
 )
 ```
@@ -82,11 +84,16 @@ Drawn bottom to top: the `layers` in order, the `polylines`, the `overlay`, the 
 
 `MapGestures(enabled = true, rotate = true)`. Enabled, the map pans, pinches, flings, zooms on double-tap and on double-tap-and-drag, and zooms on the mouse wheel. `rotate` allows two-finger turning, with a slop so a pinch is not mistaken for a twist; it is off in course-up regardless. `enabled = false` makes a map the user can look at but not move.
 
+### Limits
+
+`CameraLimits(zoom = ZOOM_LIMITS, center = null)` keeps the camera in a range of zoom and, when `center` is a `GeoBounds`, keeps the middle of the map inside that box, which can cross the antimeridian. It limits where the middle goes, not what the screen shows, so zoomed out the edges can show ground outside the box. `CameraLimits(zoom = 10f..18f, center = GeoBounds(south = 43.5, west = -80.0, north = 44.0, east = -79.0))` holds a map to one town. map-view moves the camera directly from its gestures, so kartog brings it back inside the limits whenever it moves out; at an edge a gesture can show it past the limit for a frame. Holding it there in the first place is asked of map-view.
+
 ### Ornaments
 
 | `MapOrnaments` field | Default | What it is |
 |---|---|---|
-| `compass`, `compassAlignment` | on, top centre | map-view's compass tape; tapping it turns the map back to north-up |
+| `compass`, `compassAlignment` | on, top centre | the compass; tapping it turns the map back to north-up |
+| `compassStyle` | `Tape` | `Tape` is map-view's strip of headings across the map, for a map someone navigates by; `Rosette` is its small needle that always points north, for a map someone looks around on |
 | `orientationToggle`, `orientationToggleAlignment` | off, top end | a button switching between north-up and course-up |
 | `scaleBar`, `scaleBarAlignment`, `scaleUnits` | on, bottom start, metric | map-view's scale bar |
 | `zoomButtons`, `zoomButtonsAlignment` | off, centre end | map-view's zoom buttons |

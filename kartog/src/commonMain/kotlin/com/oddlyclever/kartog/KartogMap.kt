@@ -35,6 +35,7 @@ import com.coderwise.libs.mapview.MapView
 import com.coderwise.libs.mapview.Polyline
 import com.coderwise.libs.mapview.TileKey
 import com.coderwise.libs.mapview.controls.CompassTape
+import com.coderwise.libs.mapview.controls.NorthButton
 import com.coderwise.libs.mapview.controls.CourseUp
 import com.coderwise.libs.mapview.controls.ScaleBar
 import com.coderwise.libs.mapview.controls.ScaleUnits
@@ -55,6 +56,9 @@ import com.coderwise.libs.mapview.mapGestures
  * The credits of the layers' sources are shown as [MapOrnaments.attributionStyle] says, collapsing to an "i" by
  * default. [onAttributionClick] runs when they are tapped, to open the page behind them, such as
  * openstreetmap.org/copyright.
+ *
+ * The camera is kept inside [limits]: a range of zoom, and a box for the middle of the map when one is given. Neither
+ * a gesture nor a move on [state] takes it out of them for longer than a frame.
  */
 @Composable
 fun KartogMap(
@@ -65,6 +69,7 @@ fun KartogMap(
     polylines: List<MapPolyline> = emptyList(),
     gestures: MapGestures = MapGestures(),
     ornaments: MapOrnaments = MapOrnaments(),
+    limits: CameraLimits = CameraLimits(),
     onTap: ((LatLon) -> Unit)? = null,
     onMarkerClick: ((MapMarker) -> Unit)? = null,
     onAttributionClick: (() -> Unit)? = null,
@@ -73,6 +78,7 @@ fun KartogMap(
     val placed = layers.map { layer -> key(layer) { layer.place(state) } }
     val density = LocalDensity.current
     TrackInteraction(state)
+    HoldCamera(state, limits)
     CourseUp(state.camera, state.heading, enabled = state.orientation == Orientation.CourseUp)
 
     val size = remember { mutableStateOf(IntSize.Zero) }
@@ -134,11 +140,24 @@ data class MapGestures(
     val rotate: Boolean = true,
 )
 
+/** How a map's compass is drawn. */
+enum class CompassStyle {
+    /** A strip of headings across the map, for a map someone navigates by. */
+    Tape,
+
+    /**
+     * A small needle in a circle that always points north, for a map someone looks around on. Pressing it turns the
+     * map back to north-up. It does not leave course-up, where the heading turns the map straight back.
+     */
+    Rosette,
+}
+
 /** The controls drawn over a map, each switched on or off and placed in a corner. */
 @Immutable
 data class MapOrnaments(
     val compass: Boolean = true,
     val compassAlignment: Alignment = Alignment.TopCenter,
+    val compassStyle: CompassStyle = CompassStyle.Tape,
     /** A button that switches between north-up and course-up. */
     val orientationToggle: Boolean = false,
     val orientationToggleAlignment: Alignment = Alignment.TopEnd,
@@ -214,11 +233,14 @@ class PlacedLayer(
 private fun BoxScope.Ornaments(state: KartogMapState, ornaments: MapOrnaments, credits: List<String>, onAttributionClick: (() -> Unit)?) {
     val edge = Modifier.padding(ornaments.padding)
     if (ornaments.compass) {
-        CompassTape(
-            state.camera,
-            edge.align(ornaments.compassAlignment),
-            onClick = { state.orientation = Orientation.NorthUp; state.camera.rotateTo(0f) },
-        )
+        when (ornaments.compassStyle) {
+            CompassStyle.Tape -> CompassTape(
+                state.camera,
+                edge.align(ornaments.compassAlignment),
+                onClick = { state.orientation = Orientation.NorthUp; state.camera.rotateTo(0f) },
+            )
+            CompassStyle.Rosette -> NorthButton(state.camera, edge.align(ornaments.compassAlignment), alwaysVisible = true)
+        }
     }
     if (ornaments.orientationToggle) {
         val courseUp = state.orientation == Orientation.CourseUp
