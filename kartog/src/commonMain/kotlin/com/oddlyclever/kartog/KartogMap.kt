@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,10 +84,15 @@ fun KartogMap(
     overlay: @Composable MapOverlayScope.() -> Unit = {},
 ) {
     val placed = layers.map { layer -> key(layer) { layer.place(state) } }
-    // Grouped again only when the zoom crosses a step, or reaches the closest zoom, where nothing is grouped.
+    // Grouped again only when the zoom crosses a step, or reaches the closest zoom, where nothing is grouped. The zoom
+    // is read through derived state, so a pinch recomposes the map once per step rather than once per frame; and the
+    // groups are keyed on what decides them, so a MarkerClustering built inline does not regroup at every composition.
     val closest = limits.effectiveZoom.endInclusive
-    val groupingZoom = clustering?.let { if (state.zoom >= closest) closest else it.groupingZoom(state.zoom) }
-    val drawn = remember(markers, clustering, limits, groupingZoom) {
+    val currentClustering by rememberUpdatedState(clustering)
+    val groupingZoom by remember(state, closest) {
+        derivedStateOf { currentClustering?.let { if (state.zoom >= closest) closest else it.groupingZoom(state.zoom) } }
+    }
+    val drawn = remember(markers, clustering?.radius, clustering?.step, closest, groupingZoom) {
         clusteredMarkers(markers, groupingZoom ?: closest, clustering, limits)
     }
     val density = LocalDensity.current
@@ -139,7 +146,7 @@ fun KartogMap(
                             }
                         } else {
                             // Keyed on its first marker, so a group that only gains or loses members keeps its state.
-                            key(CLUSTER_KEY_PREFIX + marker.id) {
+                            key(ClusterKey(marker.id)) {
                                 Box(
                                     Modifier
                                         .at(group.position, Alignment.Center)

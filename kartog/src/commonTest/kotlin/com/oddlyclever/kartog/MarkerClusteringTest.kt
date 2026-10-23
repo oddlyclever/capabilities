@@ -16,10 +16,12 @@ import kotlin.test.assertTrue
  */
 class MarkerClusteringTest {
 
-    private val town = LatLon(44.3894, -79.6903)
-    private val village = LatLon(44.4500, -79.8300)
-    private val city = LatLon(43.6532, -79.3832)
-    private val farAway = LatLon(46.5136, -84.3358)
+    // Downtown Toronto and its airport, a city an hour away, and one far off: well-known places at the distances the
+    // tests need, in the city the other map tests use.
+    private val downtown = LatLon(43.6532, -79.3832)
+    private val airport = LatLon(43.6777, -79.6248)
+    private val nearbyCity = LatLon(43.4516, -80.4925)
+    private val farAway = LatLon(45.5019, -73.5674)
 
     private fun groupsAt(zoom: Float, vararg points: LatLon) = clusterPoints(points.toList(), zoom) { it }
 
@@ -27,39 +29,39 @@ class MarkerClusteringTest {
 
     @Test
     fun pointsAFewKilometresApartAreOneGroupFromFarAwayAndPartWhenZoomedIn() {
-        val far = groupsAt(6f, town, village)
+        val far = groupsAt(6f, downtown, airport)
         assertEquals(1, far.size, "one group from far away: $far")
         assertTrue(far.single().isGroup)
 
-        val close = groupsAt(12f, town, village)
+        val close = groupsAt(12f, downtown, airport)
         assertEquals(2, close.size, "two groups close up: $close")
         assertFalse(close.any { it.isGroup })
     }
 
     @Test
     fun theRadiusDecidesWhatCountsAsCovering() {
-        assertEquals(2, clusterPoints(listOf(town, village), 6f, radius = 1.dp) { it }.size)
-        assertEquals(1, clusterPoints(listOf(town, village), 6f, radius = 40.dp) { it }.size)
+        assertEquals(2, clusterPoints(listOf(downtown, airport), 6f, radius = 1.dp) { it }.size)
+        assertEquals(1, clusterPoints(listOf(downtown, airport), 6f, radius = 40.dp) { it }.size)
     }
 
     @Test
     fun aGroupIsDrawnInTheMiddleOfItsPoints() {
-        val group = groupsAt(6f, town, village).single()
-        assertTrue(abs(group.position.lon - (town.lon + village.lon) / 2) < 1e-9, "longitude ${group.position.lon}")
-        assertTrue(abs(group.position.lat - (town.lat + village.lat) / 2) < 1e-3, "latitude ${group.position.lat}")
+        val group = groupsAt(6f, downtown, airport).single()
+        assertTrue(abs(group.position.lon - (downtown.lon + airport.lon) / 2) < 1e-9, "longitude ${group.position.lon}")
+        assertTrue(abs(group.position.lat - (downtown.lat + airport.lat) / 2) < 1e-3, "latitude ${group.position.lat}")
     }
 
     @Test
     fun everyPointIsInExactlyOneGroupInTheOrderGiven() {
-        val groups = groupsAt(6f, town, farAway, village, city)
-        assertEquals(listOf(town, village), groups[0].items, "the first point's group takes the later points near it")
+        val groups = groupsAt(6f, downtown, farAway, airport, nearbyCity)
+        assertEquals(listOf(downtown, airport), groups[0].items, "the first point's group takes the later points near it")
         assertEquals(listOf(farAway), groups[1].items, "a point with nothing near it is a group of one")
         assertEquals(4, groups.sumOf { it.size })
     }
 
     @Test
     fun theSamePointsAtTheSameZoomAlwaysGroupTheSameWay() {
-        assertEquals(groupsAt(7f, town, village, city), groupsAt(7f, town, village, city))
+        assertEquals(groupsAt(7f, downtown, airport, nearbyCity), groupsAt(7f, downtown, airport, nearbyCity))
     }
 
     @Test
@@ -83,7 +85,7 @@ class MarkerClusteringTest {
 
     @Test
     fun withoutClusteringOrAtTheClosestZoomEveryMarkerIsDrawnWhereItIs() {
-        val markers = listOf(marker("a", town), marker("b", town))
+        val markers = listOf(marker("a", downtown), marker("b", downtown))
         val limits = CameraLimits(zoom = 2f..18f)
 
         assertEquals(2, clusteredMarkers(markers, 6f, clustering = null, limits = limits).size)

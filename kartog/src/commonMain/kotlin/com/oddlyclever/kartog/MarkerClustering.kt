@@ -142,8 +142,8 @@ internal fun clusteredMarkers(
     if (clustering == null || zoom >= limits.effectiveZoom.endInclusive) markers.map { PointCluster(listOf(it), it.position) }
     else clusterPoints(markers, clustering.groupingZoom(zoom), clustering.radius) { it.position }
 
-/** What a group's composition key starts with, so it never collides with a single marker's own id. */
-internal const val CLUSTER_KEY_PREFIX = "kartog-cluster:"
+/** A group's composition key, named for its first marker. Its own type, so it never equals a single marker's id. */
+internal data class ClusterKey(val firstMarkerId: String)
 
 /** The zoom a tapped group moves the map to: [MarkerClustering.zoomStep] closer, but no closer than [limits]. Pure. */
 internal fun zoomIntoCluster(zoom: Float, clustering: MarkerClustering, limits: CameraLimits): Float =
