@@ -1,0 +1,3 @@
+#!/bin/sh
+# Refuses a commit message that would publish private data or carry tool attribution.
+exec python3 -I "$(git rev-parse --show-toplevel)/.githooks/privacy-check.py" --message "$1"

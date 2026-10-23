@@ -3,8 +3,13 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 local.properties
 .kotlin/
+__pycache__/
 
 # IDE
 .idea/
 *.iml
 .DS_Store
+# BEGIN story-tools (generated - do not edit between markers)
+docs/stories/
+.agents/config/dimensions.md
+# END story-tools

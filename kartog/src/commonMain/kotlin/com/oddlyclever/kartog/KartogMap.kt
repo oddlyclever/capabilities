@@ -59,6 +59,10 @@ import com.coderwise.libs.mapview.mapGestures
  *
  * The camera is kept inside [limits]: a range of zoom, and a box for the middle of the map when one is given. Neither
  * a gesture nor a move on [state] takes it out of them for longer than a frame.
+ *
+ * With [clustering], markers that would cover each other at the current zoom are drawn as one marker for the group,
+ * regrouped as the map zooms. Tapping a group runs [onClusterClick], or without one zooms the map in on the group;
+ * [onMarkerClick] is only for single markers. Without [clustering], every marker is drawn where it is.
  */
 @Composable
 fun KartogMap(
@@ -73,9 +77,17 @@ fun KartogMap(
     onTap: ((LatLon) -> Unit)? = null,
     onMarkerClick: ((MapMarker) -> Unit)? = null,
     onAttributionClick: (() -> Unit)? = null,
+    clustering: MarkerClustering? = null,
+    onClusterClick: ((PointCluster<MapMarker>) -> Unit)? = null,
     overlay: @Composable MapOverlayScope.() -> Unit = {},
 ) {
     val placed = layers.map { layer -> key(layer) { layer.place(state) } }
+    // Grouped again only when the zoom crosses a step, or reaches the closest zoom, where nothing is grouped.
+    val closest = limits.effectiveZoom.endInclusive
+    val groupingZoom = clustering?.let { if (state.zoom >= closest) closest else it.groupingZoom(state.zoom) }
+    val drawn = remember(markers, clustering, limits, groupingZoom) {
+        clusteredMarkers(markers, groupingZoom ?: closest, clustering, limits)
+    }
     val density = LocalDensity.current
     TrackInteraction(state)
     HoldCamera(state, limits)
@@ -114,14 +126,30 @@ fun KartogMap(
                         key(line.id) { Polyline(line.points, line.color, width = line.width, onClick = line.onClick) }
                     }
                     overlay()
-                    for (marker in markers) {
-                        key(marker.id) {
-                            Box(
-                                Modifier
-                                    .at(marker.position, marker.anchor)
-                                    .then(if (onMarkerClick != null) Modifier.clickable { onMarkerClick(marker) } else Modifier)
-                                    .then(marker.description?.let { text -> Modifier.semantics { contentDescription = text } } ?: Modifier)
-                            ) { marker.content() }
+                    for (group in drawn) {
+                        val marker = group.items.first()
+                        if (!group.isGroup || clustering == null) {
+                            key(marker.id) {
+                                Box(
+                                    Modifier
+                                        .at(marker.position, marker.anchor)
+                                        .then(if (onMarkerClick != null) Modifier.clickable { onMarkerClick(marker) } else Modifier)
+                                        .then(marker.description?.let { text -> Modifier.semantics { contentDescription = text } } ?: Modifier)
+                                ) { marker.content() }
+                            }
+                        } else {
+                            // Keyed on its first marker, so a group that only gains or loses members keeps its state.
+                            key(CLUSTER_KEY_PREFIX + marker.id) {
+                                Box(
+                                    Modifier
+                                        .at(group.position, Alignment.Center)
+                                        .clickable {
+                                            if (onClusterClick != null) onClusterClick(group)
+                                            else state.moveTo(group.position, zoomIntoCluster(state.zoom, clustering, limits))
+                                        }
+                                        .then(clustering.description(group)?.let { text -> Modifier.semantics { contentDescription = text } } ?: Modifier)
+                                ) { clustering.content(group) }
+                            }
                         }
                     }
                 }

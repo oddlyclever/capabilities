@@ -1,0 +1,11 @@
+# Paths the privacy check skips: third-party code vendored whole, whose author and contact lines are already public
+# upstream and cannot be edited without modifying the vendored source. One glob per line, matched against the
+# repo-relative path. First-party code never goes here; a single legitimate line carries `privacy-check: allow`.
+
+# libwebp, copied verbatim by media-webp/native/update-source.sh, and the headers the iOS cinterop takes from it.
+# One glob, because the history also holds both from before the module was renamed from webp to media-webp.
+*/libwebp/*
+
+# Agent skills, copied by the story-tools installer from a public skills repository and overwritten on every refresh,
+# so a line here cannot carry the allow marker. Project-specific files under .agents/config are still checked.
+.agents/skills/*

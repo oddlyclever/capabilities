@@ -68,6 +68,8 @@ fun KartogMap(
     onTap: ((LatLon) -> Unit)? = null,
     onMarkerClick: ((MapMarker) -> Unit)? = null,
     onAttributionClick: (() -> Unit)? = null,
+    clustering: MarkerClustering? = null,
+    onClusterClick: ((PointCluster<MapMarker>) -> Unit)? = null,
     overlay: @Composable MapOverlayScope.() -> Unit = {},
 )
 ```
@@ -87,6 +89,27 @@ Drawn bottom to top: the `layers` in order, the `polylines`, the `overlay`, the 
 ### Limits
 
 `CameraLimits(zoom = ZOOM_LIMITS, center = null)` keeps the camera in a range of zoom and, when `center` is a `GeoBounds`, keeps the middle of the map inside that box, which can cross the antimeridian. It limits where the middle goes, not what the screen shows, so zoomed out the edges can show ground outside the box. `CameraLimits(zoom = 10f..18f, center = GeoBounds(south = 43.5, west = -80.0, north = 44.0, east = -79.0))` holds a map to one town. map-view moves the camera directly from its gestures, so kartog brings it back inside the limits whenever it moves out; at an edge a gesture can show it past the limit for a frame. Holding it there in the first place is asked of map-view.
+
+### Clustering
+
+Markers close together cover each other, so only the top one can be read or tapped. Pass `clustering = MarkerClustering()` and markers whose positions fall within `radius` (40 dp) of each other at the current zoom are drawn as one marker for the group, centred on the middle of its markers. As the map zooms in, the groups part.
+
+```kotlin
+KartogMap(
+    state = state,
+    markers = markers,
+    clustering = MarkerClustering(
+        description = { "${it.size} places" },
+        content = { group -> DefaultClusterMarker(group.size) },
+    ),
+)
+```
+
+- **Tapping a group** zooms the map `zoomStep` (2) levels closer, centred on it, no closer than the limits allow. Give `onClusterClick` to do something else, such as listing the group's markers; `onMarkerClick` is only for single markers.
+- **The groups are worked out again at every `step` (0.5) of zoom**, not every frame of a pinch, so a map of hundreds of markers stays smooth and groups do not flicker at a boundary.
+- **At the closest zoom the limits allow, nothing is grouped.** Zooming no further cannot part markers at the same spot, so there they are drawn on top of each other, as they would be without clustering.
+- **A group's look and words are the app's.** `content` draws it, `DefaultClusterMarker(count)` (a ringed dot with the count) unless the app draws its own, and `description` is what a screen reader says, null unless the app gives it.
+- **`clusterPoints(items, zoom, radius) { position }`** is the grouping on its own, for anything that is not a `MapMarker`: a list beside the map, a count in a header. It measures on the same plane map-view draws, the short way round the antimeridian, and gives the same groups for the same points at the same zoom. It is quadratic, meant for the hundreds of markers a screen shows.
 
 ### Ornaments
 

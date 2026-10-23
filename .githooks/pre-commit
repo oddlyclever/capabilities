@@ -1,0 +1,3 @@
+#!/bin/sh
+# Refuses a commit whose staged changes, or whose author and committer identity, would publish private data.
+exec python3 -I "$(git rev-parse --show-toplevel)/.githooks/privacy-check.py" --staged
