@@ -22,7 +22,13 @@ interface MapFrameLayer {
     suspend fun tile(key: TileKey): MapFrameTile?
 }
 
-/** A tile, decoded and ready to draw without a composition. */
+/**
+ * A tile, decoded and ready to draw without a composition.
+ *
+ * Drawn in two passes, as a live map draws its tiles and then their names: every tile's [draw] first, then every
+ * tile's [drawLabels]. A name can run past the edge of its own tile, so drawn with the ground it would be covered by
+ * the neighbour drawn after it.
+ */
 fun interface MapFrameTile {
     /**
      * Draws the [src] fraction of this tile (a square in `0..1`) to fill the whole of this scope. [zoom] is the
@@ -30,4 +36,11 @@ fun interface MapFrameTile {
      * not the level the tile was cut at.
      */
     fun DrawScope.draw(src: Rect, zoom: Int)
+
+    /**
+     * Draws this tile's names over the map, in the same square as [draw], once every tile's ground is down. Names may
+     * run past the square. [bearing] is the map's, in degrees clockwise, so a name can take it back out and stay
+     * level. Nothing by default: a tile with no names draws only its ground.
+     */
+    fun DrawScope.drawLabels(src: Rect, zoom: Int, bearing: Float) {}
 }

@@ -1,9 +1,11 @@
 package com.oddlyclever.wayfinder.frame
 
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.decodeToImageBitmap
@@ -25,7 +27,7 @@ import kotlin.test.assertTrue
 
 /**
  * Pins wayfinder-frame: that a rendered map is covered by its layers' tiles, falls back to ancestors as a live map does
- * and to the background where there are none; that a prepared map scales as a whole, overlay included; and that the
+ * and to the background where there are none, and draws names over every layer's ground at the map's bearing; that a prepared map scales as a whole, overlay included; and that the
  * image encodes as PNG and WebP.
  */
 class RenderMapTest {
@@ -51,6 +53,28 @@ class RenderMapTest {
         for ((x, y) in listOf(0 to 0, 199 to 0, 0 to 119, 199 to 119)) {
             assertEquals(Color.Red.toArgb(), image.pixel(x, y), "corner ($x, $y) of a turned map should be covered")
         }
+    }
+
+    @Test
+    fun namesAreDrawnOverEveryLayersGroundAtTheMapsBearing() = runTest {
+        awaitSkia()
+        val bearings = mutableListOf<Float>()
+        val named = object : MapFrameLayer {
+            override val zoomRange = 0..19
+            override suspend fun tile(key: TileKey): MapFrameTile = object : MapFrameTile {
+                override fun DrawScope.draw(src: Rect, zoom: Int) = drawRect(Color.Red)
+
+                override fun DrawScope.drawLabels(src: Rect, zoom: Int, bearing: Float) {
+                    bearings += bearing
+                    drawRect(Color.Green)
+                }
+            }
+        }
+        val turned = CameraPosition(toronto.center, toronto.zoom, bearing = 37f)
+        // The second layer's ground covers the first's, so only a names pass after both can show green.
+        val image = renderMap(size, density, turned, listOf(named, solid(0..19, Color.Blue)))
+        assertEquals(Color.Green.toArgb(), image.pixel(100, 60), "names should be drawn over every layer's ground")
+        assertTrue(bearings.isNotEmpty() && bearings.all { it == 37f }, "names should get the map's bearing, got $bearings")
     }
 
     @Test

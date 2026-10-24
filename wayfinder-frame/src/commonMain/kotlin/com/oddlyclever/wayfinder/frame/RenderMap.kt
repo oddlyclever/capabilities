@@ -39,7 +39,8 @@ import kotlin.math.pow
  *
  * [layers] are drawn in order, each on the tile grid map-view would use for [position], turned to its bearing and
  * magnified past each layer's last level. A tile a layer does not have is drawn from its nearest ancestor, up to five
- * levels up, as on a live map; where there is none, [background] shows. [overlay] is drawn last, upright, through a
+ * levels up, as on a live map; where there is none, [background] shows. Names, from a layer that draws them, go over
+ * every layer's ground. [overlay] is drawn last, upright, through a
  * [MapFrameProjection] that places a coordinate where it falls on the image: a track, pins, shapes.
  *
  * Every layer's tiles are fetched at once, so the time it takes is the slowest tile's, not the sum. To draw the same
@@ -83,6 +84,8 @@ class PreparedMap internal constructor(
                     // The map turns the other way to put the bearing at the top, as map-view's camera does.
                     rotate(-position.bearing, pivot = Offset.Zero) {
                         for (tiles in placed) for (tile in tiles) drawTile(tile, this@PreparedMap.density, zoom)
+                        // Names after every layer's ground, so no tile drawn later covers a name that ran onto it.
+                        for (tiles in placed) for (tile in tiles) drawTileLabels(tile, this@PreparedMap.density, zoom, position.bearing)
                     }
                 }
                 overlay(projection)
@@ -186,15 +189,21 @@ private suspend fun standIn(
     return null
 }
 
-/** Draws one tile into its square; a pixel wider than its spacing, so neighbours meet without a hairline seam. */
-private fun DrawScope.drawTile(placed: Placed, density: Density, zoom: Int) {
+/** Draws one tile's ground into its square. */
+private fun DrawScope.drawTile(placed: Placed, density: Density, zoom: Int) =
+    inTileSquare(placed, density) { with(placed.tile) { draw(placed.src, zoom) } }
+
+/** Draws one tile's names, over the square its ground was drawn in. */
+private fun DrawScope.drawTileLabels(placed: Placed, density: Density, zoom: Int, bearing: Float) =
+    inTileSquare(placed, density) { with(placed.tile) { drawLabels(placed.src, zoom, bearing) } }
+
+/** Runs [block] in [placed]'s square, a pixel wider than its spacing so neighbours meet without a hairline seam. */
+private fun DrawScope.inTileSquare(placed: Placed, density: Density, block: DrawScope.() -> Unit) {
     val canvas = drawContext.canvas
     canvas.save()
     canvas.translate(placed.left, placed.top)
     val side = ceil(placed.side) + 1f
-    CanvasDrawScope().draw(density, LayoutDirection.Ltr, canvas, Size(side, side)) {
-        with(placed.tile) { draw(placed.src, zoom) }
-    }
+    CanvasDrawScope().draw(density, LayoutDirection.Ltr, canvas, Size(side, side), block)
     canvas.restore()
 }
 

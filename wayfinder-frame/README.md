@@ -18,7 +18,7 @@ It depends on `wayfinder`, and on [`media-webp`](../media-webp) for encoding. La
 
 ```kotlin
 MapFrame(
-    layers = listOf(vectorFrameLayer(streets.zoomRange) { key -> streets.fetch(client, key) }),
+    layers = listOf(vectorFrameLayer(streets.zoomRange, names = rememberTextMeasurer()) { key -> streets.fetch(client, key) }),
     modifier = Modifier.fillMaxWidth().aspectRatio(3f / 2f),
     fit = route,                                   // or position = CameraPosition(center, zoom)
     contentDescription = "Map of the route",
@@ -50,7 +50,7 @@ val webp: ByteArray = image.encodeToWebp()
 - **The image matches the live map.** Tiles are laid out on the grid map-view would use for the position, turned to its bearing, magnified past each layer's last level, and drawn by the same renderers. A tile a layer lacks is drawn from its nearest ancestor, up to five levels up; where there is none, `background` shows.
 - **Every tile is fetched at once**, so rendering takes as long as the slowest tile, not the sum of them.
 - **The overlay is drawn upright** through a `MapFrameProjection`: `project(point)` places a coordinate on the image, `metresPerPixel` turns a distance into a radius, and `bearing` turns a heading onto the image. To draw over an image rendered earlier, build a `MapFrameProjection(position, size, density)` with the same values.
-- **Names are not drawn yet.** map-view draws place and road names only inside a composition; drawing them here waits on a change to map-view.
+- **Names are drawn when a layer is given a `TextMeasurer`** (`vectorFrameLayer(…, names = measurer)`), after every layer's ground so no tile covers a name that runs onto it, and level at any bearing. Outside a composition, build one from a font family resolver: `TextMeasurer(createFontFamilyResolver(), density, LayoutDirection.Ltr)` where the platform has one without a context, as the JVM does.
 
 ## A map that scales like a vector image
 

@@ -18,7 +18,7 @@ It exposes `wayfinder`, map-view-tiles-vector and map-view-tiles-raster as `api`
 WayfinderMap(state, layers = listOf(vectorBasemap(streets, client)))
 ```
 
-`vectorBasemap(source, client, style = null, labels = true, rasterize = false)` fetches each tile through the client, decodes it off the main thread with map-view's decoder, and draws it with map-view's renderer: the ground first, then place and road names in a layer of their own, so every name sits over every tile. Tiles are decoded once, as they arrive, and a tile the source lacks is drawn from its nearest ancestor.
+`vectorBasemap(source, client, style = null, labels = true, rasterize = false)` fetches each tile through the client, decodes it off the main thread with map-view's decoder, and draws it with map-view's renderer: the ground first, then the names in a layer of their own, so every name sits over every tile: places, roads, water, rivers, peaks and points of interest. Tiles are decoded once, as they arrive, and a tile the source lacks is drawn from its nearest ancestor.
 
 The source is expected to use the OpenMapTiles schema, as map-view's style is written for it: `water`, `landcover`, `landuse`, `park`, `building`, `transportation` and the rest.
 
@@ -35,6 +35,7 @@ VectorStyleProvider(systemVectorStyle()) {
 - **A palette changes colour and nothing else.** `VectorStyle.recolored(palette)` keeps map-view's road widths that grow with zoom, the zooms at which casings and building outlines appear, and the paint order. A class map-view leaves undrawn stays undrawn.
 - **Your own palette:** copy `MapPalette.Dark` or `MapPalette.Light` and change what you need. `MapPalette` names every colour: land, water, greenery, bare ground, built-up land, buildings and their outlines, airports, boundaries, label ink, halo and water labels, a `RoadColors` (casing and core) for each road tier from motorway to service, and paths, rail and ferries.
 - **Build a recoloured style once and keep it.** A style is compared by its lookups, and `recolored` makes new ones on every call, so a style rebuilt inside a composition looks new on every frame and throws away the decoded tiles. `MapStyles` holds the built ones; keep your own in a top-level `val`.
+- **What is named is the style's.** Both styles name places, roads, water, rivers, peaks and points of interest, as map-view does by default. Turn a kind off with its `NameStyle`, and a kind that is off is not even decoded: `val Quiet = MapStyles.Light.copy(poiName = NameStyle(9.5f, enabled = false))`, kept in a top-level `val` like any style.
 - **Not yet:** dashed footpaths, and tunnels and bridges drawn apart from other roads. map-view's road paint sees only a road's class; both are requests to map-view.
 
 ## Drawing tiles as images
@@ -60,4 +61,4 @@ Keep `rasterize` in mind if a GPU driver fault on complex paths appears on some 
 
 ## On an image
 
-`vectorFrameLayer(zoomRange, style) { key -> bytes }` is the same basemap for wayfinder-frame's `renderMap`, drawn by the same renderer so an image matches the live map. Names are not drawn on images yet: map-view draws them only inside a composition.
+`vectorFrameLayer(zoomRange, style, names = null) { key -> bytes }` is the same basemap for wayfinder-frame's `renderMap` and `MapFrame`, drawn by the same renderer so a frame matches the live map. Give it a `TextMeasurer` as `names` and it draws the style's names too, laid out by map-view as on a live map, over every tile and level at any bearing. In a composable that is `rememberTextMeasurer()`; laying out text needs a context on Android, which is why it is the app's to give. Names cost a second decode of each tile.

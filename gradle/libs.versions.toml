@@ -21,7 +21,7 @@ webpack = "5.111.1"
 
 # map-view, the tiled map :wayfinder builds on. Its family is released in lockstep, so one version covers every
 # artifact of it. It is 0.x and its types are part of wayfinder's public API, so a bump is a deliberate change.
-mapView = "0.2.0"
+mapView = "0.3.0"
 kotlinxCoroutines = "1.11.0"
 # :media-image's web target: the DOM, for <img> and <canvas>.
 kotlinxBrowser = "0.5.0"

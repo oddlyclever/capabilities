@@ -21,9 +21,10 @@ import kotlin.math.ceil
  * GPU driver crash drawing complex paths on some device, for instance.
  *
  * The tile is drawn by map-view's own renderer in [style], on the CPU, at the size a tile is shown at: 256 dp at
- * [density]. [zoom] is the level the tile was cut at, which decides the road widths it is drawn with. Labels are not
- * drawn: map-view draws them only inside a composition (request W3 in the wayfinder plan), so show them with map-view's
- * `VectorLabels` over the image, as over a vector slot.
+ * [density]. [zoom] is the level the tile was cut at, which decides the road widths it is drawn with. Names are not
+ * drawn into the image: on a map the user pans, zooms and turns, a name baked into a tile is clipped at its edge,
+ * blurs when the tile is magnified and turns with the map. Show them with map-view's `VectorLabels` over the image
+ * instead, as over a vector slot, which is what [vectorBasemap] does.
  *
  * It costs more than decoding: tens of milliseconds a tile, on [Dispatchers.Default] whatever thread calls it. Call
  * it from a tile state's `load`, upstream of the view. Null for bytes that are not a tile.
@@ -35,7 +36,7 @@ suspend fun rasterizeVectorTile(
     style: VectorStyle = MapStyles.Light,
 ): ImageBitmap? = withContext(Dispatchers.Default) {
     try {
-        val layers = decodeMvt(bytes, keep = DRAWN_LAYERS, classLayers = CLASS_LAYERS)
+        val layers = decodeMvt(bytes, keep = DRAWN_LAYERS, classLayers = CLASS_LAYERS, detailLayers = style.roadDetailLayers())
         val render = buildRenderTile(layers, style)
         val side = ceil(TILE_DP * density).toInt()
         val image = ImageBitmap(side, side)
@@ -67,3 +68,10 @@ internal val DRAWN_LAYERS = setOf(
 
 /** What each layer is styled by: `class` for most, `admin_level` for boundaries. */
 internal val CLASS_LAYERS = VectorStyle.CLASS_AWARE_LAYERS
+
+/**
+ * The road tags to decode for this style: a road's `subclass` and `brunnel` when it paints by them through
+ * [VectorStyle.roadDetail], else none, since resolving them costs every tile. As map-view's vector slot decides.
+ */
+internal fun VectorStyle.roadDetailLayers(): Map<String, List<String>>? =
+    if (roadDetail != null) VectorStyle.DETAIL_LAYERS else null

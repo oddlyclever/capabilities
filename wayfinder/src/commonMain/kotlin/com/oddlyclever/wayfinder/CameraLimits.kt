@@ -15,8 +15,9 @@ import kotlin.math.abs
  *
  * map-view holds every camera to its own [ZOOM_LIMITS] and to nothing else, and its gestures move the camera
  * directly. So wayfinder holds a map to these by bringing the camera back inside them whenever it moves out, which can
- * show it past an edge for a frame before it is brought back. Holding the camera inside them in the first place is
- * asked of map-view in wayfinder's requests; until it lands, this is how they are kept.
+ * show it past an edge for a frame before it is brought back. Holding the camera inside them in the first place has to
+ * happen where map-view moves it, and is asked of map-view in coderwise/libs-mobile#5; until it lands, this is how
+ * they are kept.
  *
  * The box limits where the middle of the map can go, as MapLibre's does, not what the map shows: zoomed out, the
  * edges of the screen can show ground outside it.

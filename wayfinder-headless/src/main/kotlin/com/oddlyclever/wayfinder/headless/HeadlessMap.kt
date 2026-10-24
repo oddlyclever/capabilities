@@ -6,9 +6,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.font.createFontFamilyResolver
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.coderwise.libs.mapview.LatLon
 import com.coderwise.libs.mapview.TileKey
@@ -58,14 +61,16 @@ class HeadlessLineStyle(
  * - **The camera** frames every coordinate inside [padding], no closer than the last level of [zoomRange], so a single
  *   point shows the streets around it.
  * - **Tiles** may be images (PNG, JPEG or WebP) or vector tiles, told apart by their bytes; vector tiles are drawn in
- *   [style]. A tile [tiles] cannot supply is drawn from its nearest ancestor.
+ *   [style], with their place, road, water, peak and point-of-interest names unless [names] is off. A tile [tiles]
+ *   cannot supply is drawn from its nearest ancestor.
  * - **Lines** are drawn one by one, so a route in pieces never jumps straight from one piece to the next. The first
  *   point of the first line is marked as the start and the last point of the last as the end, and [points] as
  *   waypoints; with no lines, [points] are marked as places. The lines' own points are never marked.
  * - **Encoding** is [format], WebP by default at [quality].
  *
  * Needs Java 21, and on Linux the system libraries Skia links against: on Debian or Ubuntu, `libgl1`, `libx11-6` and
- * `libegl1`. Skia's own native library comes with this module, for Linux and macOS on x64 and arm64.
+ * `libegl1`. Skia's own native library comes with this module, for Linux and macOS on x64 and arm64. Names are drawn
+ * in the machine's default font, so a server that draws them needs a font installed, such as `fonts-dejavu-core`.
  *
  * @throws IllegalArgumentException when there is no coordinate to fit, or the size is empty.
  * @throws com.oddlyclever.media.webp.WebpException when the WebP encoder refuses the image.
@@ -80,6 +85,7 @@ suspend fun renderMapImage(
     format: ImageFormat = ImageFormat.Webp,
     quality: Int = MAP_WEBP_QUALITY,
     style: VectorStyle = MapStyles.Light,
+    names: Boolean = true,
     zoomRange: IntRange = DEFAULT_ZOOM_RANGE,
     padding: Dp = 48.dp,
     line: HeadlessLineStyle = HeadlessLineStyle(),
@@ -92,7 +98,9 @@ suspend fun renderMapImage(
     val position = fit(everything, size, density, padding, maxZoom = zoomRange.last.toFloat())
     val ends = TrackStyle(line = LineStyle.None, speed = SpeedStyle.None, heading = HeadingMarker.None, showAccuracy = false)
 
-    val image = renderMap(size, density, position, listOf(eitherLayer(zoomRange, style, tiles)), background = style.background) { projection ->
+    val measurer = if (names) TextMeasurer(createFontFamilyResolver(), density, LayoutDirection.Ltr) else null
+    val layer = eitherLayer(zoomRange, style, measurer, tiles)
+    val image = renderMap(size, density, position, listOf(layer), background = style.background) { projection ->
         for (piece in lines) drawLine(piece, projection, line)
         drawTrack(lines.flatten().map { TrackPoint(it) }, projection, ends, waypoints = points)
     }
@@ -118,12 +126,17 @@ private fun DrawScope.drawLine(points: List<LatLon>, projection: MapFrameProject
 }
 
 /** One layer for a tile server that may answer with images or with vector tiles. */
-private fun eitherLayer(zoomRange: IntRange, style: VectorStyle, tiles: suspend (TileKey) -> ByteArray?) = object : MapFrameLayer {
+private fun eitherLayer(
+    zoomRange: IntRange,
+    style: VectorStyle,
+    names: TextMeasurer?,
+    tiles: suspend (TileKey) -> ByteArray?,
+) = object : MapFrameLayer {
     override val zoomRange = zoomRange
 
     override suspend fun tile(key: TileKey): MapFrameTile? {
         val bytes = tiles(key) ?: return null
-        val layer = if (isImage(bytes)) rasterFrameLayer(zoomRange) { bytes } else vectorFrameLayer(zoomRange, style) { bytes }
+        val layer = if (isImage(bytes)) rasterFrameLayer(zoomRange) { bytes } else vectorFrameLayer(zoomRange, style, names) { bytes }
         return layer.tile(key)
     }
 }

@@ -3,6 +3,7 @@ package com.oddlyclever.wayfinder
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -10,16 +11,13 @@ import androidx.compose.ui.unit.dp
 import com.coderwise.libs.mapview.LatLon
 import com.coderwise.libs.mapview.MapCameraState
 import com.coderwise.libs.mapview.ZOOM_LIMITS
+import com.coderwise.libs.mapview.fitCamera
 import com.coderwise.libs.mapview.flyTo
+import com.coderwise.libs.mapview.isOnScreen as mapViewIsOnScreen
+import com.coderwise.libs.mapview.screenPosition as mapViewScreenPosition
 import kotlin.math.PI
 import kotlin.math.atan
-import kotlin.math.cos
-import kotlin.math.floor
 import kotlin.math.ln
-import kotlin.math.log2
-import kotlin.math.min
-import kotlin.math.pow
-import kotlin.math.sin
 import kotlin.math.sinh
 import kotlin.math.tan
 
@@ -51,6 +49,9 @@ class CameraPosition(val center: LatLon, val zoom: Float, val bearing: Float = 0
  * map with no room left inside its [padding] — one not yet measured, say — gets the farthest zoom rather than an
  * error.
  *
+ * The fitting is map-view's `fitCamera`; this takes Compose's sizes and units and answers a [CameraPosition], which a
+ * live map and a map frame both take.
+ *
  * @throws IllegalArgumentException when [points] is empty.
  */
 fun fit(
@@ -62,54 +63,13 @@ fun fit(
     maxZoom: Float = DEFAULT_FIT_MAX_ZOOM,
 ): CameraPosition {
     require(points.isNotEmpty()) { "Nothing to fit: the list of points is empty." }
-    val ceiling = min(maxZoom, ZOOM_LIMITS.endInclusive)
-
-    // Unwrap longitudes so the points sit in one unbroken span, starting just after the widest empty gap between them.
-    val xs = points.map { WebMercator.x(it.lon) }.sorted()
-    var gapEnd = xs.first()
-    var widest = xs.first() + 1.0 - xs.last()
-    for (i in 1 until xs.size) {
-        val gap = xs[i] - xs[i - 1]
-        if (gap > widest) {
-            widest = gap
-            gapEnd = xs[i]
-        }
-    }
-
-    val radians = bearing * PI / 180.0
-    val c = cos(radians)
-    val s = sin(radians)
-    var minAcross = Double.MAX_VALUE
-    var maxAcross = -Double.MAX_VALUE
-    var minDown = Double.MAX_VALUE
-    var maxDown = -Double.MAX_VALUE
-    for (point in points) {
-        val x = WebMercator.x(point.lon).let { if (it < gapEnd) it + 1.0 else it }
-        val y = WebMercator.y(point.lat)
-        // World axes to screen axes, the way map-view turns a world offset onto the screen.
-        val across = x * c + y * s
-        val down = -x * s + y * c
-        minAcross = min(minAcross, across); maxAcross = maxOf(maxAcross, across)
-        minDown = min(minDown, down); maxDown = maxOf(maxDown, down)
-    }
-
-    // The middle of the framed points, turned back from screen axes into the world.
-    val midAcross = (minAcross + maxAcross) / 2
-    val midDown = (minDown + maxDown) / 2
-    val centerX = midAcross * c - midDown * s
-    val centerY = midAcross * s + midDown * c
-    val center = LatLon(WebMercator.lat(centerY), WebMercator.lon(centerX))
-
+    // map-view's fit, which only answers null for no points.
+    val fitted = fitCamera(points.toList(), Size(size.width.toFloat(), size.height.toFloat()), density.density, padding, bearing, maxZoom)!!
+    // With no room left inside the padding, map-view fits to a single pixel; a map that has not been measured yet is
+    // better served by the farthest zoom, whatever the points.
     val inset = with(density) { padding.toPx() } * 2
-    val roomAcross = size.width - inset
-    val roomDown = size.height - inset
-    if (roomAcross <= 0f || roomDown <= 0f) return CameraPosition(center, ZOOM_LIMITS.start, bearing)
-
-    val tile = WebMercator.WORLD_TILE * density.density
-    val zoomAcross = (maxAcross - minAcross).let { if (it > 0) log2(roomAcross / (it * tile)) else Double.MAX_VALUE }
-    val zoomDown = (maxDown - minDown).let { if (it > 0) log2(roomDown / (it * tile)) else Double.MAX_VALUE }
-    val zoom = min(zoomAcross, zoomDown).toFloat().coerceIn(ZOOM_LIMITS.start, ceiling)
-    return CameraPosition(center, zoom, bearing)
+    val zoom = if (size.width - inset <= 0f || size.height - inset <= 0f) ZOOM_LIMITS.start else fitted.zoom
+    return CameraPosition(fitted.center, zoom, bearing)
 }
 
 /** The fit's default closest zoom: street level, where a single point still shows the streets around it. */
@@ -143,35 +103,27 @@ suspend fun MapCameraState.zoomOut(animationSpec: AnimationSpec<Float> = spring(
  * bearing taken into account. A point off the map gets a position off its edges.
  *
  * Inside an overlay, map-view's own `project()` answers the same question; this is for code outside one, such as a
- * view model deciding whether to bring the camera back to the user.
+ * view model deciding whether to bring the camera back to the user. It is map-view's `screenPosition`, in Compose's
+ * sizes and units.
  */
-fun MapCameraState.screenPosition(point: LatLon, size: IntSize, density: Density): Offset {
-    val world = WebMercator.WORLD_TILE * density.density * 2.0.pow(zoom.toDouble())
-    val dx = (WebMercator.x(point.lon) - WebMercator.x(center.lon)).let { it - floor(it + 0.5) } * world
-    val dy = (WebMercator.y(point.lat) - WebMercator.y(center.lat)) * world
-    val radians = bearing * PI / 180.0
-    val c = cos(radians)
-    val s = sin(radians)
-    return Offset((dx * c + dy * s + size.width / 2.0).toFloat(), (-dx * s + dy * c + size.height / 2.0).toFloat())
-}
+fun MapCameraState.screenPosition(point: LatLon, size: IntSize, density: Density): Offset =
+    mapViewScreenPosition(point, size.width.toFloat(), size.height.toFloat(), density.density)
 
 /**
  * Whether [point] is on a map of [size] pixels, with the bearing taken into account. [margin] shrinks the area that
- * counts, so a point under a control at the edge can be treated as off screen.
+ * counts, so a point under a control at the edge can be treated as off screen. It is map-view's `isOnScreen`, in
+ * Compose's sizes and units.
  */
-fun MapCameraState.isOnScreen(point: LatLon, size: IntSize, density: Density, margin: Dp = 0.dp): Boolean {
-    val at = screenPosition(point, size, density)
-    val inset = with(density) { margin.toPx() }
-    return at.x >= inset && at.y >= inset && at.x <= size.width - inset && at.y <= size.height - inset
-}
+fun MapCameraState.isOnScreen(point: LatLon, size: IntSize, density: Density, margin: Dp = 0.dp): Boolean =
+    // map-view's margin widens the area and a negative one narrows it; this one narrows it.
+    mapViewIsOnScreen(point, size.width.toFloat(), size.height.toFloat(), density.density, -with(density) { margin.toPx() })
 
 /**
  * Web Mercator on the unit square, as map-view lays its map out: x and y in `[0, 1)`, origin top left, and a tile
  * 256 dp across at zoom 0.
  *
- * A copy, because map-view keeps its own internal; [fit], [screenPosition] and [isOnScreen] need it, and map-view has
- * no fit or on-screen test of its own. It must agree with map-view's to the last digit, which the tests pin, and it
- * goes if map-view ever exposes its projection.
+ * A copy, because map-view keeps its own internal; marker clustering and [GeoBounds] measure on it. It must agree with
+ * map-view's to the last digit, which the tests pin, and it goes if map-view ever exposes its projection.
  */
 internal object WebMercator {
     const val WORLD_TILE = 256

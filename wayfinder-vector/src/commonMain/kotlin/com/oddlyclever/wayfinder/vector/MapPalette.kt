@@ -140,7 +140,10 @@ fun VectorStyle.recolored(palette: MapPalette): VectorStyle {
 
 /** The styles wayfinder builds, each made once so it compares equal to itself across compositions. */
 object MapStyles {
-    /** map-view's own default style, which is a daytime map. */
+    /**
+     * map-view's own default style, which is a daytime map. Like map-view's, it names places, roads, water, rivers,
+     * peaks and points of interest; turn a kind off with its `NameStyle`.
+     */
     val Light: VectorStyle = VectorStyle()
 
     /** map-view's default style in [MapPalette.Dark]. */

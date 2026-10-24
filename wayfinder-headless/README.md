@@ -16,12 +16,13 @@ Skia's native library comes with it, for Linux and macOS on x64 and arm64, and i
 
 - **Java 21,** since map-view's classes are built for it.
 - **The system libraries Skia links against,** even with no display: `libGL.so.1`, `libX11.so.6` and `libEGL.so.1`. Without them the first render fails with a `LibraryLoadException` that names the missing library.
+- **A font,** for the place and road names, which are drawn in the machine's default font. `fonts-dejavu-core` is one; with `names = false` none is needed.
 
 In a Debian or Ubuntu based image:
 
 ```dockerfile
 FROM eclipse-temurin:21-jre
-RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libx11-6 libegl1 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libx11-6 libegl1 fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
 ```
 
 ## Use
@@ -46,6 +47,7 @@ call.respondBytes(webp, ContentType("image", "webp"))
 | `tiles` | required | fetches a tile's bytes, or returns null for a tile it cannot supply |
 | `format`, `quality` | `ImageFormat.Webp`, 90 | WebP is several times smaller than PNG; `ImageFormat.Png` is lossless |
 | `style` | `MapStyles.Light` | the vector style; `MapStyles.Dark` for a dark image |
+| `names` | on | draws the style's names on vector tiles: places, roads, water, rivers, peaks and points of interest |
 | `zoomRange` | `0..14` | the levels the tile source has; the camera goes no closer than its last |
 | `padding` | 48 dp | the space kept between the coordinates and the edges |
 | `line` | violet over a dark casing | `HeadlessLineStyle(color, width, casing, casingWidth)` |

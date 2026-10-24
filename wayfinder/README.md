@@ -88,7 +88,7 @@ Drawn bottom to top: the `layers` in order, the `polylines`, the `overlay`, the 
 
 ### Limits
 
-`CameraLimits(zoom = ZOOM_LIMITS, center = null)` keeps the camera in a range of zoom and, when `center` is a `GeoBounds`, keeps the middle of the map inside that box, which can cross the antimeridian. It limits where the middle goes, not what the screen shows, so zoomed out the edges can show ground outside the box. `CameraLimits(zoom = 10f..18f, center = GeoBounds(south = 43.5, west = -80.0, north = 44.0, east = -79.0))` holds a map to one town. map-view moves the camera directly from its gestures, so wayfinder brings it back inside the limits whenever it moves out; at an edge a gesture can show it past the limit for a frame. Holding it there in the first place is asked of map-view.
+`CameraLimits(zoom = ZOOM_LIMITS, center = null)` keeps the camera in a range of zoom and, when `center` is a `GeoBounds`, keeps the middle of the map inside that box, which can cross the antimeridian. It limits where the middle goes, not what the screen shows, so zoomed out the edges can show ground outside the box. `CameraLimits(zoom = 10f..18f, center = GeoBounds(south = 43.5, west = -80.0, north = 44.0, east = -79.0))` holds a map to one town. map-view moves the camera directly from its gestures, so wayfinder brings it back inside the limits whenever it moves out; at an edge a gesture can show it past the limit for a frame. Holding it there in the first place is asked of map-view in [coderwise/libs-mobile#5](https://github.com/coderwise/libs-mobile/issues/5).
 
 ### Clustering
 
