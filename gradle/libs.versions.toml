@@ -19,13 +19,13 @@ compose-multiplatform = "1.12.1"
 # root build.gradle.kts for why).
 webpack = "5.111.1"
 
-# map-view, the tiled map :kartog builds on. Its family is released in lockstep, so one version covers every
-# artifact of it. It is 0.x and its types are part of kartog's public API, so a bump is a deliberate change.
+# map-view, the tiled map :wayfinder builds on. Its family is released in lockstep, so one version covers every
+# artifact of it. It is 0.x and its types are part of wayfinder's public API, so a bump is a deliberate change.
 mapView = "0.2.0"
 kotlinxCoroutines = "1.11.0"
 # :media-image's web target: the DOM, for <img> and <canvas>.
 kotlinxBrowser = "0.5.0"
-# Skia's native libraries, which :kartog-headless bundles so a server needs no Compose desktop setup. Must be the
+# Skia's native libraries, which :wayfinder-headless bundles so a server needs no Compose desktop setup. Must be the
 # Skiko version Compose Multiplatform brings (Compose 1.12.1 brings 0.150.1); move it with every Compose bump.
 skiko = "0.150.1"
 # H3 hexagonal grid, used by :h3spatial. These move together with the vendored C source pinned in
@@ -48,22 +48,22 @@ androidx-exifinterface = "1.4.2"
 [libraries]
 # Libraries are added with the modules that need them, each with a comment naming that module and why.
 
-# :kartog exposes these as api: MapCameraState, TileKey and MapState are kartog's own vocabulary.
+# :wayfinder exposes these as api: MapCameraState, TileKey and MapState are wayfinder's own vocabulary.
 mapview-base = { module = "com.coderwise.libs:map-view", version.ref = "mapView" }
 mapview-tiles-core = { module = "com.coderwise.libs:map-view-tiles", version.ref = "mapView" }
-# :kartog exposes these as api: its map draws the compass, scale bar, zoom buttons and attribution from them.
+# :wayfinder exposes these as api: its map draws the compass, scale bar, zoom buttons and attribution from them.
 mapview-controls = { module = "com.coderwise.libs:map-view-controls", version.ref = "mapView" }
-# :kartog-vector exposes the vector tiles it styles and rasterizes, and the raster slot that draws a rasterized tile.
+# :wayfinder-vector exposes the vector tiles it styles and rasterizes, and the raster slot that draws a rasterized tile.
 mapview-tiles-vector = { module = "com.coderwise.libs:map-view-tiles-vector", version.ref = "mapView" }
-# :kartog-raster exposes the raster slot its fading slot wraps; :kartog-vector, as above.
+# :wayfinder-raster exposes the raster slot its fading slot wraps; :wayfinder-vector, as above.
 mapview-tiles-raster = { module = "com.coderwise.libs:map-view-tiles-raster", version.ref = "mapView" }
-# :kartog-geojson exposes map-view's GeoJSON model, style and overlay.
+# :wayfinder-geojson exposes map-view's GeoJSON model, style and overlay.
 mapview-geojson = { module = "com.coderwise.libs:map-view-geojson", version.ref = "mapView" }
 
-# :kartog's map state, and :kartog-raster and :kartog-vector, which decode and rasterize tiles on Dispatchers.Default.
+# :wayfinder's map state, and :wayfinder-raster and :wayfinder-vector, which decode and rasterize tiles on Dispatchers.Default.
 # The version map-view 0.2.0 is built with.
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
-# runTest, for the suspending functions the kartog modules test.
+# runTest, for the suspending functions the wayfinder modules test.
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 
 # :media-webp's and :h3spatial's Android device tests: their native code loads only on a device.
@@ -86,7 +86,7 @@ kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.re
 uber-h3 = { module = "com.uber:h3", version.ref = "uberH3" }
 uber-h3-android = { module = "com.uber:h3-android", version.ref = "uberH3" }
 
-# :kartog's Compose UI tests of its map ornaments, at the Compose Multiplatform version.
+# :wayfinder's Compose UI tests of its map ornaments, at the Compose Multiplatform version.
 compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose-multiplatform" }
 
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -97,7 +97,7 @@ skiko = { module = "org.jetbrains.skiko:skiko", version.ref = "skiko" }
 # :media-webp's and :media-image's web tests: Skia's WebAssembly, which a Compose app's build would otherwise unpack.
 skiko-wasm-runtime = { module = "org.jetbrains.skiko:skiko-js-wasm-runtime", version.ref = "skiko" }
 
-# :kartog-headless, at runtime only: Skia for the server platforms, and macOS for running it on a developer's machine.
+# :wayfinder-headless, at runtime only: Skia for the server platforms, and macOS for running it on a developer's machine.
 # :media-webp's and :media-image's JVM tests, for the machine they run on.
 skiko-runtime-linux-x64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-linux-x64", version.ref = "skiko" }
 skiko-runtime-linux-arm64 = { module = "org.jetbrains.skiko:skiko-awt-runtime-linux-arm64", version.ref = "skiko" }

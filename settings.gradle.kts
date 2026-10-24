@@ -34,16 +34,15 @@ dependencyResolutionManagement {
 // One `include(":<module>")` per module, each a standalone Kotlin Multiplatform library published as
 // `com.oddlyclever:<module>`. A module that drops a standard target says which, and why, beside its line.
 
-// kartog: maps on map-view. The base every kartog-<part> extension builds on.
-include(":kartog")
+// wayfinder: maps on map-view, with tracks and the user's position. The base every wayfinder-<part> extension builds on.
+include(":wayfinder")
 
-include(":kartog-raster")
-include(":kartog-vector")
-include(":kartog-static")
-include(":kartog-track")
-include(":kartog-geojson")
-// JVM only: kartog-headless bundles Skia native libraries for servers. Devices use kartog-static.
-include(":kartog-headless")
+include(":wayfinder-raster")
+include(":wayfinder-vector")
+include(":wayfinder-frame")
+include(":wayfinder-geojson")
+// JVM only: wayfinder-headless bundles Skia native libraries for servers. Devices use wayfinder-frame.
+include(":wayfinder-headless")
 
 // WebP encoding with metadata, on every target.
 include(":media-webp")

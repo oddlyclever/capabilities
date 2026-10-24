@@ -13,13 +13,12 @@ A module that cannot support one of these says which and why, in its own README 
 | Module | What it does |
 |---|---|
 | [`h3spatial`](h3spatial) | Uber's H3 hexagonal grid behind one `String`-cell API: indexing, traversal, hierarchy and GeoJSON, with the same answers on every target. |
-| [`kartog`](kartog) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the map, its state, markers, polylines and controls. The root of the kartog family. |
-| [`kartog-vector`](kartog-vector) | Light and dark styles for map-view's vector tiles, and vector tiles drawn to images on GPUs that cannot draw their paths. |
-| [`kartog-raster`](kartog-raster) | Raster basemaps for kartog: decoded off the main thread, and faded in as they arrive. |
-| [`kartog-geojson`](kartog-geojson) | GeoJSON on a kartog map, from text or a URL. |
-| [`kartog-track`](kartog-track) | Recorded tracks and the user's position, on a live map and on images. |
-| [`kartog-static`](kartog-static) | Maps drawn without a composition: to images, or to a painter that scales like a vector image; PNG or WebP. |
-| [`kartog-headless`](kartog-headless) | Map images on a server in one call, WebP or PNG. **JVM only**: it bundles Skia's native libraries for servers. |
+| [`wayfinder`](wayfinder) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the map, its state, markers, polylines, controls, recorded tracks and the user's position. The root of the wayfinder family. |
+| [`wayfinder-vector`](wayfinder-vector) | Light and dark styles for map-view's vector tiles, and vector tiles drawn to images on GPUs that cannot draw their paths. |
+| [`wayfinder-raster`](wayfinder-raster) | Raster basemaps for wayfinder: decoded off the main thread, and faded in as they arrive. |
+| [`wayfinder-geojson`](wayfinder-geojson) | GeoJSON on a wayfinder map, from text or a URL. |
+| [`wayfinder-frame`](wayfinder-frame) | Map frames: a map at one camera position and size, drawn without a composition to an image or to a painter that scales like a vector image; PNG or WebP. |
+| [`wayfinder-headless`](wayfinder-headless) | Map images on a server in one call, WebP or PNG. **JVM only**: it bundles Skia's native libraries for servers. |
 | [`platform`](platform) | What must exist once in a process: on Android, the application context and the activity in front, captured at start-up so no library has to ask for them; and `OsFamily`. |
 | [`media-image`](media-image) | Images downsized and encoded for an upload or a file, as WebP, JPEG or PNG, with the same call on every target. |
 | [`media-webp`](media-webp) | WebP encoding, lossy or lossless, with GPS position and capture time in the file; the same call on every target, with libwebp built in on Android and iOS. |
@@ -69,7 +68,7 @@ The app keeps depending on the same coordinates, and Gradle builds them from you
 
 `check` compiles every target and runs every module's tests. A single module is `./gradlew :<module>:check`.
 
-The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Modules compile for JDK 17 unless a dependency needs newer; kartog compiles for 21 because map-view does. Building the iOS targets needs a Mac with Xcode.
+The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Modules compile for JDK 17 unless a dependency needs newer; wayfinder compiles for 21 because map-view does. Building the iOS targets needs a Mac with Xcode.
 
 ## License
 
