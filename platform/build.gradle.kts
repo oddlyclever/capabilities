@@ -14,7 +14,7 @@ version = libs.versions.versionName.get()
 // What must exist exactly once in a process: on Android, the application context and the activity in front, captured
 // at process start by an App Startup initializer this module's manifest merges into the app. And OsFamily.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(libs.versions.javaVersion.get().toInt())
 
     jvm()
 
@@ -24,7 +24,7 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
         }
 
         // The initializer is the manifest merge and App Startup's provider at work, which only a device has.

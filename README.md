@@ -68,7 +68,7 @@ The app keeps depending on the same coordinates, and Gradle builds them from you
 
 `check` compiles every target and runs every module's tests. A single module is `./gradlew :<module>:check`.
 
-The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Modules compile for JDK 17 unless a dependency needs newer; wayfinder compiles for 21 because map-view does. Building the iOS targets needs a Mac with Xcode.
+The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Every module builds and targets Java 21, set once by `javaVersion` in `gradle/libs.versions.toml`, so an app using one on the JVM runs on Java 21, and an Android app that calls one of their inline functions compiles with `jvmTarget` 21. Building the iOS targets needs a Mac with Xcode.
 
 ## License
 

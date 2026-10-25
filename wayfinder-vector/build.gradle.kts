@@ -17,9 +17,7 @@ version = libs.versions.versionName.get()
 // image on devices whose GPU driver cannot be trusted with its paths. Depends on map-view-tiles-vector, and on
 // map-view-tiles-raster to show those images.
 kotlin {
-    // 21, not the repository's usual 17: map-view's JVM classes are Java 21, so a JVM app using wayfinder runs on 21
-    // whatever this module targets, and tests on 17 cannot load them.
-    jvmToolchain(21)
+    jvmToolchain(libs.versions.javaVersion.get().toInt())
 
     jvm()
 
@@ -29,7 +27,7 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
         }
     }
 

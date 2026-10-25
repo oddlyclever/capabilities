@@ -5,6 +5,10 @@ namespace = "com.oddlyclever"
 group = "com.oddlyclever"
 versionName = "0.0.3"
 
+# The Java version of every module: its jvmToolchain, and its Android jvmTarget. 21 because map-view's JVM classes are
+# Java 21, so an app using the map modules runs on 21 anyway; one number keeps the rest of the repository with them.
+javaVersion = "21"
+
 # Kept low so consuming apps are not forced up; module cores are pure Kotlin.
 android-minSdk = "24"
 android-compileSdk = "37"
@@ -13,7 +17,7 @@ agp = "9.4.1"
 kotlin = "2.4.21"
 vanniktech = "0.37.0"
 # Provisioned repo-wide (the root applies the plugins `apply false`) so modules that need Compose can opt in.
-compose-multiplatform = "1.12.1"
+compose-multiplatform = "1.12.2"
 
 # webpack for the Kotlin/JS and Kotlin/Wasm test and bundle tooling, overriding the version Kotlin ships (see the
 # root build.gradle.kts for why).
@@ -26,8 +30,10 @@ kotlinxCoroutines = "1.11.0"
 # :media-image's web target: the DOM, for <img> and <canvas>.
 kotlinxBrowser = "0.5.0"
 # Skia's native libraries, which :wayfinder-headless bundles so a server needs no Compose desktop setup. Must be the
-# Skiko version Compose Multiplatform brings (Compose 1.12.1 brings 0.150.1); move it with every Compose bump.
-skiko = "0.150.1"
+# Skiko version Compose Multiplatform brings (Compose 1.12.2 brings 0.150.2), not the newest on Central; move it with
+# every Compose bump. From 0.151.0 Skiko no longer publishes skiko-js-wasm-runtime, which :media-image and
+# :media-webp unpack for their web tests, so the Compose 1.13 bump has to move them to Skiko's runtime variant.
+skiko = "0.150.2"
 # H3 hexagonal grid, used by :h3spatial. These move together with the vendored C source pinned in
 # h3spatial/native/PROVENANCE: a version that advances on some targets and not others gives different answers per
 # platform for the same input. uberH3 backs the JVM and Android targets, h3Js the JS and wasmJs targets (an npm

@@ -14,7 +14,7 @@ version = libs.versions.versionName.get()
 // Images downsized and encoded for an upload or a file: WebP through media-webp on every target, JPEG and PNG through
 // each platform's own encoder. On Android the application context comes from :platform.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(libs.versions.javaVersion.get().toInt())
 
     jvm()
 
@@ -24,7 +24,7 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
         }
 
 

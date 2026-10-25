@@ -16,9 +16,7 @@ version = libs.versions.versionName.get()
 // The base of the wayfinder family: what every wayfinder extension shares, on top of map-view. An app that only
 // wants map-view with wayfinder's helpers takes this alone; each extension adds its own dependency and nothing else.
 kotlin {
-    // 21, not the repository's usual 17: map-view's JVM classes are Java 21, so a JVM app using wayfinder runs on 21
-    // whatever this module targets, and tests on 17 cannot load them.
-    jvmToolchain(21)
+    jvmToolchain(libs.versions.javaVersion.get().toInt())
 
     jvm()
 
@@ -28,7 +26,7 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
         }
     }
 

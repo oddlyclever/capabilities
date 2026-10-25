@@ -16,7 +16,7 @@ version = libs.versions.versionName.get()
 // committed (native/build-natives.sh); the JVM and the web encode with Skia's libwebp. Metadata is written in
 // common Kotlin, so it is the same everywhere.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(libs.versions.javaVersion.get().toInt())
 
     jvm()
 
@@ -26,7 +26,7 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
         }
 
         optimization {

@@ -1,0 +1,52 @@
+# What the version catalog's versions must agree with, beyond "the newest stable release".
+#
+# Read by the update-libraries skill's planner, which proposes a version for every key in libs.versions.toml: a
+# follower at the version its leader's release asks for, a held key not at all, a set only when every member has the
+# same release. The catalog's comments say why; this file says what, in a form a script can check.
+
+# A follower takes the version a module published at its leader's version requires of it, never its own newest.
+[followers.skiko]
+leader = "compose-multiplatform"
+via = "org.jetbrains.compose.ui:ui-graphics"
+group = "org.jetbrains.skiko"
+module = "skiko"
+
+[followers.kotlinxCoroutines]
+leader = "mapView"
+via = "com.coderwise.libs:map-view"
+group = "org.jetbrains.kotlinx"
+module = "kotlinx-coroutines-core"
+
+# Held keys are never moved in a routine round; the reason is shown in every plan.
+[held.android-minSdk]
+reason = "Kept low so consuming apps are not forced up."
+
+[held.javaVersion]
+reason = "Decides the Java a consumer's JVM must run; moving it is the maintainer's decision."
+
+[held.mapView]
+reason = "Its types are wayfinder's public API, so a bump is its own decision, proposed apart from a routine round."
+
+[held.webpack]
+reason = "Overrides the webpack Kotlin's tooling ships, for the reason in the root build.gradle.kts; remove the override once Kotlin's own is fixed."
+npm = "webpack"
+
+[held.versionName]
+reason = "The project's own version, which belongs to the release."
+
+[held.namespace]
+reason = "The project's package prefix."
+
+[held.group]
+reason = "The project's Maven groupId."
+
+# A set moves only when every member has the same newer release; otherwise all of it holds.
+[sets.h3]
+keys = ["uberH3", "h3Js"]
+npm = { h3Js = "h3-js" }
+vendored = "h3spatial/native"
+reason = "The JVM, Android, web and iOS targets must run the same H3 release, or they answer differently for the same input."
+
+# What proves a round: run in order, each must succeed.
+[verify]
+commands = ["./gradlew clean check"]

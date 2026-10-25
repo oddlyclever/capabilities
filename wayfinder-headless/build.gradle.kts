@@ -9,8 +9,7 @@ version = libs.versions.versionName.get()
 // Map images on a server: one call from coordinates to WebP or PNG bytes. JVM only, deliberately: it exists to bundle
 // Skia's native libraries for the platforms servers run on, which only the JVM loads. Devices use wayfinder-frame.
 kotlin {
-    // 21, because map-view's classes are built for it.
-    jvmToolchain(21)
+    jvmToolchain(libs.versions.javaVersion.get().toInt())
 }
 
 dependencies {

@@ -16,7 +16,7 @@ version = libs.versions.versionName.get()
 // Android, the vendored C through cinterop on iOS, and h3-js on JS and wasmJs. Their versions move
 // together — see README "Version pin".
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(libs.versions.javaVersion.get().toInt())
 
     jvm()
 
@@ -26,7 +26,7 @@ kotlin {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.fromTarget(libs.versions.javaVersion.get()))
         }
 
         optimization {

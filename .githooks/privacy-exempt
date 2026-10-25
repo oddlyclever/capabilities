@@ -6,6 +6,23 @@
 # One glob, because the history also holds both from before the module was renamed from webp to media-webp.
 */libwebp/*
 
-# Agent skills, copied by the story-tools installer from a public skills repository and overwritten on every refresh,
-# so a line here cannot carry the allow marker. Project-specific files under .agents/config are still checked.
-.agents/skills/*
+# Agent skills the story-tools installer copies from a public skills repository and overwrites on every refresh, so a
+# line in them cannot carry the allow marker: the ones .agents/skills/MANAGED.md lists, by name. A project's own skill
+# beside them is first-party and is checked, and so is a skill the installer adds until it is listed here.
+.agents/skills/story-workflow/*
+.agents/skills/story-reconcile/*
+.agents/skills/to-issues/*
+.agents/skills/triage/*
+.agents/skills/project-docs/*
+.agents/skills/to-prd/*
+.agents/skills/to-adr/*
+.agents/skills/to-rad/*
+.agents/skills/grill-with-docs/*
+.agents/skills/regulatory-compliance/*
+.agents/skills/handoff/*
+.agents/skills/housekeeping/*
+.agents/skills/zoom-out/*
+.agents/skills/tdd/*
+.agents/skills/improve-codebase-architecture/*
+.agents/skills/to-ux/*
+.agents/skills/write-a-skill/*
