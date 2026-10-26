@@ -1,0 +1,42 @@
+# .github/workflows/privacy.yml
+#
+# The backstop for the local git hooks: every commit that reaches GitHub is checked for private data, whether or not
+# its author had the hooks enabled. The private-term denylist comes from the PRIVACY_DENYLIST secret, so the terms
+# never appear in the repository; a pull request from a fork gets no secrets and is checked for generic patterns only.
+
+name: Privacy
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  privacy:
+    name: Check for private data
+    if: github.event.deleted != true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check the new commits
+        env:
+          PRIVACY_DENYLIST: ${{ secrets.PRIVACY_DENYLIST }}
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            RANGE="$PR_BASE..$PR_HEAD"
+          elif git cat-file -e "$PUSH_BEFORE^{commit}" 2>/dev/null; then
+            RANGE="$PUSH_BEFORE..$PUSH_AFTER"
+          else
+            # A new branch, or a force push that dropped the old tip: check everything the branch carries.
+            RANGE="$PUSH_AFTER"
+          fi
+          python3 -I .githooks/privacy-check.py --commits "$RANGE"

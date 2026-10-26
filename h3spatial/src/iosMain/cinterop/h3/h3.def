@@ -1,0 +1,3 @@
+headers = headers/h3api.h
+staticLibraries = libh3.a
+package = h3

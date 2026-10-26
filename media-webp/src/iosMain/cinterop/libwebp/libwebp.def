@@ -1,0 +1,5 @@
+# libwebp's simple encoding API, from the static library native/build-natives.sh builds and commits per target.
+headers = webp/encode.h
+headerFilter = webp/*
+staticLibraries = libwebp.a
+package = com.oddlyclever.media.webp.libwebp

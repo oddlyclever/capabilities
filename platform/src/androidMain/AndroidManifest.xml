@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- No activity, service or receiver, and nothing exported: the only thing this library adds to the app is the
+         initializer below.
+
+         App Startup's provider is merged rather than declared, since other libraries contribute their own copy;
+         tools:node="merge" adds this initializer to whichever copy wins instead of colliding with it. Running from a
+         provider is the point: providers are created before Application.onCreate. -->
+    <application>
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="com.oddlyclever.platform.PlatformInitializer"
+                android:value="androidx.startup" />
+        </provider>
+    </application>
+
+</manifest>

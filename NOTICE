@@ -1,0 +1,19 @@
+Oddly Clever Capabilities
+Copyright 2026 Oddly Clever, a division of Rattlebox Software Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+these files except in compliance with the License. A copy of the License is
+included in the LICENSE file at the root of this repository, and is also
+available at http://www.apache.org/licenses/LICENSE-2.0
+
+--------------------------------------------------------------------------------
+Third-party derived work
+--------------------------------------------------------------------------------
+
+Individual capability modules may be derived from third-party works. Where that is
+the case, the derived source files retain the original copyright notice in their
+headers and carry a notice describing the modification, and the module's own README
+identifies its origin.
+
+No third-party endorsement of this project is implied by any such attribution. Third-
+party names are used only to identify the origin of derived work.

@@ -1,0 +1,17 @@
+{
+  "tracker": {
+    "type": "github",
+    "connection": "github-capabilities",
+    "mcpServer": "github-capabilities",
+    "repo": "oddlyclever/capabilities",
+    "prefix": "CAPA",
+    "project": "1"
+  },
+  "snapshot": "synced",
+  "updates": {
+    "check": true,
+    "skillsRepo": "bpappin/skills",
+    "skillsBranch": "master"
+  },
+  "wikiShortPageNames": true
+}
