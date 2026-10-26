@@ -1,8 +1,8 @@
 # Capabilities
 
-Independent, composable Kotlin Multiplatform libraries, one capability each: sign-in, calendars and schedules, crash reporting, file viewing, permissions, spatial indexing and the like. Each is a small library you depend on, not code you copy, and none knows anything about the app that uses it.
+Independent, composable Kotlin Multiplatform libraries, one capability each: maps, spatial indexing, image and WebP encoding, and the platform plumbing they share. Each is a small library you depend on, not code you copy, and none knows anything about the app that uses it.
 
-Every module is published as `com.oddlyclever:<module>` and builds for the same targets:
+Every module's coordinates are `com.oddlyclever:<module>`, and every module builds for the same targets:
 
 **JVM · Android · iOS (arm64, simulator) · JS (browser) · wasmJs (browser)**
 
@@ -28,11 +28,11 @@ A module that cannot support one of these says which and why, in its own README 
 - **A capability is mechanism, not policy.** It provides the ability, such as asking for a permission, holding a token or reporting a crash. What to ask for, when, and what to show the user stay with the app.
 - **Vendors sit behind a neutral core.** Where a capability needs a third-party backend, the core module owns the interface, and a `-<backend>` module supplies one implementation. The app chooses a backend in its own wiring, and nothing upstream of that names the vendor.
 - **Classes construct directly.** Some modules ship a Koin module where it saves real wiring across platforms, but a dependency-injection container is never the only way to get an instance. Each module's README says whether Koin is required or optional.
-- **The public API is a released surface.** It widens before it narrows and deprecates before it deletes. A source-incompatible change is called out in the release notes.
+- **The public API is a released surface.** It widens before it narrows and deprecates before it deletes. A source-incompatible change is called out in the [changelog](CHANGELOG.md).
 
 ## Using a module
 
-Released modules are on Maven Central:
+The modules are not on Maven Central yet. Until they are, build them from source: include this repository as a composite build (below), or `publishToMavenLocal`. Once published, a module is one dependency:
 
 ```kotlin
 kotlin {
@@ -44,7 +44,14 @@ kotlin {
 }
 ```
 
-Every module in a release carries the same version.
+Every module in a release carries the same version, and the [changelog](CHANGELOG.md) says what each release changed.
+
+What a consuming app needs:
+
+- **On the JVM, Java 21.** Every module's JVM classes are Java 21.
+- **On Android, API level 24 or later**, and an app that calls one of the modules' inline functions compiles with `jvmTarget` 21.
+- **On iOS**, arm64 devices or the arm64 simulator.
+- **On the web**, a browser: the JS and wasmJs targets are built for it, not for Node.js.
 
 To work on a module alongside an app, include this repository as a **composite build**, which picks up local edits with no publish step. In the consuming project's `settings.gradle.kts`:
 
@@ -68,7 +75,7 @@ The app keeps depending on the same coordinates, and Gradle builds them from you
 
 `check` compiles every target and runs every module's tests. A single module is `./gradlew :<module>:check`.
 
-The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Every module builds and targets Java 21, set once by `javaVersion` in `gradle/libs.versions.toml`, so an app using one on the JVM runs on Java 21, and an Android app that calls one of their inline functions compiles with `jvmTarget` 21. Building the iOS targets needs a Mac with Xcode.
+The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Every module builds and targets Java 21, set once by `javaVersion` in `gradle/libs.versions.toml`. Building the iOS targets needs a Mac with Xcode.
 
 ## License
 

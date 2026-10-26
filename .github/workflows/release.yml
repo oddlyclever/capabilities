@@ -1,0 +1,35 @@
+# .github/workflows/release.yml
+#
+# A push to master is a release: master only moves when a release branch is merged into it. This tags the commit
+# v<versionName> and creates the GitHub release, and nothing else. Nothing in this repository publishes to Maven
+# Central: no workflow does, and no build configures it.
+
+name: Release
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Get version
+        id: get_version
+        run: |
+          VERSION=$(grep "versionName =" gradle/libs.versions.toml | cut -d'"' -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

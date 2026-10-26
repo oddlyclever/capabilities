@@ -29,9 +29,8 @@ dependencies {
 }
 
 mavenPublishing {
-    publishToMavenCentral(automaticRelease = true)
-
-    // Signed only where a key is configured, which is CI; a local build publishes to mavenLocal unsigned.
+    // No remote repository is configured: publishing goes to mavenLocal only. Signed only where a key is configured,
+    // which nothing does yet, so the artifacts are unsigned.
     val hasSigningKey = project.hasProperty("signingInMemoryKey") ||
             project.hasProperty("signingInMemoryKeyId") ||
             project.hasProperty("signing.gnupg.keyName")

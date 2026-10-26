@@ -97,7 +97,7 @@ Every target runs the same H3 release, so the version is asserted in several pla
 
 The library is deliberately held at 4.5.0 even though upstream `master` has moved ahead of the tag.
 
-There is no 4.5.1 tag of H3, `com.uber:h3` has published nothing newer, and the matching `h3-js` changes are unreleased on npm. Only the vendored C could follow `master`, and doing so would put iOS ahead of every other target and replace a reproducible tag pin with a moving branch reference. Neither is worth it: nothing in the current `master` delta is reachable from this library's surface.
+There is no 4.5.1 tag of H3, and the matching `h3-js` changes are unreleased on npm. `com.uber:h3` has a 4.5.1, but it is the same binding on H3 4.5.0, re-released to sign with a new key, so it changes nothing this library runs. Only the vendored C could follow `master`, and doing so would put iOS ahead of every other target and replace a reproducible tag pin with a moving branch reference. Neither is worth it: nothing in the current `master` delta is reachable from this library's surface.
 
 When H3 4.5.1 ships, move once `com.uber:h3` and `h3-js` have released against it too. That release is expected to carry the fix for an out-of-bounds read in `_baseCellToCCWrot60` when passed a face index equal to `NUM_ICOSA_FACES` (uber/h3#978, fixed by uber/h3#1224). The affected path is reached only from H3's vertex API, which this library does not expose.
 
