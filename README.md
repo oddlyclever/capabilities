@@ -2,7 +2,7 @@
 
 Independent, composable Kotlin Multiplatform libraries, one capability each: maps, spatial indexing, image and WebP encoding, and the platform plumbing they share. Each is a small library you depend on, not code you copy, and none knows anything about the app that uses it.
 
-Every module is published as `com.oddlyclever:<module>` and builds for the same targets:
+Every module's coordinates are `com.oddlyclever:<module>`, and every module builds for the same targets:
 
 **JVM · Android · iOS (arm64, simulator) · JS (browser) · wasmJs (browser)**
 
@@ -32,7 +32,7 @@ A module that cannot support one of these says which and why, in its own README 
 
 ## Using a module
 
-Released modules are on Maven Central:
+The modules are not on Maven Central yet. Until they are, build them from source: include this repository as a composite build (below), or `publishToMavenLocal`. Once published, a module is one dependency:
 
 ```kotlin
 kotlin {

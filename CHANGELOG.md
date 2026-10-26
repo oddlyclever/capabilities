@@ -6,7 +6,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [0.0.3] - 2026-10-26
 
-The first release to Maven Central, as `com.oddlyclever:<module>:0.0.3`.
+The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but not yet published to Maven Central, so until it is, these coordinates resolve from a composite build or `mavenLocal` only.
 
 ### Added
 
