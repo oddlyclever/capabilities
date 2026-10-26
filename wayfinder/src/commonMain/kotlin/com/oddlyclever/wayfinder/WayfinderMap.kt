@@ -1,5 +1,6 @@
 package com.oddlyclever.wayfinder
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
@@ -193,7 +195,11 @@ data class MapOrnaments(
     val compass: Boolean = true,
     val compassAlignment: Alignment = Alignment.TopCenter,
     val compassStyle: CompassStyle = CompassStyle.Tape,
-    /** A button that switches between north-up and course-up. */
+    /**
+     * A button that switches between north-up and course-up. It shows a compass needle in north-up and a navigation
+     * arrowhead in course-up. With [CompassStyle.Tape] at the top, which spans the map's width, put it somewhere other
+     * than a top corner, or it sits on the tape's end.
+     */
     val orientationToggle: Boolean = false,
     val orientationToggleAlignment: Alignment = Alignment.TopEnd,
     val scaleBar: Boolean = true,
@@ -291,7 +297,7 @@ private fun BoxScope.Ornaments(state: WayfinderMapState, ornaments: MapOrnaments
                 .semantics { contentDescription = if (courseUp) "Course up: tap for north up" else "North up: tap for course up" },
             contentAlignment = Alignment.Center,
         ) {
-            Box(Modifier.size(10.dp).clip(CircleShape).background(if (courseUp) Color.White else Color(0xFF2563EB)))
+            OrientationIcon(courseUp = courseUp, modifier = Modifier.size(22.dp))
         }
     }
     if (ornaments.scaleBar) ScaleBar(state.camera, edge.align(ornaments.scaleBarAlignment), units = ornaments.scaleUnits)
@@ -305,5 +311,45 @@ private fun BoxScope.Ornaments(state: WayfinderMapState, ornaments: MapOrnaments
             onAttributionClick,
             edge.align(ornaments.attributionAlignment),
         )
+    }
+}
+
+/**
+ * What the orientation toggle shows: in north-up, a compass needle, its north half blue and its south half grey; in
+ * course-up, a white navigation arrowhead, the map turning with the heading. It replaced a bare dot, which said nothing
+ * about what the button does. Drawn rather than taken from an icon set, so the module needs no icon dependency.
+ */
+@Composable
+private fun OrientationIcon(courseUp: Boolean, modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        if (courseUp) {
+            // A navigation arrowhead pointing up, with a notch at its base.
+            val arrow = Path().apply {
+                moveTo(w * 0.5f, h * 0.08f)
+                lineTo(w * 0.86f, h * 0.9f)
+                lineTo(w * 0.5f, h * 0.7f)
+                lineTo(w * 0.14f, h * 0.9f)
+                close()
+            }
+            drawPath(arrow, Color.White)
+        } else {
+            // A compass needle: north half blue, south half grey.
+            val north = Path().apply {
+                moveTo(w * 0.5f, h * 0.04f)
+                lineTo(w * 0.72f, h * 0.5f)
+                lineTo(w * 0.28f, h * 0.5f)
+                close()
+            }
+            val south = Path().apply {
+                moveTo(w * 0.28f, h * 0.5f)
+                lineTo(w * 0.72f, h * 0.5f)
+                lineTo(w * 0.5f, h * 0.96f)
+                close()
+            }
+            drawPath(north, Color(0xFF2563EB))
+            drawPath(south, Color(0xFF9CA3AF))
+        }
     }
 }
