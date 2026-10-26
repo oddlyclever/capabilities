@@ -4,7 +4,7 @@ Maps for Compose Multiplatform. `WayfinderMap` is a map screen's worth of map: t
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 
-**In development.** Not yet released.
+Released on Maven Central from 0.0.3. Its API is 0.x and built on map-view's, which is 0.x too, so a minor release may change it; the [changelog](../CHANGELOG.md) says when one does.
 
 ## Install
 
