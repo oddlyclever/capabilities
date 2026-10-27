@@ -14,8 +14,9 @@ env:
 jobs:
   test:
     name: Run Multiplatform Tests
-    # macOS, because the iOS targets only compile on a Mac.
-    runs-on: macOS-latest
+    # macOS, because the iOS targets only compile on a Mac. The org's own Mac rather than a GitHub-hosted one, which
+    # bills at ten times the Linux rate and used up the month's included minutes.
+    runs-on: [self-hosted, macOS, ARM64]
     permissions:
       checks: write
       contents: read
