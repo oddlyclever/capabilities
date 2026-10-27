@@ -198,7 +198,8 @@ data class MapOrnaments(
     /**
      * A button that switches between north-up and course-up. It shows a compass needle in north-up and a navigation
      * arrowhead in course-up. With [CompassStyle.Tape] at the top, which spans the map's width, put it somewhere other
-     * than a top corner, or it sits on the tape's end.
+     * than a top corner, or it sits on the tape's end. A screen that wants it in a layout of its own, such as a top bar,
+     * leaves this off and draws [OrientationToggle] there.
      */
     val orientationToggle: Boolean = false,
     val orientationToggleAlignment: Alignment = Alignment.TopEnd,
@@ -275,31 +276,11 @@ private fun BoxScope.Ornaments(state: WayfinderMapState, ornaments: MapOrnaments
     val edge = Modifier.padding(ornaments.padding)
     if (ornaments.compass) {
         when (ornaments.compassStyle) {
-            CompassStyle.Tape -> CompassTape(
-                state.camera,
-                edge.align(ornaments.compassAlignment),
-                onClick = { state.orientation = Orientation.NorthUp; state.camera.rotateTo(0f) },
-            )
+            CompassStyle.Tape -> MapCompassTape(state, edge.align(ornaments.compassAlignment))
             CompassStyle.Rosette -> NorthButton(state.camera, edge.align(ornaments.compassAlignment), alwaysVisible = true)
         }
     }
-    if (ornaments.orientationToggle) {
-        val courseUp = state.orientation == Orientation.CourseUp
-        Box(
-            edge.align(ornaments.orientationToggleAlignment)
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(if (courseUp) Color(0xFF2563EB) else Color.White)
-                .clickable {
-                    state.orientation = if (courseUp) Orientation.NorthUp else Orientation.CourseUp
-                    if (courseUp) state.camera.rotateTo(0f)
-                }
-                .semantics { contentDescription = if (courseUp) "Course up: tap for north up" else "North up: tap for course up" },
-            contentAlignment = Alignment.Center,
-        ) {
-            OrientationIcon(courseUp = courseUp, modifier = Modifier.size(22.dp))
-        }
-    }
+    if (ornaments.orientationToggle) OrientationToggle(state, edge.align(ornaments.orientationToggleAlignment))
     if (ornaments.scaleBar) ScaleBar(state.camera, edge.align(ornaments.scaleBarAlignment), units = ornaments.scaleUnits)
     if (ornaments.zoomButtons) ZoomButtons(state.camera, edge.align(ornaments.zoomButtonsAlignment))
     if (ornaments.attribution && credits.isNotEmpty()) {
@@ -315,12 +296,55 @@ private fun BoxScope.Ornaments(state: WayfinderMapState, ornaments: MapOrnaments
 }
 
 /**
- * What the orientation toggle shows: in north-up, a compass needle, its north half blue and its south half grey; in
- * course-up, a white navigation arrowhead, the map turning with the heading. It replaced a bare dot, which said nothing
- * about what the button does. Drawn rather than taken from an icon set, so the module needs no icon dependency.
+ * The compass tape [MapOrnaments] draws, for a screen that places it in its own layout, such as between the buttons of
+ * a top bar. It takes the width it is given. Tapping it turns the map back to north-up. [background] is the tape's
+ * own plate; pass [Color.Transparent] to draw it on a plate of the screen's.
  */
 @Composable
-private fun OrientationIcon(courseUp: Boolean, modifier: Modifier = Modifier) {
+fun MapCompassTape(
+    state: WayfinderMapState,
+    modifier: Modifier = Modifier,
+    background: Color = Color.White.copy(alpha = 0.85f),
+) {
+    CompassTape(
+        state.camera,
+        modifier,
+        onClick = { state.orientation = Orientation.NorthUp; state.camera.rotateTo(0f) },
+        background = background,
+    )
+}
+
+/**
+ * The north-up/course-up button [MapOrnaments] draws, for a screen that places it in its own layout, such as at the
+ * end of a top bar. It is [size] across; give it the size of the buttons beside it.
+ */
+@Composable
+fun OrientationToggle(state: WayfinderMapState, modifier: Modifier = Modifier, size: Dp = 40.dp) {
+    val courseUp = state.orientation == Orientation.CourseUp
+    Box(
+        modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(if (courseUp) Color(0xFF2563EB) else Color.White)
+            .clickable {
+                state.orientation = if (courseUp) Orientation.NorthUp else Orientation.CourseUp
+                if (courseUp) state.camera.rotateTo(0f)
+            }
+            .semantics { contentDescription = if (courseUp) "Course up: tap for north up" else "North up: tap for course up" },
+        contentAlignment = Alignment.Center,
+    ) {
+        OrientationIcon(courseUp = courseUp, modifier = Modifier.size(size * 0.55f))
+    }
+}
+
+/**
+ * What the orientation toggle shows: in north-up, a compass needle, its north half blue and its south half grey; in
+ * course-up, a white navigation arrowhead, the map turning with the heading. It replaced a bare dot, which said nothing
+ * about what the button does. Drawn rather than taken from an icon set, so the module needs no icon dependency. Public
+ * for a screen that draws its own button around it.
+ */
+@Composable
+fun OrientationIcon(courseUp: Boolean, modifier: Modifier = Modifier) {
     Canvas(modifier) {
         val w = size.width
         val h = size.height
