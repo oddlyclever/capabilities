@@ -7,7 +7,7 @@ Images downsized and encoded for an upload or a file: a photo from the camera or
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:media-image:0.0.3")
+implementation("com.oddlyclever:media-image:0.0.4")
 ```
 
 It depends on [media-webp](../media-webp), which encodes the WebP, and on Android on [platform](../platform), which supplies the application context.

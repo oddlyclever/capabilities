@@ -7,7 +7,7 @@ What must exist exactly once in a process. On Android, that is the application c
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:platform:0.0.3")
+implementation("com.oddlyclever:platform:0.0.4")
 ```
 
 There is nothing to call and no dependency-injection container. On Android the initializer arrives in the library's manifest and runs by itself.

@@ -4,7 +4,7 @@ Maps for Compose Multiplatform. `WayfinderMap` is a map screen's worth of map: t
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 
-Released as 0.0.3, and not yet published to Maven Central. Its API is 0.x and built on map-view's, which is 0.x too, so a minor release may change it; the [changelog](../CHANGELOG.md) says when one does.
+Released as 0.0.4, and not yet published to Maven Central. Its API is 0.x and built on map-view's, which is 0.x too, so a minor release may change it; the [changelog](../CHANGELOG.md) says when one does.
 
 ## Install
 
@@ -12,8 +12,8 @@ Released as 0.0.3, and not yet published to Maven Central. Its API is 0.x and bu
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.oddlyclever:wayfinder:0.0.3")
-            implementation("com.oddlyclever:wayfinder-vector:0.0.3")   // for a vector basemap
+            implementation("com.oddlyclever:wayfinder:0.0.4")
+            implementation("com.oddlyclever:wayfinder-vector:0.0.4")   // for a vector basemap
         }
     }
 }

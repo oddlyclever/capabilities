@@ -33,7 +33,7 @@ Add it to the `commonMain` source set of the consuming module:
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.oddlyclever:h3spatial:0.0.3")
+            implementation("com.oddlyclever:h3spatial:0.0.4")
         }
     }
 }

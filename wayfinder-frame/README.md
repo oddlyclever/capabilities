@@ -9,7 +9,7 @@ A frame is drawn without a composition: to an image for a share sheet, a notific
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:wayfinder-frame:0.0.3")
+implementation("com.oddlyclever:wayfinder-frame:0.0.4")
 ```
 
 It depends on `wayfinder`, and on [`media-webp`](../media-webp) for encoding. Layers come from the module that draws them, `vectorFrameLayer` in wayfinder-vector or `rasterFrameLayer` in wayfinder-raster, so an app takes only the one it uses. There is no dependency-injection container.

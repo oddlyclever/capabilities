@@ -4,6 +4,14 @@ Every module is released together, at one version, so one entry covers them all.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions are 0.x: until 1.0, a minor release may change a public API, and its entry says how.
 
+## [0.0.4] - 2026-10-26
+
+Tagged here and, like 0.0.3, not yet published to Maven Central.
+
+### Added
+
+- **`wayfinder`**: `MapCompassTape`, `OrientationToggle` and `OrientationIcon` are public, so a screen can place the compass tape and the orientation toggle in its own layout, or draw its own button around the icon. `MapCompassTape` takes the tape's background, for a screen that draws it on a plate of its own. The map's own ornaments draw the same composables, so nothing changes for a map that keeps them.
+
 ## [0.0.3] - 2026-10-26
 
 The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but not yet published to Maven Central, so until it is, these coordinates resolve from a composite build or `mavenLocal` only.
@@ -32,4 +40,5 @@ The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but no
 
 The map modules were developed as `kartog`, built only from source and never published under that name. A project that included this repository as a composite build switches to the `wayfinder` names with [docs/outbox/wayfinder-migration.md](docs/outbox/wayfinder-migration.md), a prompt an agent in that project can follow.
 
+[0.0.4]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.4
 [0.0.3]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.3
