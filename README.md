@@ -38,7 +38,7 @@ The modules are not on Maven Central yet. Until they are, build them from source
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.oddlyclever:example:0.0.3")
+            implementation("com.oddlyclever:example:0.0.4")
         }
     }
 }

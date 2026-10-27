@@ -7,7 +7,7 @@ GeoJSON on a [wayfinder](../wayfinder) map, from text or from a URL, drawn by ma
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:wayfinder-geojson:0.0.3")
+implementation("com.oddlyclever:wayfinder-geojson:0.0.4")
 ```
 
 It exposes `wayfinder` and map-view-geojson as `api`, so `FeatureCollection`, `Feature`, `Geometry` and `GeoJsonStyle` are available without declaring them. There is no dependency-injection container.
