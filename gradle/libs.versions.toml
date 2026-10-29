@@ -3,7 +3,7 @@
 # `group` is the Maven groupId. Both are com.oddlyclever here.
 namespace = "com.oddlyclever"
 group = "com.oddlyclever"
-versionName = "0.0.4"
+versionName = "0.0.5"
 
 # The Java version of every module: its jvmToolchain, and its Android jvmTarget. 21 because map-view's JVM classes are
 # Java 21, so an app using the map modules runs on 21 anyway; one number keeps the rest of the repository with them.
