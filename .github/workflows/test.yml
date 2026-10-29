@@ -17,6 +17,8 @@ jobs:
     # macOS, because the iOS targets only compile on a Mac. The org's own Mac rather than a GitHub-hosted one, which
     # bills at ten times the Linux rate and used up the month's included minutes.
     runs-on: [self-hosted, macOS, ARM64]
+    # Never for a pull request from a fork: it would run that fork's code on the org's Mac.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       checks: write
       contents: read
@@ -32,6 +34,9 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        # The self-hosted Mac keeps its Gradle home between runs; a restored cache would only overwrite it.
+        with:
+          cache-disabled: true
 
       - name: Run all tests
         run: ./gradlew check
