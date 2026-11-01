@@ -1,6 +1,6 @@
 // Not `capabilities`: a consumer that includes this build often has a `:capabilities` project of its own, and
 // IntelliJ names modules after the root project.
-rootProject.name = "oddlyclever-capabilities"
+rootProject.name = "Capabilities"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 // No mavenLocal(): everything must resolve from public repositories, so a build that passes here passes for anyone.
@@ -55,3 +55,4 @@ include(":media-image")
 
 // Uber H3 hexagonal grid indexing behind one String-cell API, on every standard target.
 include(":h3spatial")
+include(":jsonlogic")
