@@ -13,7 +13,7 @@ javaVersion = "21"
 android-minSdk = "24"
 android-compileSdk = "37"
 
-agp = "9.4.1"
+agp = "9.5.0"
 kotlin = "2.4.21"
 vanniktech = "0.37.0"
 # Provisioned repo-wide (the root applies the plugins `apply false`) so modules that need Compose can opt in.

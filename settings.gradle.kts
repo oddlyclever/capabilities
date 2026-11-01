@@ -55,3 +55,4 @@ include(":media-image")
 
 // Uber H3 hexagonal grid indexing behind one String-cell API, on every standard target.
 include(":h3spatial")
+include(":jsonlogic")

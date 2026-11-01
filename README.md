@@ -19,6 +19,7 @@ A module that cannot support one of these says which and why, in its own README 
 | [`wayfinder-geojson`](wayfinder-geojson) | GeoJSON on a wayfinder map, from text or a URL. |
 | [`wayfinder-frame`](wayfinder-frame) | Map frames: a map at one camera position and size, drawn without a composition to an image or to a painter that scales like a vector image; PNG or WebP. |
 | [`wayfinder-headless`](wayfinder-headless) | Map images on a server in one call, WebP or PNG. **JVM only**: it bundles Skia's native libraries for servers. |
+| [`jsonlogic`](jsonlogic) | A clean-room [JSONLogic](https://jsonlogic.com) rule evaluator in pure common Kotlin: one rule, the same result on every target. |
 | [`platform`](platform) | What must exist once in a process: on Android, the application context and the activity in front, captured at start-up so no library has to ask for them; and `OsFamily`. |
 | [`media-image`](media-image) | Images downsized and encoded for an upload or a file, as WebP, JPEG or PNG, with the same call on every target. |
 | [`media-webp`](media-webp) | WebP encoding, lossy or lossless, with GPS position and capture time in the file; the same call on every target, with libwebp built in on Android and iOS. |
