@@ -24,9 +24,6 @@ reason = "Kept low so consuming apps are not forced up."
 [held.javaVersion]
 reason = "Decides the Java a consumer's JVM must run; moving it is the maintainer's decision."
 
-[held.mapView]
-reason = "Its types are wayfinder's public API, so a bump is its own decision, proposed apart from a routine round."
-
 [held.webpack]
 reason = "Overrides the webpack Kotlin's tooling ships, for the reason in the root build.gradle.kts; remove the override once Kotlin's own is fixed."
 npm = "webpack"

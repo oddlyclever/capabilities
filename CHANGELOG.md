@@ -38,7 +38,7 @@ The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but no
 
 ### For projects that built from source before this release
 
-The map modules were developed as `kartog`, built only from source and never published under that name. A project that included this repository as a composite build switches to the `wayfinder` names with [docs/outbox/wayfinder-migration.md](docs/outbox/wayfinder-migration.md), a prompt an agent in that project can follow.
+The map modules were developed as `kartog`, built only from source and never published under that name. A project that included this repository as a composite build switches to the `wayfinder` modules, packages and names.
 
 [0.0.4]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.4
 [0.0.3]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.3
