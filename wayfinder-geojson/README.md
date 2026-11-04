@@ -42,3 +42,7 @@ WayfinderMap(state, layers = listOf(basemap)) {
 - **`parseGeoJsonOrNull(text)`** parses on its own, for filtering or splitting before drawing.
 
 GeoJSON from another library comes in as text, so that library needs no dependency on wayfinder. Cell outlines from an H3 library are one example.
+
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-wayfinder-geojson`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-wayfinder-geojson/SKILL.md](src/commonMain/skills/com-oddlyclever-wayfinder-geojson/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-wayfinder-geojson/`.

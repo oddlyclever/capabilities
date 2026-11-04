@@ -62,3 +62,7 @@ Keep `rasterize` in mind if a GPU driver fault on complex paths appears on some 
 ## On an image
 
 `vectorFrameLayer(zoomRange, style, names = null) { key -> bytes }` is the same basemap for wayfinder-frame's `renderMap` and `MapFrame`, drawn by the same renderer so a frame matches the live map. Give it a `TextMeasurer` as `names` and it draws the style's names too, laid out by map-view as on a live map, over every tile and level at any bearing. In a composable that is `rememberTextMeasurer()`; laying out text needs a context on Android, which is why it is the app's to give. Names cost a second decode of each tile.
+
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-wayfinder-vector`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-wayfinder-vector/SKILL.md](src/commonMain/skills/com-oddlyclever-wayfinder-vector/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-wayfinder-vector/`.

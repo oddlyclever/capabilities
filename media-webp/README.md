@@ -89,6 +89,10 @@ val webp: ByteArray = bitmap.encodeToWebp(                  // Android Bitmap, i
 - **Skia's native library must be present at run time.** A Compose Multiplatform app has it already. A server adds `org.jetbrains.skiko:skiko-awt-runtime-<os>-<arch>` at the Skiko version its Compose brings. On Linux, Skia also needs `libGL.so.1`, `libX11.so.6` and `libEGL.so.1`: the `libgl1`, `libx11-6` and `libegl1` packages on Debian or Ubuntu.
 - **On the web, Skia's WebAssembly must have loaded** before the first lossy encode, as it has once a Compose app is showing. Lossless needs no Skia at all.
 
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-media-webp`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-media-webp/SKILL.md](src/commonMain/skills/com-oddlyclever-media-webp/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-media-webp/`.
+
 ## The vendored libwebp
 
 libwebp's encoder source is vendored under [`native/libwebp`](native/libwebp), unmodified, from the release recorded in [`native/PROVENANCE`](native/PROVENANCE). The Android and iOS libraries are built from it and committed, so a consumer needs no NDK, CMake or network access.

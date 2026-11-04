@@ -62,6 +62,10 @@ It is harmless to call when the provider did run. Activities created before the 
 
 Its members are upper case (`IOS`, `ANDROID`, `WEB`…), an exception to this repository's PascalCase rule. They are kept that way until the apps that use them move with a rename. Compare members; do not store or send their names.
 
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-platform`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-platform/SKILL.md](src/commonMain/skills/com-oddlyclever-platform/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-platform/`.
+
 ## Tests
 
 The initializer is the manifest merge and App Startup at work, which only a device has:

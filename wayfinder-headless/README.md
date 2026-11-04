@@ -58,3 +58,7 @@ call.respondBytes(webp, ContentType("image", "webp"))
 - **WebP or PNG.** Some desktop mail clients do not show WebP, so ask for `ImageFormat.Png` where the image goes into an email.
 - **It refuses** an image with no coordinates or an empty size, with an `IllegalArgumentException`. A WebP the encoder cannot produce is a `WebpException`, from the [media-webp](../media-webp) library that encodes it.
 - **Rendering is all in memory** and safe to run concurrently; tiles for one image are fetched at once.
+
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-wayfinder-headless`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/main/skills/com-oddlyclever-wayfinder-headless/SKILL.md](src/main/skills/com-oddlyclever-wayfinder-headless/SKILL.md) and published inside the sources jar, at `skills/com-oddlyclever-wayfinder-headless/`.

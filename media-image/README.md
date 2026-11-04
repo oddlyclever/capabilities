@@ -90,3 +90,7 @@ Skia's native library must be on the classpath at run time. A Compose desktop ap
 ### Web
 
 The source must come from this origin: a cross-origin image taints the canvas, and the browser then refuses to read it. Skia's WebAssembly must have loaded before WebP is encoded, as it has once a Compose app is showing.
+
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-media-image`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-media-image/SKILL.md](src/commonMain/skills/com-oddlyclever-media-image/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-media-image/`.

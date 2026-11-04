@@ -145,6 +145,10 @@ Two suites run on every target, each from a per-target test class, because every
 
 Both pass on `jvmTest`, `jsBrowserTest`, `wasmJsBrowserTest` and `iosSimulatorArm64Test`, which `./gradlew :h3spatial:check` runs. Android cannot load its native library in a host test, so its suite lives in `androidDeviceTest` and runs with `./gradlew :h3spatial:connectedAndroidDeviceTest` against an ARM device or emulator; it has been run on an Android 16-era arm64 emulator with 16 KB memory pages and on an API 24 arm64 emulator.
 
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-h3spatial`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-h3spatial/SKILL.md](src/commonMain/skills/com-oddlyclever-h3spatial/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-h3spatial/`.
+
 ## Third-party code
 
 The vendored C library is Uber's H3, unmodified, under the Apache License 2.0, and the agreement fixtures are derived from H3's own test data. The JVM, Android and web bindings are Uber's published packages, used as dependencies. See `NOTICE`, which is also included under `META-INF` in every published jar.

@@ -36,3 +36,7 @@ WayfinderMap(state, layers = listOf(rasterBasemap(imagery, client)))
 ## On an image
 
 `rasterFrameLayer(zoomRange) { key -> bytes }` is the same basemap for wayfinder-frame's `renderMap`.
+
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-wayfinder-raster`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-wayfinder-raster/SKILL.md](src/commonMain/skills/com-oddlyclever-wayfinder-raster/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-wayfinder-raster/`.

@@ -4,6 +4,27 @@ Every module is released together, at one version, so one entry covers them all.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions are 0.x: until 1.0, a minor release may change a public API, and its entry says how.
 
+## [Unreleased]
+
+### Added
+
+- **Every module ships an agent skill:** an [Agent Skill](https://agentskills.io/specification) named `com-oddlyclever-<module>`, for the coding agents of projects that depend on it, saying what the module is for, how it is meant to be called, and the mistakes that compile. It is published inside every sources jar, at `commonMain/skills/com-oddlyclever-<module>/`; `wayfinder-headless`, a JVM module, has it at `skills/com-oddlyclever-wayfinder-headless/`.
+
+### Changed
+
+- **`jsonlogic`**: its agent skill is now an [Agent Skill](https://agentskills.io/specification) named `com-oddlyclever-jsonlogic`, shipped in every sources jar at `commonMain/skills/com-oddlyclever-jsonlogic/`. The old `META-INF/ai-skills/` file in the JVM jar is gone.
+- **Building from source:** the Kotlin compiler gets 6 GB in `gradle.properties`, up from 3 GB, which ran out of memory linking the wayfinder modules' JS and Wasm test bundles.
+
+## [0.0.6] - 2026-11-01
+
+### Added
+
+- **`jsonlogic`**: a clean-room [JSONLogic](https://jsonlogic.com) rule evaluator in pure common Kotlin, with no dependencies beyond the standard library. Rules and data are plain maps, lists and values, so the caller chooses how JSON becomes them, and a rule gives the same result on every target.
+
+## [0.0.5] - 2026-10-29
+
+No changes to the libraries: the tests moved to a self-hosted Mac.
+
 ## [0.0.4] - 2026-10-26
 
 Tagged here and, like 0.0.3, not yet published to Maven Central.
@@ -40,5 +61,8 @@ The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but no
 
 The map modules were developed as `kartog`, built only from source and never published under that name. A project that included this repository as a composite build switches to the `wayfinder` modules, packages and names.
 
+[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.6...develop
+[0.0.6]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.6
+[0.0.5]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.5
 [0.0.4]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.4
 [0.0.3]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.3

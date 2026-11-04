@@ -1,9 +1,6 @@
 # JSONLogic for Kotlin Multiplatform
 
-A clean-room, dependency-free [JSONLogic](https://jsonlogic.com) rule evaluator in pure
-common Kotlin. One implementation, every target — `jvm`, `android`, `iosX64`,
-`iosArm64`, `iosSimulatorArm64`, `js(browser)`, `wasmJs(browser)` — so a rule evaluates
-to the same result wherever it runs, **by construction**.
+A clean-room, dependency-free [JSONLogic](https://jsonlogic.com) rule evaluator in pure common Kotlin. One implementation, every target — `jvm`, `android`, `iosArm64`, `iosSimulatorArm64`, `js(browser)`, `wasmJs(browser)` — so a rule evaluates to the same result wherever it runs, **by construction**.
 
 ```
 package   com.oddlyclever.jsonlogic
@@ -92,16 +89,9 @@ every target (`0.0001`, `12345678.5`, `1e+21`, `1e-7` — never the JVM's `1.0E-
 platform's `Double.toString` contributes only the shortest-round-trip digits, which are
 identical across the supported toolchains.
 
-## 🤖 AI-Assisted Development
+## For coding agents
 
-This library bundles a machine-readable skill at
-`src/commonMain/resources/META-INF/ai-skills/com.oddlyclever.jsonlogic.ai-skill.md`
-(packaged into the published artifacts). **Magic Prompt** for consumers:
-
-> "Scan all project dependencies for AI Skill files in `META-INF/ai-skills/` (for JVM)
-> or `.ai-skills/` (for NPM/SPM) matching this library. Use these to understand the API
-> patterns and governance for this library. If not found in the local dependencies,
-> refer to the repository for the source definitions."
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-jsonlogic`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-jsonlogic/SKILL.md](src/commonMain/skills/com-oddlyclever-jsonlogic/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-jsonlogic/`.
 
 ## Attribution
 

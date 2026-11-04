@@ -85,3 +85,7 @@ val webp = image.encodeToWebp(metadata = WebpMetadata(location = GpsLocation(cen
 - **Java 21,** since map-view's classes are built for it.
 - **Skia's native library for its platform** on the classpath: `org.jetbrains.skiko:skiko-awt-runtime-linux-x64` or `-linux-arm64`, at the Skiko version Compose brings.
 - **The system libraries that library links against,** even though nothing is shown on a screen: `libGL.so.1`, `libX11.so.6` and `libEGL.so.1`. On Debian or Ubuntu they are the packages `libgl1`, `libx11-6` and `libegl1`. Without them the first render fails with a `LibraryLoadException` naming the missing library.
+
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-wayfinder-frame`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-wayfinder-frame/SKILL.md](src/commonMain/skills/com-oddlyclever-wayfinder-frame/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-wayfinder-frame/`.

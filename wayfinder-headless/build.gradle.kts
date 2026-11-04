@@ -28,6 +28,16 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
 }
 
+// Ships this library's agent skill in the sources jar, where a consumer's tooling reads it.
+tasks.withType<Jar>()
+    .matching { it.name == "sourcesJar" || it.name.endsWith("SourcesJar") }
+    .configureEach {
+        from("src/main/skills") {
+            include("*/SKILL.md", "*/references/**", "*/assets/**")
+            into("skills")
+        }
+    }
+
 mavenPublishing {
     // No remote repository is configured: publishing goes to mavenLocal only. Signed only where a key is configured,
     // which nothing does yet, so the artifacts are unsigned.

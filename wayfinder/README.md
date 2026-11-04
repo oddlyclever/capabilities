@@ -261,3 +261,7 @@ A `TrackPoint(position, speed, accuracy, heading)` is a recorded fix: a position
 | [`wayfinder-headless`](../wayfinder-headless) | Map images on a server, JVM only, in one call |
 
 Three interfaces here are how the other modules work together without depending on one another: `MapLayer` and `PlacedLayer` put tiles on a live map, `MapFrameLayer` and `MapFrameTile` put them on an image, and `MapProjection` places a coordinate on either, so a track draws the same way on both.
+
+## For coding agents
+
+The module ships an [Agent Skill](https://agentskills.io/specification), `com-oddlyclever-wayfinder`, for the agents of projects that depend on it: what the library is for, how it's meant to be called, and the mistakes that compile. It is written at [src/commonMain/skills/com-oddlyclever-wayfinder/SKILL.md](src/commonMain/skills/com-oddlyclever-wayfinder/SKILL.md) and published inside every sources jar, at `commonMain/skills/com-oddlyclever-wayfinder/`.

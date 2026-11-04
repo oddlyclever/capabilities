@@ -16,6 +16,6 @@ Everything about this repository lives in one of four kinds of place. This file 
 
 **Plain git owns the machinery.** `AGENTS.md` and `WORKFLOW.md` at the repo root, this file, `docs/outbox/` for artifacts written for someone outside the project, and `docs/_archive/` for retired files. None of that syncs.
 
-**Module documentation stays with the module.** Each module's `README.md` and its KDoc are the user-facing documentation of a released library, and they live beside the code. The knowledge base holds what sits behind them: why the API is shaped the way it is, and what was tried first.
+**Module documentation stays with the module.** Each module's `README.md` and its KDoc are the user-facing documentation of a released library, and they live beside the code. The knowledge base holds what sits behind them: why the API is shaped the way it is, and what was tried first. Every module has a section of its own in `docs/knowledge/<module>/` for what concerns it alone; what spans several modules goes in the sections filed by kind. A new module gets its section when it is added, as one of the four places [`AGENTS.md`](../AGENTS.md) says a module is registered.
 
 Git is the version history for all of it. Diffs, blame and merges work on knowledge exactly as they do on code.
