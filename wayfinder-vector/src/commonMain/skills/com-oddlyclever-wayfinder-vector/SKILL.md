@@ -91,8 +91,7 @@ val layer = vectorFrameLayer(streets.zoomRange, style = MapStyles.Dark, names = 
 
 - **There is no MapLibre or Mapbox style JSON.** A style is a Kotlin `VectorStyle`, and a vector basemap is `vectorBasemap(source, client)`, not a style URL.
 - **There is no device list.** The ground is drawn as paths on the GPU on every device unless the app passes `rasterize = true`.
-- **It was never published under `kartog`.** A project that built from source before 0.0.3 may have `com.oddlyclever.kartog.vector` imports: `KartogStyles` is now `MapStyles` and `staticVectorLayer` is now `vectorFrameLayer`.
 
 ## What it is not for
 
-It draws OpenMapTiles vector tiles and nothing else: image tiles are `rasterBasemap` in `com.oddlyclever:wayfinder-raster`, and GeoJSON is in `com.oddlyclever:wayfinder-geojson`. It does not host, fetch or cache tiles, and it does not read MapLibre style documents. Dashed footpaths, and tunnels and bridges drawn apart from other roads, are not drawn yet, since map-view's road paint sees only a road's class.
+It draws OpenMapTiles vector tiles and nothing else: image tiles are `rasterBasemap` in `com.oddlyclever:wayfinder-raster`, and GeoJSON is in `com.oddlyclever:wayfinder-geojson`. It does not host, fetch or cache tiles, and it does not read MapLibre style documents. Its two styles draw footpaths solid, and tunnels and bridges like other roads of their class; map-view's `LayerStyle.dash` and `VectorStyle.roadDetail` can draw both, in a style of your own.

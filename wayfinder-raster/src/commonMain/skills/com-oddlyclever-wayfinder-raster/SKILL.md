@@ -78,7 +78,6 @@ For code that builds its own map-view layer, `decodeRasterTile(bytes)` is the de
 - **Since 0.0.7, `rasterBasemap` layers from equal arguments are equal.** Before it, each call was a new layer, and one made in a composable lost its tiles at every recomposition.
 
 - **There is no tile provider class.** A raster layer is `rasterBasemap(source, client)` in a `WayfinderMap`'s `layers`, not a `TileOverlay` or `UrlTileProvider`: the URL is the `TileSource`'s template, and the fetching is the app's `TileClient`.
-- **It was never published under `kartog`.** A project that built from source before 0.0.3 may have `com.oddlyclever.kartog.raster` imports; `staticRasterLayer` is now `rasterFrameLayer`.
 
 ## What it is not for
 

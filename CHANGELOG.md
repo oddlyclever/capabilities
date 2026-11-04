@@ -20,6 +20,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ### Changed
 
+- **Documentation:** every module's full documentation is now in its section of the knowledge base, `docs/knowledge/<module>/`, mirrored to the repository's wiki: each feature in detail, platform notes, deployment, troubleshooting and the decisions behind it. A module's README keeps install, a first use and links to those pages.
 - **`jsonlogic`**: its agent skill is now an [Agent Skill](https://agentskills.io/specification) named `com-oddlyclever-jsonlogic`, shipped in every sources jar at `commonMain/skills/com-oddlyclever-jsonlogic/`. The old `META-INF/ai-skills/` file in the JVM jar is gone.
 - **Building from source:** the Kotlin compiler gets 6 GB in `gradle.properties`, up from 3 GB, which ran out of memory linking the wayfinder modules' JS and Wasm test bundles.
 
@@ -64,10 +65,6 @@ The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but no
 - **JVM:** Java 21.
 - **Android:** API level 24 or later. An app that calls one of these modules' inline functions compiles with `jvmTarget` 21.
 - **Built with:** Kotlin 2.4.21, Compose Multiplatform 1.12.2 (Skiko 0.150.2) and map-view 0.3.0.
-
-### For projects that built from source before this release
-
-The map modules were developed as `kartog`, built only from source and never published under that name. A project that included this repository as a composite build switches to the `wayfinder` modules, packages and names.
 
 [Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.6...develop
 [0.0.6]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.6

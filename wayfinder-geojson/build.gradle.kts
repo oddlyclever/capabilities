@@ -13,7 +13,7 @@ plugins {
 group = libs.versions.group.get()
 version = libs.versions.versionName.get()
 
-// GeoJSON on a wayfinder map, from text or from a URL fetched through the app's TileClient, drawn by map-view-geojson.
+// GeoJSON on a wayfinder map, from text or from a URL fetched by the app's own load function, drawn by map-view-geojson.
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 

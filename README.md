@@ -33,7 +33,7 @@ A module that cannot support one of these says which and why, in its own README 
 
 ## Using a module
 
-The modules are not on Maven Central yet. Until they are, build them from source: include this repository as a composite build (below), or `publishToMavenLocal`. Once published, a module is one dependency:
+**Releases are not published to Maven Central yet.** Each release is tagged here and has a GitHub release, but deploying to Central is turned off until it is set up deliberately, so the coordinates below don't resolve from Central. Until then, build the modules from source: include this repository as a composite build (below), or `publishToMavenLocal`. Once published, a module is one dependency:
 
 ```kotlin
 kotlin {

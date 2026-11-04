@@ -12,18 +12,7 @@ dependencies {
 }
 ```
 
-Skia's native library comes with it, for Linux and macOS on x64 and arm64, and is unpacked and loaded on first use. The server needs two more things:
-
-- **Java 21,** since map-view's classes are built for it.
-- **The system libraries Skia links against,** even with no display: `libGL.so.1`, `libX11.so.6` and `libEGL.so.1`. Without them the first render fails with a `LibraryLoadException` that names the missing library.
-- **A font,** for the place and road names, which are drawn in the machine's default font. `fonts-dejavu-core` is one; with `names = false` none is needed.
-
-In a Debian or Ubuntu based image:
-
-```dockerfile
-FROM eclipse-temurin:21-jre
-RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libx11-6 libegl1 fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
-```
+Skia's native library comes with it, for Linux and macOS on x64 and arm64. The server also needs Java 21, and on Linux the system libraries Skia links against and a font for the names; on Debian or Ubuntu, `libgl1`, `libx11-6`, `libegl1` and `fonts-dejavu-core`. [Running on a Server](../docs/knowledge/wayfinder-headless/DOC-0001-running-on-a-server.md) has the details, a container image, and what each failure looks like.
 
 ## Use
 
@@ -39,25 +28,16 @@ val webp: ByteArray = renderMapImage(
 call.respondBytes(webp, ContentType("image", "webp"))
 ```
 
-| Parameter | Default | What it does |
-|---|---|---|
-| `width`, `height`, `scale` | `scale` 1 | the image is `width × scale` by `height × scale` pixels, with lines and markers `scale` times as thick |
-| `lines` | none | the route or track, in pieces; each piece is drawn on its own, so the image never joins pieces with a straight line |
-| `points` | none | waypoints beside the lines; with no lines, the places the map is about |
-| `tiles` | required | fetches a tile's bytes, or returns null for a tile it cannot supply |
-| `format`, `quality` | `ImageFormat.Webp`, 90 | WebP is several times smaller than PNG; `ImageFormat.Png` is lossless |
-| `style` | `MapStyles.Light` | the vector style; `MapStyles.Dark` for a dark image |
-| `names` | on | draws the style's names on vector tiles: places, roads, water, rivers, peaks and points of interest |
-| `zoomRange` | `0..14` | the levels the tile source has; the camera goes no closer than its last |
-| `padding` | 48 dp | the space kept between the coordinates and the edges |
-| `line` | violet over a dark casing | `HeadlessLineStyle(color, width, casing, casingWidth)` |
+The camera fits the route and waypoints, the start, end and waypoints are marked, and the tiles may come from a vector or a raster tile server. For an image going into an email, pass `format = ImageFormat.Png`, since some desktop mail clients do not show WebP.
 
-- **The camera frames every coordinate** inside the padding, no closer than the last level of `zoomRange`, so a single point shows the streets around it.
-- **Tiles may be images or vector tiles.** PNG, JPEG and WebP are told apart from vector tiles by their bytes, so one tile server of either kind works with no setting. Vector tiles are drawn in `style`. A tile `tiles` cannot supply is drawn from its nearest ancestor.
-- **Markers:** the first point of the first line is the start, in green, and the last point of the last line the end, in red; on a loop they show as one marker. `points` are waypoints, in blue. The lines' own points are never marked.
-- **WebP or PNG.** Some desktop mail clients do not show WebP, so ask for `ImageFormat.Png` where the image goes into an email.
-- **It refuses** an image with no coordinates or an empty size, with an `IllegalArgumentException`. A WebP the encoder cannot produce is a `WebpException`, from the [media-webp](../media-webp) library that encodes it.
-- **Rendering is all in memory** and safe to run concurrently; tiles for one image are fetched at once.
+## Documentation
+
+The full documentation is in the module's section of the [knowledge base](../docs/knowledge/wayfinder-headless/README.md), which is mirrored to the repository's wiki:
+
+- [Running on a Server](../docs/knowledge/wayfinder-headless/DOC-0001-running-on-a-server.md): what the machine needs, a container image, and the failures.
+- [Rendering Options](../docs/knowledge/wayfinder-headless/DOC-0002-rendering-options.md): every parameter, the camera, the markers, and what the call refuses.
+- [Tile Sources](../docs/knowledge/wayfinder-headless/DOC-0003-tile-sources.md): what the tile function returns, and why a map comes out empty.
+- [Skia on the JVM for Server-Side Map Images](../docs/knowledge/wayfinder-headless/ADR-0001-skia-on-the-jvm-for-server-side-map-images.md): why the module is built the way it is.
 
 ## For coding agents
 

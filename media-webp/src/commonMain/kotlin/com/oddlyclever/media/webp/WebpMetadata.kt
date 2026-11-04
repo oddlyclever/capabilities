@@ -33,7 +33,7 @@ class WebpMetadata(
  * A position on the Earth in WGS 84, the datum GPS and EXIF use.
  *
  * Kept to this module rather than borrowed from a geometry library, so writing a WebP needs no other dependency.
- * Degrees are written to about a millimetre.
+ * Degrees are written to a ten-thousandth of a second of arc, about 3 mm.
  *
  * @property latitude degrees north, -90 to 90.
  * @property longitude degrees east, -180 to 180.

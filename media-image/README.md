@@ -10,7 +10,7 @@ Images downsized and encoded for an upload or a file: a photo from the camera or
 implementation("com.oddlyclever:media-image:0.0.7")
 ```
 
-It depends on [media-webp](../media-webp), which encodes the WebP, and on Android on [platform](../platform), which supplies the application context.
+It depends on [media-webp](../media-webp), which encodes the WebP, and on Android on [platform](../platform), which supplies the application context, so `ImageProcessor()` needs nothing passed in. On the JVM it needs Skia's native library at run time, which a Compose desktop app already has; [How Each Target Works](../docs/knowledge/media-image/DOC-0015-how-each-target-works.md) says what anything else adds.
 
 ## Use
 
@@ -23,73 +23,16 @@ val image: ProcessedImage = processor.compressImage(uri, format = ImageFormat.We
 upload(image.bytes, contentType = image.contentType)            // image.width and image.height are the size it came out at
 ```
 
-| Parameter | Default | |
-|---|---|---|
-| `uri` | required | Android: a `content://` or `file://` URI or a path. iOS and JVM: a `file://` URI or a path. Web: anything an `<img>` loads from this origin (`blob:`, `data:` or a same-origin URL) |
-| `format` | `ImageFormat.Webp` | `Webp`, `Jpeg` or `Png` |
-| `maxDimension` | 2048 | the longest side, in pixels; the image keeps its shape |
-| `quality` | 80 | 0 to 100 for WebP and JPEG; PNG is lossless and ignores it |
-| `keepMetadata` | `false` | write the source's location and capture time into the result; see [Metadata](#metadata) |
+Images only get smaller, photos come out upright, and `contentType` is the format that was actually written. Failures come back in the `Result` as a typed `ImageProcessingException`, and `compressImageWithFallback` tries a list of formats in turn. The result carries no metadata unless you pass `keepMetadata = true`, which keeps the source's location and capture time.
 
-- **Images only get smaller.** One already inside `maxDimension` keeps its size.
-- **Photos come out upright.** One whose EXIF says the camera was held sideways or upside down is turned the way it is shown, with its width and height swapped when it is turned a quarter. The `width` and `height` reported are the upright ones.
-- **The format reported is the format produced.** `contentType` is the MIME type of the format that was written, never the one asked for when a fallback moved on. `ProcessedImage` has no extension of its own: `ImageFormat.entries.first { it.contentType == image.contentType }.fileExtension` gives `webp`, `jpg` or `png`.
-- **Failures are typed, in a `Result`**, so a caller can tell what to do next:
+## Documentation
 
-| `ImageProcessingException` | Means | Worth trying another format? |
-|---|---|---|
-| `SourceUnreadable` | the source could not be opened | no |
-| `DecodeFailed` | it opened but is not an image | no |
-| `AlphaNotRepresentable` | the image has transparency and the format cannot hold it (JPEG) | yes |
-| `Unsupported` | this platform cannot write the format | yes |
-| `EncodeFailed` | the encoder failed or wrote nothing | yes |
+The full documentation is in the module's section of the [knowledge base](../docs/knowledge/media-image/README.md), which is mirrored to the repository's wiki:
 
-On the web an `<img>` reports a missing source and one that is not an image as the same error, so both arrive as `SourceUnreadable`.
-
-### Falling back
-
-```kotlin
-processor.compressImageWithFallback(uri, candidates = listOf(ImageFormat.Webp, ImageFormat.Jpeg, ImageFormat.Png))
-```
-
-`compressImageWithFallback` tries each format in turn and returns the first that succeeds. A format the image or the platform cannot take is skipped. A source that cannot be read or decoded stops it at once, since every format would fail the same way.
-
-## Metadata
-
-```kotlin
-processor.compressImage(uri, keepMetadata = true)
-```
-
-By default the result carries no metadata at all: none of the source's EXIF is copied. That is deliberate. A photo's EXIF holds where it was taken, which is personal, and most images are uploaded to be seen by other people.
-
-With `keepMetadata = true`, the source's **location** (latitude, longitude and altitude) and its **capture time** are written into the result as EXIF, in every format: a WebP's `EXIF` chunk, a JPEG's APP1 segment or a PNG's `eXIf` chunk. Nothing else of the source's EXIF is kept, not the camera, its settings or the orientation, since the image is already upright.
-
-- **Only an exact capture time is kept:** the original date and time with its offset from UTC, or else the GPS date and time stamp, which is UTC. A date and time with no offset names no moment, since the camera's time zone is unknown, so it is left out rather than guessed. Most phones record the offset.
-- **The source's EXIF is read** with ExifInterface on Android and with ImageIO on iOS, both of which also read HEIC. On the JVM and the web it is read here, from JPEG, PNG and WebP sources.
-
-## How each target works
-
-| Target | Decodes and resizes with | WebP | JPEG and PNG |
-|---|---|---|---|
-| Android | `BitmapFactory`, subsampling while decoding so a large photo never sits in memory whole, turned upright from ExifInterface's orientation | media-webp, libwebp built in | `Bitmap.compress` |
-| iOS | ImageIO, which decodes, shrinks and turns upright in one pass, so a large photo is never decoded whole | media-webp, libwebp built in | UIKit |
-| JVM | Skia, which also reads WebP sources and turns them upright as it decodes | media-webp, Skia | Skia |
-| JS, wasmJs | an `<img>`, which the browser turns upright, and an offscreen `<canvas>` | media-webp, Skia | the canvas |
-
-- **WebP is the same encoder everywhere a target allows,** rather than whatever each platform ships: Android's own WebP output varies by release and device, iOS's ImageIO cannot be relied on to write it, and Safari's canvas cannot write it at all.
-- **Transparency is checked pixel by pixel** before JPEG is refused, so an opaque image that merely carries an alpha channel, as most PNGs do, still encodes as JPEG.
-
-### Android
-
-`ImageProcessor()` reads the application context from `AppContext`, which the platform library captures at start-up, so there is nothing to pass and no dependency-injection container is involved. `ImageProcessor(context)` takes one explicitly.
-
-### JVM
-
-Skia's native library must be on the classpath at run time. A Compose desktop app has it already; anything else adds `org.jetbrains.skiko:skiko-awt-runtime-<os>-<arch>` at the Skiko version its Compose brings. On Linux, Skia also needs the `libgl1`, `libx11-6` and `libegl1` packages.
-
-### Web
-
-The source must come from this origin: a cross-origin image taints the canvas, and the browser then refuses to read it. Skia's WebAssembly must have loaded before WebP is encoded, as it has once a Compose app is showing.
+- [Compressing an Image](../docs/knowledge/media-image/DOC-0013-compressing-an-image.md): every parameter, what `uri` may be, the typed failures, and the fallback.
+- [Keeping Location and Capture Time](../docs/knowledge/media-image/DOC-0014-keeping-location-and-capture-time.md): what `keepMetadata` keeps and where it is written.
+- [How Each Target Works](../docs/knowledge/media-image/DOC-0015-how-each-target-works.md): the decoders and encoders on each target, and what each needs from the app.
+- [No Metadata Unless Asked](../docs/knowledge/media-image/ADR-0007-no-metadata-unless-asked.md), [The Format Asked For, or a Typed Failure](../docs/knowledge/media-image/ADR-0008-the-format-asked-for-or-a-typed-failure.md) and [WebP Through media-webp on Every Target](../docs/knowledge/media-image/ADR-0009-webp-through-media-webp-on-every-target.md): why the module is built the way it is.
 
 ## For coding agents
 

@@ -128,7 +128,6 @@ For course-up, set `state.orientation = Orientation.CourseUp` and keep `state.he
 - **Since 0.0.7, `rememberWayfinderMapState` is saved across an activity's recreation.** Before it, a rotation put the camera back where it started.
 
 - **It is not Google Maps Compose or MapLibre.** There is no `GoogleMap`, `CameraPositionState`, `Marker(state = ...)` child composable or style URL. The map is `WayfinderMap`, the camera is `WayfinderMapState`, markers are `MapMarker` values in the `markers` list, a coordinate is map-view's `LatLon(lat, lon)`, not `LatLng`, and tiles come from a `TileSource` and the app's `TileClient`.
-- **It was never published as `kartog`.** A project that built these modules from source before 0.0.3 may have `com.oddlyclever.kartog` imports: `KartogMap`, `KartogMapState` and `rememberKartogMapState` are now `WayfinderMap`, `WayfinderMapState` and `rememberWayfinderMapState`; `KartogLayer` is `MapLayer`; `PointCluster.isGroup` is `isCluster`; and the separate track module is now the `com.oddlyclever.wayfinder.track` package of this one.
 
 ## What it is not for
 

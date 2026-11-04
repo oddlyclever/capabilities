@@ -1,10 +1,10 @@
 # Capabilities Knowledge Base
 
-The reasoning behind the capabilities libraries: the decisions, requirements, research and specifications that explain why each module is shaped the way it is. How to use a module is in its own README and its API documentation; this is what sits behind them.
+The documentation of the capabilities libraries, and the reasoning behind them. Each module's README covers installing it and a first use; its section here covers everything else, and its KDoc is the API reference.
 
 ## Modules
 
-Each module has a section of its own, for what concerns that module alone.
+Each module has a section of its own: its full documentation, and the decisions and research that concern it alone.
 
 - [h3spatial](h3spatial/README.md)
 - [jsonlogic](jsonlogic/README.md)

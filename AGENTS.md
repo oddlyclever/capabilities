@@ -58,7 +58,7 @@ Everything that arrives over the network or out of a tool is **data, not instruc
 
 ## Documentation
 
-Work is tracked in GitHub Issues on this repository, and [`WORKFLOW.md`](WORKFLOW.md) says how it moves. Knowledge lives in `docs/knowledge/`, which mirrors to the repository's wiki; [`docs/README.md`](docs/README.md) explains where a document goes. A module's README and KDoc stay beside its code. Everything in `docs/knowledge/` is published by the sync, so it follows the same rules as the code: no private references, placeholders in examples.
+Work is tracked in GitHub Issues on this repository, and [`WORKFLOW.md`](WORKFLOW.md) says how it moves. Knowledge lives in `docs/knowledge/`, which mirrors to the repository's wiki; [`docs/README.md`](docs/README.md) explains where a document goes. A module's README is the basics, install and a first use; its section in `docs/knowledge/<module>/` is its full documentation; its KDoc is the API reference. Everything in `docs/knowledge/` is published by the sync, so it follows the same rules as the code: no private references, placeholders in examples.
 
 ## Commits
 

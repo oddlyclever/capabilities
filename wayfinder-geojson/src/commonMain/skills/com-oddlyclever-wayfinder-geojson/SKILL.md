@@ -66,7 +66,7 @@ WayfinderMap(state, layers = listOf(basemap)) {
 }
 ```
 
-`GeoJsonStyle(fill, stroke, strokeWidth, pointColor, pointRadius)` sets the polygons' inside, the outlines and lines, and the dots for points; a transparent colour or a width of 0 leaves that part out. `touchWidth`, 24 dp by default, is how close a tap must land to a line or point to count; a tap inside a polygon always counts.
+`GeoJsonStyle(fill, stroke, strokeWidth, pointColor, pointRadius)` sets the polygons' inside, the outlines and lines, and the dots for points; a transparent colour or a width of 0 leaves that part out. `touchWidth`, 24 dp by default, is the width of the band around a line or point that a tap must land in, so a tap counts within half of it, 12 dp either side; a tap inside a polygon always counts.
 
 ## Invariants and traps
 
@@ -80,7 +80,7 @@ WayfinderMap(state, layers = listOf(basemap)) {
 
 **Use `minZoom`, not an `if`, to hide a layer.** A `RemoteGeoJsonLayer` is fetched again whenever its `url` changes or it leaves the composition and comes back, so one wrapped in `if (state.zoom > 12f)` refetches every time the user crosses that zoom. Below `minZoom` a layer is neither drawn nor tappable, and keeps what it fetched.
 
-**The nearest feature takes the tap, not the top one.** Of the tappable features within `touchWidth`, in every layer, the nearest wins, and a tap that misses every feature goes on to the map underneath. A drag that starts on a feature still pans the map.
+**The nearest feature takes the tap, not the top one.** Of the tappable features a tap reaches, in every layer, the nearest wins, and a tap that misses every feature goes on to the map underneath. A drag that starts on a feature still pans the map.
 
 **Properties come back as JSON types.** Every number in `properties` is a `Double`, whole or not, so `properties["count"] as? Int` is null; read it as `(properties["count"] as? Double)?.toInt()`. A feature's `id` is a `String?`, a numeric id written without a fraction: `"7"`, not `7` or `"7.0"`.
 
@@ -93,7 +93,6 @@ WayfinderMap(state, layers = listOf(basemap)) {
 - **Since 0.0.7, a `load` that throws draws nothing.** Before it, the exception escaped `RemoteGeoJsonLayer`'s effect and crashed the app, so code written for 0.0.6 caught inside `load`; that still works.
 
 - **It is not a map-attached layer object.** There is no `GeoJsonLayer(map, resourceId)` with `addLayerToMap()`, and no JSON object or resource id input: `GeoJsonLayer` is a composable in the map's overlay, and it takes a `String`.
-- **It was never published under `kartog`.** A project that built from source before 0.0.3 may have `com.oddlyclever.kartog.geojson` imports; the same functions are now in `com.oddlyclever.wayfinder.geojson`.
 
 ## What it is not for
 

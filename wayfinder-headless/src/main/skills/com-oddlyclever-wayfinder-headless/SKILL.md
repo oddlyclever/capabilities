@@ -80,7 +80,6 @@ The camera frames every coordinate inside the padding, no closer than the last l
 
 `wayfinder-headless` was first released in 0.0.3 and its API has not changed since, so no published version had another shape.
 
-- **Before 0.0.3 it was developed as `kartog-headless` and never published.** A project that built it from source may import `com.oddlyclever.kartog.headless`; the same names are now in `com.oddlyclever.wayfinder.headless`.
 - **Since 0.0.7, `style` can be passed.** In 0.0.3 to 0.0.6 the vector module was not exposed, so `MapStyles` was an unresolved reference and passing `style` failed with "Cannot access class 'com.coderwise.libs.mapview.tiles.vector.VectorStyle'" unless `com.oddlyclever:wayfinder-vector` was also a dependency.
 - **There is no tile URL setting.** The library makes no HTTP requests: `tiles` is a function from a `TileKey` to bytes, written with your own client, keys and cache.
 - **The result is encoded bytes, not a bitmap.** `renderMapImage` returns a `ByteArray` in `format`; there is no `ImageBitmap` or `BufferedImage` to encode afterwards. The formats are `ImageFormat.Webp` and `ImageFormat.Png`, and there is no JPEG.

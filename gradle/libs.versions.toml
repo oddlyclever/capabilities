@@ -68,7 +68,7 @@ mapview-tiles-raster = { module = "com.coderwise.libs:map-view-tiles-raster", ve
 mapview-geojson = { module = "com.coderwise.libs:map-view-geojson", version.ref = "mapView" }
 
 # :wayfinder's map state, and :wayfinder-raster and :wayfinder-vector, which decode and rasterize tiles on Dispatchers.Default.
-# The version map-view 0.2.0 is built with.
+# The version map-view 0.3.0 is built with.
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 # runTest, for the suspending functions the wayfinder modules test.
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }

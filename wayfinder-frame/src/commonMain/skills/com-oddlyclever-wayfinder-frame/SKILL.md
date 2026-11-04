@@ -94,7 +94,6 @@ The layers come from the module that decodes the tiles: `vectorFrameLayer` in `c
 
 `wayfinder-frame` was first released in 0.0.3 and its API has not changed since, so no published version had another shape.
 
-- **Before 0.0.3 it was developed as `kartog-static` and never published.** A project that built it from source may have `com.oddlyclever.kartog.staticmap` imports, `StaticMapImage`, `StaticMapPainter` and `StaticProjection`. They are now `com.oddlyclever.wayfinder.frame`, `MapFrame`, `MapFramePainter` and `MapFrameProjection`.
 - **A frame is not a capture of the live map.** There is no snapshot or `captureToImage` of a `WayfinderMap` and no frame built from a `WayfinderMapState`: a frame is rendered on its own from a `CameraPosition`, which `fit` returns and a live map can also move to.
 - **Live-map layers do not fit.** `vectorBasemap(…)` and `rasterBasemap(…)` return `MapLayer`, for `WayfinderMap`; a frame takes `MapFrameLayer`, from `vectorFrameLayer` or `rasterFrameLayer`, which take a tile-loading function rather than a `TileSource` and `TileClient`.
 - **"Frame" is the cartographic sense:** a composed map at one position and size. It has nothing to do with animation frames or with a container around `WayfinderMap`.

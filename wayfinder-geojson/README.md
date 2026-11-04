@@ -28,20 +28,15 @@ WayfinderMap(state, layers = listOf(basemap)) {
 }
 ```
 
-| Parameter | What it does |
-|---|---|
-| `style` | `GeoJsonStyle(fill, stroke, strokeWidth, pointColor, pointRadius)`: one style for the layer's polygons, lines and points |
-| `minZoom` | below this zoom nothing is drawn, so a dense layer does not cover a zoomed-out map |
-| `touchWidth` | how close a tap must land to a line or point to count, 24 dp by default |
-| `onFeatureClick` | receives the feature tapped; the nearest feature takes the tap, and a drag still pans the map |
+Points, lines and polygons are drawn, holes and multi-parts included, with one style per layer; below `minZoom` a layer is hidden, and `onFeatureClick` gets the feature tapped. Text that is not GeoJSON draws nothing rather than failing, and so does a `load` that returns null or throws, so a network failure costs the layer, never the app. GeoJSON from another library, such as [h3spatial](../h3spatial)'s cell outlines, comes in as text, so that library needs no dependency on wayfinder.
 
-- **Every geometry type is drawn:** points, lines and polygons, multi-parts, polygons with holes, and geometry collections. Lines and polygon edges cross the antimeridian the short way.
-- **Text is parsed once** and kept while it is unchanged. Text that is not GeoJSON draws nothing rather than failing; so does a URL whose `load` returns null or throws, so a network failure costs the layer, never the app.
-- **A remote layer is fetched once per URL** with the app's own `load`, so it uses the app's HTTP client, keys and cache.
-- **Different styles** are different layers: split a collection by property and draw each part with its own `GeoJsonLayer`.
-- **`parseGeoJsonOrNull(text)`** parses on its own, for filtering or splitting before drawing.
+## Documentation
 
-GeoJSON from another library comes in as text, so that library needs no dependency on wayfinder. Cell outlines from an H3 library are one example.
+The full documentation is in the module's section of the [knowledge base](../docs/knowledge/wayfinder-geojson/README.md), which is mirrored to the repository's wiki:
+
+- [Drawing GeoJSON on a Map](../docs/knowledge/wayfinder-geojson/DOC-0036-drawing-geojson-on-a-map.md): drawing order, styles, `minZoom`, taps and attribution.
+- [Parsing and Loading GeoJSON](../docs/knowledge/wayfinder-geojson/DOC-0037-parsing-and-loading-geojson.md): what is parsed, properties and ids, why a layer shows nothing, and remote layers.
+- [GeoJSON Comes In as Text and Is Fetched by the App](../docs/knowledge/wayfinder-geojson/ADR-0018-geojson-comes-in-as-text-and-is-fetched-by-the-app.md): why the module is shaped the way it is.
 
 ## For coding agents
 

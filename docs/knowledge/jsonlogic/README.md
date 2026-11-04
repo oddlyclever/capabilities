@@ -1,5 +1,18 @@
 # jsonlogic
 
-The knowledge behind [`jsonlogic`](../../../jsonlogic/README.md): a clean-room JSONLogic rule evaluator in pure common Kotlin.
+The full documentation of [`jsonlogic`](../../../jsonlogic/README.md): a clean-room JSONLogic rule evaluator in pure common Kotlin, giving the same result on every target. Its README covers installing it and a first use, and its KDoc is the API reference; this section covers the rest.
 
-A document about this module alone goes here: a decision, an investigation, a specification or a note, numbered like every other document in the knowledge base. How to use the module is in its README and its KDoc, beside the code; this section holds why it is shaped the way it is, and what was tried first. Knowledge that spans several modules goes in the shared sections instead.
+## Using it
+
+- [Rules, Data and Results](DOC-0009-rules-data-and-results.md): plain values in, converting JSON, how a rule is read, `var` paths, results as `Long` and `Double`, and the one thing that throws.
+- [Standard Operators](DOC-0010-standard-operators.md): every standard operator with its JavaScript semantics and edges, and the three places it departs from json-logic-js.
+- [Custom Operators](DOC-0011-custom-operators.md): eager and lazy operators, registration and overriding, reading arguments with `JsCoercion`, and where an app's operators belong.
+- [Conformance and Tests](DOC-0012-conformance-and-tests.md): the vendored conformance suite, the generated tests, what the hand-written tests pin, and running them on every target.
+
+## Why it is built this way
+
+- [A Clean-Room JSONLogic Evaluator in Common Kotlin](ADR-0004-a-clean-room-jsonlogic-evaluator-in-common-kotlin.md): why JSONLogic, and why one implementation in common code with no platform code.
+- [Plain Values Instead of a JSON Library](ADR-0005-plain-values-instead-of-a-json-library.md): why rules and data are maps and lists, and JSON is the caller's concern.
+- [JavaScript Semantics in Common Kotlin](ADR-0006-javascript-semantics-in-common-kotlin.md): why coercion and number formatting are JavaScript's, done by algorithm, and why results are `Long`.
+
+A new page about this module alone goes here, numbered like every other document in the knowledge base. Knowledge that spans several modules goes in the shared sections instead.
