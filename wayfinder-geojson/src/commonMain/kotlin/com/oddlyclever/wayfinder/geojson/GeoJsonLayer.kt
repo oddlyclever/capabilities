@@ -39,7 +39,8 @@ fun MapOverlayScope.GeoJsonLayer(
 
 /**
  * GeoJSON fetched from [url] with the app's [load] and drawn on a `WayfinderMap`, in its overlay. Nothing is drawn until
- * it arrives, or if [load] returns null or the text is not GeoJSON. It is fetched again only when [url] changes.
+ * it arrives, or if [load] returns null, throws, or gives text that is not GeoJSON: a network failure is no layer, not a
+ * crash, so [load] needs no catch of its own. It is fetched again only when [url] changes.
  */
 @Composable
 fun MapOverlayScope.RemoteGeoJsonLayer(
@@ -52,10 +53,22 @@ fun MapOverlayScope.RemoteGeoJsonLayer(
 ) {
     var data by remember(url) { mutableStateOf<FeatureCollection?>(null) }
     LaunchedEffect(url) {
-        data = load(url)?.let { bytes -> withContext(Dispatchers.Default) { parseOrNull(bytes.decodeToString()) } }
+        data = loadGeoJson(url, load)
     }
     val loaded = data ?: return
     GeoJson(loaded, style = style, minZoom = minZoom, touchWidth = touchWidth, onFeatureClick = onFeatureClick)
+}
+
+/** What [load] gives for [url], parsed off the main thread, or null when it gives nothing, throws, or is not GeoJSON. */
+internal suspend fun loadGeoJson(url: String, load: suspend (url: String) -> ByteArray?): FeatureCollection? {
+    val bytes = try {
+        load(url)
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        null
+    } ?: return null
+    return withContext(Dispatchers.Default) { parseOrNull(bytes.decodeToString()) }
 }
 
 /** [geoJson] parsed, or null for text that is not GeoJSON. */

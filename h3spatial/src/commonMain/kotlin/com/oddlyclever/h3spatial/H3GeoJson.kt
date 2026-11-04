@@ -8,7 +8,8 @@ package com.oddlyclever.h3spatial
  * any consumer that can parse GeoJSON — a map library's GeoJSON layer, typically — can draw it
  * directly. Coordinates follow
  * the GeoJSON convention (RFC 7946): `[lng, lat]` order and a closed ring (first position repeated
- * last). Vertex order is as the H3 library emits the boundary; pentagons yield 5-vertex rings.
+ * last). Vertex order is as the H3 library emits the boundary; a ring has as many vertices as
+ * [H3SpatialService.h3ToPolygon] gives, plus the closing one.
  *
  * @param cells Cell indexes (canonical or zero-padded, as anywhere else in the service).
  * @return A GeoJSON `FeatureCollection`; empty `features` for an empty list.

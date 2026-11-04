@@ -39,7 +39,7 @@ WayfinderMap(state, layers = listOf(basemap)) {
     GeoJsonLayer(coverageText, style = GeoJsonStyle(fill = Color(0x330066FF), stroke = Color(0xFF0066FF)))
     RemoteGeoJsonLayer(
         url = "https://data.example.com/trails.geojson",
-        load = { url -> httpGetBytesOrNull(url) }, // the app's HTTP client; null on any failure, never a throw
+        load = { url -> httpGetBytes(url) }, // the app's HTTP client; null or a throw draws nothing
         minZoom = 12f,
         onFeatureClick = { feature -> select(feature.id) },
     )
@@ -70,7 +70,7 @@ WayfinderMap(state, layers = listOf(basemap)) {
 
 ## Invariants and traps
 
-**A `load` that throws crashes the app.** `RemoteGeoJsonLayer` calls `load` in a composition effect with no catch, so a network exception escapes into the composition. Catch inside `load` and return null, which draws nothing.
+**A failed fetch is silent.** When `load` returns null or throws, `RemoteGeoJsonLayer` draws nothing and reports nothing, and it does not try again until `url` changes. Log inside `load` to see why a layer is missing.
 
 **Text that is not GeoJSON draws nothing, silently.** `GeoJsonLayer` and `parseGeoJsonOrNull` turn any parse failure into no layer at all, and one bad position anywhere, such as a missing latitude, fails the whole document. To see why, call map-view's `parseGeoJson(text)` in `com.coderwise.libs.mapview.geojson`, which throws `IllegalArgumentException` with a "Not GeoJSON: …" message saying what it found.
 
@@ -89,6 +89,8 @@ WayfinderMap(state, layers = listOf(basemap)) {
 ## What moved, and what it used to be called
 
 `wayfinder-geojson` was first released in 0.0.3, so no earlier versions exist, and its API has not changed since.
+
+- **Since 0.0.7, a `load` that throws draws nothing.** Before it, the exception escaped `RemoteGeoJsonLayer`'s effect and crashed the app, so code written for 0.0.6 caught inside `load`; that still works.
 
 - **It is not a map-attached layer object.** There is no `GeoJsonLayer(map, resourceId)` with `addLayerToMap()`, and no JSON object or resource id input: `GeoJsonLayer` is a composable in the map's overlay, and it takes a `String`.
 - **It was never published under `kartog`.** A project that built from source before 0.0.3 may have `com.oddlyclever.kartog.geojson` imports; the same functions are now in `com.oddlyclever.wayfinder.geojson`.

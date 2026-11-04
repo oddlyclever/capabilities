@@ -8,7 +8,7 @@ Map images on a server for [wayfinder](../wayfinder): coordinates in, WebP or PN
 
 ```kotlin
 dependencies {
-    implementation("com.oddlyclever:wayfinder-headless:0.0.4")
+    implementation("com.oddlyclever:wayfinder-headless:0.0.7")
 }
 ```
 

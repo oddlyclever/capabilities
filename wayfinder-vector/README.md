@@ -7,7 +7,7 @@ Vector tiles for [wayfinder](../wayfinder): a vector basemap for `WayfinderMap`,
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:wayfinder-vector:0.0.4")
+implementation("com.oddlyclever:wayfinder-vector:0.0.7")
 ```
 
 It exposes `wayfinder`, map-view-tiles-vector and map-view-tiles-raster as `api`. There is no dependency-injection container.

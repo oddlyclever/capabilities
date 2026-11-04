@@ -22,6 +22,7 @@ import com.oddlyclever.wayfinder.MapLayer
 import com.oddlyclever.wayfinder.PlacedLayer
 import com.oddlyclever.wayfinder.TileClient
 import com.oddlyclever.wayfinder.TileSource
+import com.oddlyclever.wayfinder.WayfinderMapState
 import com.oddlyclever.wayfinder.fetch
 import kotlin.math.floor
 
@@ -33,6 +34,11 @@ import kotlin.math.floor
  * GPU, through whatever renderer the platform uses. With [rasterize], the ground is drawn to images on the CPU
  * instead ([rasterizeVectorTile]), for an app that has a reason to keep tile paths off the GPU; names are still drawn
  * from the decoded tile, since text does not go through the path renderer.
+ *
+ * Two calls with equal arguments give equal layers, and the map keeps a layer's tiles for as long as an equal layer is
+ * passed, so calling this inside a composable keeps every decoded tile across recompositions. [client] is compared by
+ * identity, as a lambda is: a client made once keeps the tiles, one written inline as a new lambda on each
+ * recomposition does not. So is [style], by its lookups: build a recoloured style once, not in the composition.
  */
 fun vectorBasemap(
     source: TileSource,
@@ -40,28 +46,40 @@ fun vectorBasemap(
     style: VectorStyle? = null,
     labels: Boolean = true,
     rasterize: Boolean = false,
-): MapLayer = MapLayer { state ->
-    val resolved = style ?: LocalVectorStyle.current
-    val density = LocalDensity.current.density
-    val viewZoom by remember(state) { derivedStateOf { floor(state.zoom).toInt() } }
-    val tiles = rememberTileState(key = Triple(source, resolved, rasterize), zoomRange = source.zoomRange) { key ->
-        val bytes = source.fetch(client, key) ?: return@rememberTileState null
-        val decoded = decodeVectorTile(key.z, bytes, resolved) ?: return@rememberTileState null
-        VectorCell(decoded, if (rasterize) rasterizeVectorTile(bytes, key.z, density, resolved) else null)
-    }
-    val ground: @Composable (TileKey) -> Unit = { key ->
-        tiles.shown(key)?.let { shown ->
-            val image = shown.content.image
-            if (image != null) RasterSlot(image, shown.src)
-            else VectorSlot(shown.content.tile, shown.src, viewZoom, magnification = LocalTileMagnification.current)
+): MapLayer = VectorBasemap(source, client, style, labels, rasterize)
+
+/** A data class so that the map, which keys each layer's tiles on the layer, sees equal arguments as the same layer. */
+private data class VectorBasemap(
+    val source: TileSource,
+    val client: TileClient,
+    val style: VectorStyle?,
+    val labels: Boolean,
+    val rasterize: Boolean,
+) : MapLayer {
+    @Composable
+    override fun place(state: WayfinderMapState): PlacedLayer {
+        val resolved = style ?: LocalVectorStyle.current
+        val density = LocalDensity.current.density
+        val viewZoom by remember(state) { derivedStateOf { floor(state.zoom).toInt() } }
+        val tiles = rememberTileState(key = Triple(source, resolved, rasterize), zoomRange = source.zoomRange) { key ->
+            val bytes = source.fetch(client, key) ?: return@rememberTileState null
+            val decoded = decodeVectorTile(key.z, bytes, resolved) ?: return@rememberTileState null
+            VectorCell(decoded, if (rasterize) rasterizeVectorTile(bytes, key.z, density, resolved) else null)
         }
-    }
-    val names: @Composable (TileKey) -> Unit = { key ->
-        tiles.shown(key)?.let { shown ->
-            VectorLabels(shown.content.tile, shown.src, bearing = state.bearing, magnification = LocalTileMagnification.current)
+        val ground: @Composable (TileKey) -> Unit = { key ->
+            tiles.shown(key)?.let { shown ->
+                val image = shown.content.image
+                if (image != null) RasterSlot(image, shown.src)
+                else VectorSlot(shown.content.tile, shown.src, viewZoom, magnification = LocalTileMagnification.current)
+            }
         }
+        val names: @Composable (TileKey) -> Unit = { key ->
+            tiles.shown(key)?.let { shown ->
+                VectorLabels(shown.content.tile, shown.src, bearing = state.bearing, magnification = LocalTileMagnification.current)
+            }
+        }
+        return PlacedLayer(tiles, if (labels) listOf(ground, names) else listOf(ground), source.attribution)
     }
-    PlacedLayer(tiles, if (labels) listOf(ground, names) else listOf(ground), source.attribution)
 }
 
 /** A tile as decoded, and as an image too where the paths cannot be drawn on the GPU. */

@@ -12,8 +12,8 @@ Released as 0.0.4, and not yet published to Maven Central. Its API is 0.x and bu
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.oddlyclever:wayfinder:0.0.4")
-            implementation("com.oddlyclever:wayfinder-vector:0.0.4")   // for a vector basemap
+            implementation("com.oddlyclever:wayfinder:0.0.7")
+            implementation("com.oddlyclever:wayfinder-vector:0.0.7")   // for a vector basemap
         }
     }
 }
@@ -129,7 +129,7 @@ WayfinderMap(
 
 ## WayfinderMapState
 
-Everything the app reads or drives. `rememberWayfinderMapState(center, zoom, bearing)` keeps one for the composition; construct `WayfinderMapState(...)` directly to hold it in a view model.
+Everything the app reads or drives. `rememberWayfinderMapState(center, zoom, bearing)` keeps one for the composition, saved with the screen's instance state so a rotation keeps the camera and the orientation; its arguments are where the camera starts, and a later change to them does not move it. Construct `WayfinderMapState(...)` directly to hold it in a view model.
 
 | Member | What it is |
 |---|---|
@@ -190,6 +190,8 @@ On map-view's camera directly: `screenPosition(point, size, density)` and `isOnS
 ## Writing a layer
 
 A `MapLayer` is how a module puts tiles on the map. In `place(state)`, which `WayfinderMap` calls during composition, it remembers its tile state and returns a `PlacedLayer`: the map-view `MapState` holding the tiles, one or more composables that draw a tile, each drawn as a layer of its own so a basemap's names go over every tile, and its attribution.
+
+The map keeps a layer's tiles for as long as an equal layer is passed, by `equals`. The layers the wayfinder modules return are equal whenever their arguments are; one written as a lambda, like this one, is equal only to itself, so make it once, outside the composable that draws the map.
 
 ```kotlin
 val hillshade = MapLayer { _ ->

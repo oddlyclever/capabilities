@@ -254,6 +254,10 @@ fun DefaultMarker(color: Color = Color(0xFF2563EB), size: Dp = 14.dp) {
  * `wayfinder-vector`, `rasterBasemap` in `wayfinder-raster`.
  *
  * Implementations remember their tile state in [place], which [WayfinderMap] calls during composition, once per layer.
+ * The map keys that state on the layer itself, by `equals`, so a layer that compares equal across recompositions keeps
+ * its tiles and one that does not starts again with none. The layers the wayfinder modules return are equal whenever
+ * they were made from equal arguments; a layer of your own written as a lambda is equal only to itself, so make it
+ * once.
  */
 fun interface MapLayer {
     @Composable

@@ -1,5 +1,6 @@
 package com.oddlyclever.wayfinder
 
+import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import com.coderwise.libs.mapview.LatLon
@@ -14,7 +15,8 @@ import kotlin.test.assertTrue
 
 /**
  * Pins the root's map helpers: the visible bounds hold what is on screen, turned or not and across the antimeridian,
- * a bounds box answers containment the way a map shows it, and a tile client is asked for a source and a tile.
+ * a bounds box answers containment the way a map shows it, a tile client is asked for a source and a tile, and the
+ * state saved for an activity's recreation comes back with its camera and orientation.
  */
 class MapStateTest {
 
@@ -52,5 +54,20 @@ class MapStateTest {
         val source = TileSource(id = "streets", urlTemplate = "https://tiles.example.com/{z}/{x}/{y}.pbf")
         source.fetch(client, TileKey(3, 2, 1))
         assertEquals("https://tiles.example.com/3/2/1.pbf", asked, "the client builds the URL from the source and tile")
+    }
+
+    @Test
+    fun aSavedStateComesBackWithItsCameraAndOrientation() {
+        val state = WayfinderMapState(center = LatLon(43.65, -79.38), zoom = 13.5f, bearing = 30f)
+        state.orientation = Orientation.CourseUp
+        state.heading = 90f
+        val saved = with(WayfinderMapState.Saver) { SaverScope { true }.save(state) }
+        val restored = WayfinderMapState.Saver.restore(saved!!)!!
+        // The camera holds its centre through map-view's projection, which drifts in the last digits on some targets.
+        assertTrue(abs(restored.center.lat - 43.65) < 1e-9 && abs(restored.center.lon + 79.38) < 1e-9, "centre was ${restored.center}")
+        assertEquals(13.5f, restored.zoom, "zoom was ${restored.zoom}")
+        assertEquals(30f, restored.bearing, "bearing was ${restored.bearing}")
+        assertEquals(Orientation.CourseUp, restored.orientation, "orientation was ${restored.orientation}")
+        assertEquals(null, restored.heading, "the heading comes from a sensor and is not saved, was ${restored.heading}")
     }
 }

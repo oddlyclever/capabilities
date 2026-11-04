@@ -28,7 +28,7 @@ A street map under a `WayfinderMap`: roads with casings that widen as the map zo
 
 ## How it is meant to be used
 
-Make the basemap once and hand it to the map. `VectorStyleProvider` gives every basemap inside it a style, the way a theme gives colours, and `systemVectorStyle()` follows the system's dark mode as it changes:
+Make the basemap and hand it to the map. `VectorStyleProvider` gives every basemap inside it a style, the way a theme gives colours, and `systemVectorStyle()` follows the system's dark mode as it changes:
 
 ```kotlin
 import com.oddlyclever.wayfinder.*
@@ -65,7 +65,7 @@ val layer = vectorFrameLayer(streets.zoomRange, style = MapStyles.Dark, names = 
 
 ## Invariants and traps
 
-**Make each basemap once.** `vectorBasemap(...)` returns a new layer on every call, and the map keys the layer's tiles on that object, so a call inside a composable that recomposes throws away every decoded tile: the map blanks and refetches whenever unrelated state changes. Keep it in a top-level or view-model `val`, or `remember` it.
+**Make the client once.** Two `vectorBasemap(...)` calls with equal arguments give equal layers, and the map keeps a layer's tiles while an equal one is passed, so the call can sit inside a composable. The `TileClient` is compared by identity, though: one written inline as `TileClient { … }` is new at every recomposition, and every tile is fetched and decoded again each time. Keep the client in a top-level or view-model `val`, or `remember` it.
 
 **Build a recoloured style once.** `recolored` makes new lookups on every call, and a `VectorStyle` is compared by its lookups, so `MapStyles.Light.recolored(palette)` written in a composition is a new style at every recomposition, and every tile is fetched and decoded again each time. Use `MapStyles`, or a style in a top-level `val`. Even a real change of style, such as light to dark, starts fresh tiles and fetches each again through the client, which is one reason to cache in the client.
 
@@ -86,6 +86,8 @@ val layer = vectorFrameLayer(streets.zoomRange, style = MapStyles.Dark, names = 
 ## What moved, and what it used to be called
 
 `wayfinder-vector` was first released in 0.0.3, so no earlier versions exist, and its API has not changed since.
+
+- **Since 0.0.7, `vectorBasemap` layers from equal arguments are equal.** Before it, each call was a new layer, and one made in a composable lost its tiles at every recomposition.
 
 - **There is no MapLibre or Mapbox style JSON.** A style is a Kotlin `VectorStyle`, and a vector basemap is `vectorBasemap(source, client)`, not a style URL.
 - **There is no device list.** The ground is drawn as paths on the GPU on every device unless the app passes `rasterize = true`.

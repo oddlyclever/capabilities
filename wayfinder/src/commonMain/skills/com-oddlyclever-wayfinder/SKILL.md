@@ -30,7 +30,7 @@ A screen that needs a real map: places shown as pins the user can tap, a route o
 
 ## How it is meant to be used
 
-Describe the source, give the app's fetching, make the layer once, and pass everything to the map as data. Markers, lines and layers are parameters, not child composables.
+Describe the source, give the app's fetching once, make the layer, and pass everything to the map as data. Markers, lines and layers are parameters, not child composables.
 
 ```kotlin
 import com.coderwise.libs.mapview.LatLon
@@ -45,7 +45,7 @@ val streets = TileSource(
 )
 // The app's HTTP client. Null for any failure, never an error page's body.
 val client = TileClient { source, key -> httpGetBytesOrNull(source.url(key)) }
-val basemap = vectorBasemap(streets, client) // once, outside composition
+val basemap = vectorBasemap(streets, client) // equal arguments give an equal layer, so a recomposition keeps its tiles
 
 @Composable
 fun PlacesMap(places: List<Place>, onOpen: (String) -> Unit) {
@@ -96,13 +96,13 @@ For course-up, set `state.orientation = Orientation.CourseUp` and keep `state.he
 
 ## Invariants and traps
 
-**Make each layer once.** `vectorBasemap(...)` and `rasterBasemap(...)` return a new `MapLayer` on every call, and the map keys a layer's tiles on the layer object, so a layer built inside a composable that recomposes throws away every loaded tile: the map blanks and refetches whenever unrelated state changes. Build it in a top-level or view-model `val`, or `remember` it.
+**Make the client once.** The map keeps a layer's tiles for as long as an equal layer is passed, and `vectorBasemap(...)` and `rasterBasemap(...)` are equal when their arguments are, so either can be called inside a composable. But a `TileClient` is compared by identity, so `TileClient { … }` written inline is a new client on every recomposition, and the map blanks and refetches every tile whenever unrelated state changes. Keep the client in a top-level or view-model `val`, or `remember` it. A `MapLayer` of your own written as a lambda is equal only to itself: make it once.
 
 **A failing `TileClient` fails silently.** An exception thrown from `fetch` is swallowed and the tile retried after ten seconds, exactly as if it had returned null, so a wrong key or an expired token gives a blank map and no error. Log inside the client. `fetch` runs on background workers, several tiles at once, never on the main thread, so the client must be safe to call concurrently. Return null for a non-success response rather than its body: the map then draws the nearest ancestor tile.
 
 **No credit is shown unless a source carries one.** The attribution ornament shows only the `attribution` of each layer's `TileSource`; a source made without one shows nothing, and the ornament never shows credits for data drawn in the overlay, such as GeoJSON. Most tile licences, OpenStreetMap's among them, require the credit.
 
-**`rememberWayfinderMapState` takes its arguments once.** It is a plain `remember` with no keys: a `center` that arrives later, such as the first location fix, is ignored and the map stays at the default, 0°, 0° at zoom 3. Move it with `moveTo` or `animateTo` instead. It is not saved either, so on Android an activity recreation, such as a rotation, puts the camera back where it started. Construct `WayfinderMapState(...)` in a view model to keep it.
+**`rememberWayfinderMapState` takes its arguments once.** They are where the camera starts: a `center` that arrives later, such as the first location fix, is ignored and the map stays at the default, 0°, 0° at zoom 3. Move it with `moveTo` or `animateTo` instead. The camera and the orientation are saved with the screen's instance state, so a rotation keeps them; `heading` is not saved and must be set again from the compass. `WayfinderMapState.Saver` is the saver, for a state kept elsewhere.
 
 **The animations need a composition's frame clock.** `animateTo`, `zoomIn` and `zoomOut` are Compose animations: call them from `LaunchedEffect` or `rememberCoroutineScope()`. Called from a view model's own scope they fail with "A MonotonicFrameClock is not available in this CoroutineContext". `moveTo` is immediate and needs no coroutine.
 
@@ -122,7 +122,10 @@ For course-up, set `state.orientation = Orientation.CourseUp` and keep `state.he
 
 ## What moved, and what it used to be called
 
-`wayfinder` was first released in 0.0.3, so no earlier versions exist. 0.0.4 made `MapCompassTape`, `OrientationToggle` and `OrientationIcon` public; nothing else in its API has changed since.
+`wayfinder` was first released in 0.0.3, so no earlier versions exist. 0.0.4 made `MapCompassTape`, `OrientationToggle` and `OrientationIcon` public.
+
+- **Since 0.0.7, layers made from equal arguments are the same layer.** Before it, every call to `vectorBasemap` or `rasterBasemap` was a new layer, and one made inside a composable lost its tiles on every recomposition; code that made layers once for that reason still works.
+- **Since 0.0.7, `rememberWayfinderMapState` is saved across an activity's recreation.** Before it, a rotation put the camera back where it started.
 
 - **It is not Google Maps Compose or MapLibre.** There is no `GoogleMap`, `CameraPositionState`, `Marker(state = ...)` child composable or style URL. The map is `WayfinderMap`, the camera is `WayfinderMapState`, markers are `MapMarker` values in the `markers` list, a coordinate is map-view's `LatLon(lat, lon)`, not `LatLng`, and tiles come from a `TileSource` and the app's `TileClient`.
 - **It was never published as `kartog`.** A project that built these modules from source before 0.0.3 may have `com.oddlyclever.kartog` imports: `KartogMap`, `KartogMapState` and `rememberKartogMapState` are now `WayfinderMap`, `WayfinderMapState` and `rememberWayfinderMapState`; `KartogLayer` is `MapLayer`; `PointCluster.isGroup` is `isCluster`; and the separate track module is now the `com.oddlyclever.wayfinder.track` package of this one.

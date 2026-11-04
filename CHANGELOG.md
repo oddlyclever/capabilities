@@ -10,6 +10,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 - **Every module ships an agent skill:** an [Agent Skill](https://agentskills.io/specification) named `com-oddlyclever-<module>`, for the coding agents of projects that depend on it, saying what the module is for, how it is meant to be called, and the mistakes that compile. It is published inside every sources jar, at `commonMain/skills/com-oddlyclever-<module>/`; `wayfinder-headless`, a JVM module, has it at `skills/com-oddlyclever-wayfinder-headless/`.
 
+### Fixed
+
+- **`wayfinder-headless`**: `renderMapImage`'s `style` can be passed. The module now exposes `wayfinder-vector`, so `MapStyles` and `VectorStyle` resolve; before, passing `style` failed to compile unless the app also depended on `wayfinder-vector`.
+- **`wayfinder-vector`, `wayfinder-raster`**: `vectorBasemap` and `rasterBasemap` layers made from equal arguments are equal, so a layer made inside a composable keeps its tiles across recompositions instead of fetching them all again. The `TileClient` is compared by identity, so it still has to be made once.
+- **`wayfinder-geojson`**: a `RemoteGeoJsonLayer` whose `load` throws draws nothing, as one that returns null does, instead of crashing the app.
+- **`wayfinder`**: `rememberWayfinderMapState` is saved with the screen's instance state, so a rotation keeps the camera and the orientation. `WayfinderMapState.Saver` is public, for a state kept elsewhere.
+- **`h3spatial`**: the KDoc of `h3ToPolygon` and `cellsToGeoJson` no longer says a pentagon has five vertices, which holds at even resolutions only.
+
 ### Changed
 
 - **`jsonlogic`**: its agent skill is now an [Agent Skill](https://agentskills.io/specification) named `com-oddlyclever-jsonlogic`, shipped in every sources jar at `commonMain/skills/com-oddlyclever-jsonlogic/`. The old `META-INF/ai-skills/` file in the JVM jar is gone.

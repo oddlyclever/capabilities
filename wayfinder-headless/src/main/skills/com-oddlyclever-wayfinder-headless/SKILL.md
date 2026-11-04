@@ -60,7 +60,7 @@ The camera frames every coordinate inside the padding, no closer than the last l
 
 **Nothing is cached.** Every call fetches every tile it needs through `tiles`, all at once, so a busy endpoint sends a burst of requests to the tile server for each image. Caching belongs in the `tiles` function.
 
-**`style` cannot be passed with this module alone.** This module uses `com.oddlyclever:wayfinder-vector` internally and does not expose it, so with only this module `MapStyles` is an unresolved reference, and passing `style` at all fails with "Cannot access class 'com.coderwise.libs.mapview.tiles.vector.VectorStyle'". `MapStyles.Light` and `MapStyles.Dark` are in that module, package `com.oddlyclever.wayfinder.vector`. Leaving `style` out compiles, and draws the light style.
+**The style comes from `MapStyles`.** `style = MapStyles.Dark` draws a dark map; `MapStyles` is in `com.oddlyclever.wayfinder.vector`, which comes with this module, along with map-view's `VectorStyle` for a style of your own.
 
 **`zoomRange` is the levels your source has.** Tiles are requested only inside it, and the camera goes no closer than its last level. The default stops at 14, so a raster source that goes to 19 is never shown closer than 14 unless `zoomRange` says so.
 
@@ -81,6 +81,7 @@ The camera frames every coordinate inside the padding, no closer than the last l
 `wayfinder-headless` was first released in 0.0.3 and its API has not changed since, so no published version had another shape.
 
 - **Before 0.0.3 it was developed as `kartog-headless` and never published.** A project that built it from source may import `com.oddlyclever.kartog.headless`; the same names are now in `com.oddlyclever.wayfinder.headless`.
+- **Since 0.0.7, `style` can be passed.** In 0.0.3 to 0.0.6 the vector module was not exposed, so `MapStyles` was an unresolved reference and passing `style` failed with "Cannot access class 'com.coderwise.libs.mapview.tiles.vector.VectorStyle'" unless `com.oddlyclever:wayfinder-vector` was also a dependency.
 - **There is no tile URL setting.** The library makes no HTTP requests: `tiles` is a function from a `TileKey` to bytes, written with your own client, keys and cache.
 - **The result is encoded bytes, not a bitmap.** `renderMapImage` returns a `ByteArray` in `format`; there is no `ImageBitmap` or `BufferedImage` to encode afterwards. The formats are `ImageFormat.Webp` and `ImageFormat.Png`, and there is no JPEG.
 

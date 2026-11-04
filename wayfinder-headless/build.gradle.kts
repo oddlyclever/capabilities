@@ -14,7 +14,8 @@ kotlin {
 
 dependencies {
     api(project(":wayfinder-frame"))
-    implementation(project(":wayfinder-vector"))
+    // api: renderMapImage takes a VectorStyle, and MapStyles is where a caller gets one.
+    api(project(":wayfinder-vector"))
     implementation(project(":wayfinder-raster"))
     implementation(libs.kotlinx.coroutines.core)
 

@@ -7,7 +7,7 @@ Images downsized and encoded for an upload or a file: a photo from the camera or
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:media-image:0.0.4")
+implementation("com.oddlyclever:media-image:0.0.7")
 ```
 
 It depends on [media-webp](../media-webp), which encodes the WebP, and on Android on [platform](../platform), which supplies the application context.
@@ -33,7 +33,7 @@ upload(image.bytes, contentType = image.contentType)            // image.width a
 
 - **Images only get smaller.** One already inside `maxDimension` keeps its size.
 - **Photos come out upright.** One whose EXIF says the camera was held sideways or upside down is turned the way it is shown, with its width and height swapped when it is turned a quarter. The `width` and `height` reported are the upright ones.
-- **The format reported is the format produced.** `contentType` and `fileExtension` come from the format that was written; it never substitutes another.
+- **The format reported is the format produced.** `contentType` is the MIME type of the format that was written, never the one asked for when a fallback moved on. `ProcessedImage` has no extension of its own: `ImageFormat.entries.first { it.contentType == image.contentType }.fileExtension` gives `webp`, `jpg` or `png`.
 - **Failures are typed, in a `Result`**, so a caller can tell what to do next:
 
 | `ImageProcessingException` | Means | Worth trying another format? |

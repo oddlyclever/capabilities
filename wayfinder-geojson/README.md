@@ -7,7 +7,7 @@ GeoJSON on a [wayfinder](../wayfinder) map, from text or from a URL, drawn by ma
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:wayfinder-geojson:0.0.4")
+implementation("com.oddlyclever:wayfinder-geojson:0.0.7")
 ```
 
 It exposes `wayfinder` and map-view-geojson as `api`, so `FeatureCollection`, `Feature`, `Geometry` and `GeoJsonStyle` are available without declaring them. There is no dependency-injection container.
@@ -36,7 +36,7 @@ WayfinderMap(state, layers = listOf(basemap)) {
 | `onFeatureClick` | receives the feature tapped; the nearest feature takes the tap, and a drag still pans the map |
 
 - **Every geometry type is drawn:** points, lines and polygons, multi-parts, polygons with holes, and geometry collections. Lines and polygon edges cross the antimeridian the short way.
-- **Text is parsed once** and kept while it is unchanged. Text that is not GeoJSON draws nothing rather than failing; so does a URL whose `load` returns null.
+- **Text is parsed once** and kept while it is unchanged. Text that is not GeoJSON draws nothing rather than failing; so does a URL whose `load` returns null or throws, so a network failure costs the layer, never the app.
 - **A remote layer is fetched once per URL** with the app's own `load`, so it uses the app's HTTP client, keys and cache.
 - **Different styles** are different layers: split a collection by property and draw each part with its own `GeoJsonLayer`.
 - **`parseGeoJsonOrNull(text)`** parses on its own, for filtering or splitting before drawing.

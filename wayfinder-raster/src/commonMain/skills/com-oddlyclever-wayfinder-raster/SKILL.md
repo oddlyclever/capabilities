@@ -27,7 +27,7 @@ A map whose ground is pictures: imagery from a satellite or an aircraft, a topog
 
 ## How it is meant to be used
 
-Make each layer once and pass the layers to the map in order, bottom first. A translucent layer goes after the one it covers:
+Pass the layers to the map in order, bottom first. A translucent layer goes after the one it covers:
 
 ```kotlin
 import com.oddlyclever.wayfinder.*
@@ -57,7 +57,7 @@ For code that builds its own map-view layer, `decodeRasterTile(bytes)` is the de
 
 ## Invariants and traps
 
-**Make each layer once.** `rasterBasemap(...)` returns a new layer on every call, and the map keys the layer's tiles on that object, so a call inside a composable that recomposes throws away every decoded tile: the map blanks and fetches everything again whenever unrelated state changes. Keep the layers in a top-level or view-model `val`, or `remember` them.
+**Make the client once.** Two `rasterBasemap(...)` calls with equal arguments give equal layers, and the map keeps a layer's tiles while an equal one is passed, so the call can sit inside a composable. The `TileClient` is compared by identity, though: one written inline as `TileClient { … }` is new at every recomposition, and every tile is fetched and decoded again each time. Changing `alpha` or `fadeMillis` is a new layer too, and starts its tiles again. Keep the client in a top-level or view-model `val`, or `remember` it.
 
 **Nothing that goes wrong is reported.** `decodeRasterTile` returns null for no bytes, empty bytes, an error page, a truncated image or a format the platform cannot read, and an exception thrown by the `TileClient` is swallowed and the tile retried after ten seconds. Either way the cell shows its nearest ancestor magnified, or nothing, and no error reaches the app. A blank or blurry map means the client is failing: log inside it.
 
@@ -74,6 +74,8 @@ For code that builds its own map-view layer, `decodeRasterTile(bytes)` is the de
 ## What moved, and what it used to be called
 
 `wayfinder-raster` was first released in 0.0.3, so no earlier versions exist, and its API has not changed since.
+
+- **Since 0.0.7, `rasterBasemap` layers from equal arguments are equal.** Before it, each call was a new layer, and one made in a composable lost its tiles at every recomposition.
 
 - **There is no tile provider class.** A raster layer is `rasterBasemap(source, client)` in a `WayfinderMap`'s `layers`, not a `TileOverlay` or `UrlTileProvider`: the URL is the `TileSource`'s template, and the fetching is the app's `TileClient`.
 - **It was never published under `kartog`.** A project that built from source before 0.0.3 may have `com.oddlyclever.kartog.raster` imports; `staticRasterLayer` is now `rasterFrameLayer`.
