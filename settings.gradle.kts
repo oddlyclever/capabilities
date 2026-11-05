@@ -41,6 +41,8 @@ include(":wayfinder-raster")
 include(":wayfinder-vector")
 include(":wayfinder-frame")
 include(":wayfinder-geojson")
+// A tile cache for the app's TileClient, in memory or on disk. Compose-free, so a server can use it too.
+include(":wayfinder-cache")
 // JVM only: wayfinder-headless bundles Skia native libraries for servers. Devices use wayfinder-frame.
 include(":wayfinder-headless")
 
@@ -56,3 +58,7 @@ include(":media-image")
 // Uber H3 hexagonal grid indexing behind one String-cell API, on every standard target.
 include(":h3spatial")
 include(":jsonlogic")
+
+// The Compose parts apps keep writing for themselves, TextCopy among them. Its package is com.oddlyclever.sundries,
+// not the com.oddlyclever.sundries.compose its name would give, by the maintainer's choice: see its README.
+include(":sundries-compose")

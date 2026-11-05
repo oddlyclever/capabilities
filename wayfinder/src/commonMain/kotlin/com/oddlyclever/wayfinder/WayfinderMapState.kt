@@ -7,7 +7,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import com.coderwise.libs.mapview.LatLon
@@ -30,7 +32,8 @@ enum class Orientation {
  * which way is up, and what is on screen.
  *
  * The camera itself is map-view's [MapCameraState], exposed as [camera] for anything wayfinder does not wrap. Make one
- * with [rememberWayfinderMapState], or construct it directly to keep it in a view model.
+ * with [rememberWayfinderMapState], which saves it across an activity's recreation, or construct it directly to keep it
+ * in a view model.
  */
 @Stable
 class WayfinderMapState(center: LatLon = LatLon(0.0, 0.0), zoom: Float = 3f, bearing: Float = 0f) {
@@ -90,13 +93,38 @@ class WayfinderMapState(center: LatLon = LatLon(0.0, 0.0), zoom: Float = 3f, bea
     companion object {
         /** How long after the user lets go [isInteracting] stays true. */
         const val SETTLE_MILLIS = 2_000L
+
+        /**
+         * Saves the camera and [orientation] in instance state, so a map survives an Android activity being recreated.
+         * [heading] is not saved, since it comes from a sensor the app reads again, and nor is [visibleBounds], which
+         * the map recomputes. The orientation is saved by name.
+         */
+        val Saver: Saver<WayfinderMapState, Any> = listSaver(
+            save = { listOf(it.center.lat, it.center.lon, it.zoom.toDouble(), it.bearing.toDouble(), it.orientation.name) },
+            restore = { saved ->
+                WayfinderMapState(
+                    center = LatLon(saved[0] as Double, saved[1] as Double),
+                    zoom = (saved[2] as Double).toFloat(),
+                    bearing = (saved[3] as Double).toFloat(),
+                ).apply {
+                    orientation = Orientation.entries.firstOrNull { it.name == saved[4] } ?: Orientation.NorthUp
+                }
+            },
+        )
     }
 }
 
-/** A [WayfinderMapState] that lives as long as the composition, starting at [center] and [zoom]. */
+/**
+ * A [WayfinderMapState] that lives as long as the composition, and is saved with the screen's instance state, so a
+ * rotation keeps the camera where the user left it ([WayfinderMapState.Saver] says what is kept).
+ *
+ * [center], [zoom] and [bearing] are where the camera starts, read the first time only, as with any remembered state:
+ * an argument that changes later, such as the first location fix, does not move the camera. Move it with
+ * [WayfinderMapState.moveTo] or [WayfinderMapState.animateTo] instead.
+ */
 @Composable
 fun rememberWayfinderMapState(center: LatLon = LatLon(0.0, 0.0), zoom: Float = 3f, bearing: Float = 0f): WayfinderMapState =
-    remember { WayfinderMapState(center, zoom, bearing) }
+    rememberSaveable(saver = WayfinderMapState.Saver) { WayfinderMapState(center, zoom, bearing) }
 
 /** Keeps [WayfinderMapState.isInteracting] following map-view's gestures, held for the settle after they end. */
 @Composable

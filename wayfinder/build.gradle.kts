@@ -54,7 +54,9 @@ kotlin {
                 // exposes Compose as api in turn, which is where this module's Compose comes from.
                 api(libs.mapview.base)
                 api(libs.mapview.tiles.core)
-                api(libs.mapview.controls)
+                // The scale bar's label, and the ornaments' words, in the reader's locale.
+                implementation(libs.aughtone.format.readable)
+                implementation(libs.aughtone.types)
                 // The map state's interaction settle and bounds tracking run on coroutines and flows.
                 implementation(libs.kotlinx.coroutines.core)
             }
@@ -87,6 +89,16 @@ kotlin {
         }
     }
 }
+
+// Ships this library's agent skill in every sources jar, where a consumer's tooling reads it.
+tasks.withType<Zip>()
+    .matching { it.name == "sourcesJar" || it.name.endsWith("SourcesJar") }
+    .configureEach {
+        from("src/commonMain/skills") {
+            include("*/SKILL.md", "*/references/**", "*/assets/**")
+            into("commonMain/skills")
+        }
+    }
 
 mavenPublishing {
     // No remote repository is configured: publishing goes to mavenLocal only. Signed only where a key is configured,

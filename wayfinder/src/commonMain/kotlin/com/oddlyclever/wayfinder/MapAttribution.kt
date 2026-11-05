@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.coderwise.libs.mapview.MapCameraState
-import com.coderwise.libs.mapview.controls.Attribution
+import com.oddlyclever.wayfinder.controls.Attribution
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.selects.select
@@ -65,6 +65,7 @@ internal fun MapAttribution(
     textSize: TextUnit,
     onClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    creditsLabel: String = ornamentWords().credits,
 ) {
     var expanded by remember { mutableStateOf(true) }
     if (style == AttributionStyle.Collapsible && expanded) {
@@ -94,7 +95,7 @@ internal fun MapAttribution(
                 .background(Color.White.copy(alpha = 0.75f))
                 .clickable { expanded = true }
                 .semantics {
-                    contentDescription = "Map credits"
+                    contentDescription = creditsLabel
                     role = Role.Button
                 },
             contentAlignment = Alignment.Center,

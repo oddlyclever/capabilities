@@ -22,15 +22,68 @@ Git never enables a repository's hooks on its own, so each clone opts in once:
 git config core.hooksPath .githooks
 ```
 
-Then point the check at your denylist: the names of private projects, clients, employers, hosts and tracker prefixes that must never appear here. It lives outside the repository, because committing it would publish exactly what it protects.
+## The private-term denylist
+
+The generic checks can't know the names that are private to you: your other projects, clients, employer, machines and tracker prefixes. You list those yourself, in a plain text file that lives outside the repository, because committing it would publish exactly what it protects. The check reads it in two places: on your machine from that file, and in CI from a repository secret holding a copy of it.
+
+### Create it once
+
+Make the file and tell git where it is. `--global` points every clone on this machine at the same list:
 
 ```bash
-git config privacy.denylist ~/.config/git/private-terms
+mkdir -p ~/.config/git && touch ~/.config/git/private-terms
+git config --global privacy.denylist ~/.config/git/private-terms
 ```
 
-One term per line, matched case-insensitively as a whole word. A line starting with `re:` is a regular expression, which suits a tracker prefix: `re:\bPROJ-\d+`. Blank lines and `#` comments are ignored. A match is reported by its line in the denylist, never by its text.
+`git config --get privacy.denylist` prints the path the check will read, and is the quickest way to find the file again. `~/.config` is a hidden folder, so Finder doesn't show it unless you press Cmd-Shift-. in a Finder window.
 
-In CI the denylist is the `PRIVACY_DENYLIST` repository secret, with the same format. A pull request from a fork receives no secrets and is checked for the generic patterns only.
+### Add a term
+
+Open the file in a text editor and add one entry per line:
+
+```bash
+open -e ~/.config/git/private-terms
+```
+
+```
+# Private project and client names: matched as whole words, ignoring case.
+acme
+widgetco
+
+# A tracker prefix: a line starting with re: is a regular expression.
+re:\bPROJ-\d+
+```
+
+- A plain line is a whole word, matched case-insensitively: `acme` matches `Acme` and `ACME`, not `acmeville`.
+- A line starting with `re:` is a regular expression, also case-insensitive. Use it for a pattern, such as a tracker key: `re:\bPROJ-\d+` matches `PROJ-123`.
+- Blank lines and lines starting with `#` are ignored, so the file can carry its own notes.
+
+To add a line without opening an editor, use single quotes, so the shell leaves a backslash alone:
+
+```bash
+printf '%s\n' 're:\bPROJ-\d+' >> ~/.config/git/private-terms
+```
+
+### Check that it works
+
+Put the term you added in a scratch file, here `PROJ-123` for the pattern above, and run the check on it. It should fail and name the denylist line that matched:
+
+```bash
+printf 'a note about PROJ-123\n' > /tmp/denylist-test.txt
+python3 .githooks/privacy-check.py --message /tmp/denylist-test.txt
+```
+
+A match is reported by its line number in the denylist, never by its text, so the output is safe to share.
+
+### Copy it to CI
+
+CI can't read your file, so it reads the `PRIVACY_DENYLIST` repository secret instead, which holds the same text. After every change to the file, replace the secret with the file's new contents:
+
+```bash
+gh secret set PRIVACY_DENYLIST < ~/.config/git/private-terms
+```
+
+Without `gh`, open the repository on GitHub, go to Settings → Secrets and variables → Actions, edit `PRIVACY_DENYLIST`, and paste in the whole file. A secret can be replaced but never read back, so the file on your machine is the master copy. A pull request from a fork receives no secrets and is checked for the generic patterns only.
 
 ## When a line is legitimately public
 

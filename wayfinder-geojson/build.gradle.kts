@@ -13,7 +13,7 @@ plugins {
 group = libs.versions.group.get()
 version = libs.versions.versionName.get()
 
-// GeoJSON on a wayfinder map, from text or from a URL fetched through the app's TileClient, drawn by map-view-geojson.
+// GeoJSON on a wayfinder map, from text or from a URL fetched by the app's own load function, drawn by map-view-geojson.
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
@@ -82,6 +82,16 @@ kotlin {
         }
     }
 }
+
+// Ships this library's agent skill in every sources jar, where a consumer's tooling reads it.
+tasks.withType<Zip>()
+    .matching { it.name == "sourcesJar" || it.name.endsWith("SourcesJar") }
+    .configureEach {
+        from("src/commonMain/skills") {
+            include("*/SKILL.md", "*/references/**", "*/assets/**")
+            into("commonMain/skills")
+        }
+    }
 
 mavenPublishing {
     // No remote repository is configured: publishing goes to mavenLocal only. Signed only where a key is configured,

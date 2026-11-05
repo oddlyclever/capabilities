@@ -57,7 +57,11 @@ class H3SpatialService {
         return translate { H3Native.latLngToCell(lat, lng, resolution) }.toCanonical()
     }
 
-    /** The cell's boundary, as H3 orders it: counter-clockwise, five vertices for a pentagon. */
+    /**
+     * The cell's boundary, as H3 orders it: counter-clockwise, and not closed. A hexagon has six vertices and a pentagon
+     * five at even resolutions; at odd ones H3 adds a vertex wherever the edge crosses an icosahedron face, so a
+     * hexagon can have seven or eight and a pentagon ten. Size anything by the list, not by [isPentagon].
+     */
     @Throws(H3SpatialException::class)
     fun h3ToPolygon(h3Index: String): List<H3LatLng> {
         val cell = validCell(h3Index)

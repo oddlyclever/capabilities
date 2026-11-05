@@ -153,6 +153,16 @@ tasks.withType<org.gradle.jvm.tasks.Jar>().configureEach {
     }
 }
 
+// Ships this library's agent skill in every sources jar, where a consumer's tooling reads it.
+tasks.withType<Zip>()
+    .matching { it.name == "sourcesJar" || it.name.endsWith("SourcesJar") }
+    .configureEach {
+        from("src/commonMain/skills") {
+            include("*/SKILL.md", "*/references/**", "*/assets/**")
+            into("commonMain/skills")
+        }
+    }
+
 mavenPublishing {
     // No remote repository is configured: publishing goes to mavenLocal only. Signed only where a key is configured,
     // which nothing does yet, so the artifacts are unsigned.
