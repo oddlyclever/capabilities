@@ -9,16 +9,16 @@ on:
     branches: [ "develop" ]
 
 env:
-  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+UseParallelGC"
+  # GitHub's hosted Mac has about 7 GB of memory and 3 cores. The Kotlin daemon keeps the 6 GB gradle.properties gives
+  # it, which linking the wayfinder modules' JS and Wasm test bundles needs, so the Gradle daemon gets less here than on
+  # a workstation, and two workers keep two Kotlin/Native links or browser test runs from landing at once.
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+UseParallelGC" -Dorg.gradle.workers.max=2
 
 jobs:
   test:
     name: Run Multiplatform Tests
-    # macOS, because the iOS targets only compile on a Mac. The org's own Mac rather than a GitHub-hosted one, which
-    # bills at ten times the Linux rate and used up the month's included minutes.
-    runs-on: [self-hosted, macOS, ARM64]
-    # Never for a pull request from a fork: it would run that fork's code on the org's Mac.
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # macOS, because the iOS targets only compile on a Mac. GitHub's hosted runners are free for a public repository.
+    runs-on: macos-latest
     permissions:
       checks: write
       contents: read
@@ -34,9 +34,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
-        # The self-hosted Mac keeps its Gradle home between runs; a restored cache would only overwrite it.
-        with:
-          cache-disabled: true
 
       - name: Run all tests
         run: ./gradlew check
