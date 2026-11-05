@@ -6,6 +6,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
+### Added
+
+- **`wayfinder-geojson`**: a `GeoJsonLayer` that takes a `GeoFeatureCollection`, for a collection the app built or parsed itself, drawn with no text in between; and `parseGeoJson`, which throws with the reason a document does not parse.
+
+### Changed
+
+- **`wayfinder-geojson`**: GeoJSON is aughtone-types' model, and the module no longer depends on map-view-geojson, which it drew through. The drawing and hit-testing are a copy of map-view-geojson 0.3.0 and draw the same. **Source-incompatible:** `FeatureCollection`, `Feature` and `Geometry` from `com.coderwise.libs.mapview.geojson` become `GeoFeatureCollection`, `GeoFeature` and the `GeoGeometry` types from `io.github.aughtone.types.geo`, whose positions are `[longitude, latitude]` lists; `GeoJsonStyle` moves to `com.oddlyclever.wayfinder.geojson`; map-view's `GeoJson(data)` composable becomes `GeoJsonLayer(data)`; and `onFeatureClick` gets a `GeoFeature`, whose properties are a `JsonObject` read with `stringProperty`, `intProperty` and their siblings. Parsing follows RFC 7946 more strictly: a line of one position, or a polygon ring that is not closed or has fewer than four positions, fails the document, which then draws nothing.
+
 ## [0.0.7] - 2026-11-04
 
 ### Added

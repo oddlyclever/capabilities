@@ -31,8 +31,12 @@ mapView = "0.3.0"
 okio = "3.18.2"
 # :wayfinder writes the scale bar's label in the reader's locale with it.
 aughtone-format = "4.2.1"
-# :wayfinder finds the reader's locale with it. The version format-readable is built against.
+# :wayfinder finds the reader's locale with it, and :wayfinder-geojson's model is its GeoJSON. The version
+# format-readable is built against.
 aughtone-types = "4.1.0"
+# :wayfinder-geojson decodes GeoJSON text into aughtone-types' model with it. The version aughtone's format modules
+# bring, so the build resolves one version.
+kotlinxSerialization = "1.12.0"
 kotlinxCoroutines = "1.11.0"
 # :media-image's web target: the DOM, for <img> and <canvas>.
 kotlinxBrowser = "0.5.0"
@@ -72,6 +76,7 @@ mapview-tiles-core = { module = "com.coderwise.libs:map-view-tiles", version.ref
 # :wayfinder's scale bar label: a distance in the reader's locale. implementation, so its types stay out of wayfinder's API.
 aughtone-format-readable = { module = "io.github.aughtone:format-readable", version.ref = "aughtone-format" }
 # :wayfinder's locale for the ornaments' words, Locale.current. implementation, for the same reason.
+# :wayfinder-geojson exposes it as api: GeoFeatureCollection and GeoFeature are its model.
 aughtone-types = { module = "io.github.aughtone:types", version.ref = "aughtone-types" }
 # :wayfinder-cache exposes this as api for TileKey alone, without map-view's Compose.
 mapview-core = { module = "com.coderwise.libs:map-view-core", version.ref = "mapView" }
@@ -83,8 +88,8 @@ okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", versio
 mapview-tiles-vector = { module = "com.coderwise.libs:map-view-tiles-vector", version.ref = "mapView" }
 # :wayfinder-raster exposes the raster slot its fading slot wraps; :wayfinder-vector, as above.
 mapview-tiles-raster = { module = "com.coderwise.libs:map-view-tiles-raster", version.ref = "mapView" }
-# :wayfinder-geojson exposes map-view's GeoJSON model, style and overlay.
-mapview-geojson = { module = "com.coderwise.libs:map-view-geojson", version.ref = "mapView" }
+# :wayfinder-geojson decodes GeoJSON text into aughtone-types' model. implementation: its own API takes text or the model.
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 # :wayfinder's map state, and :wayfinder-raster and :wayfinder-vector, which decode and rasterize tiles on Dispatchers.Default.
 # The version map-view 0.3.0 is built with.

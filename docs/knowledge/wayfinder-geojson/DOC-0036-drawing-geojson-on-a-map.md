@@ -1,13 +1,13 @@
 # Drawing GeoJSON on a Map
 
 DOC-0036 · 2026-11-04
-Keywords: GeoJsonLayer, RemoteGeoJsonLayer, GeoJson composable, draw polygons on a map, coverage area, delivery zone, geofence, boundary, trails, H3 hexagons on a map, GeoJsonStyle, fill colour, stroke width, point radius, style by property, data-driven styling, minZoom, hide layer when zoomed out, tap a feature, onFeatureClick, touchWidth, feature under the marker, layer order, polygon holes, antimeridian, attribution for GeoJSON data, addLayerToMap, GeoJSON on a map image
+Keywords: GeoJsonLayer, RemoteGeoJsonLayer, GeoJson composable, GeoFeatureCollection, aughtone-types, draw polygons on a map, coverage area, delivery zone, geofence, boundary, trails, H3 hexagons on a map, GeoJsonStyle, fill colour, stroke width, point radius, style by property, data-driven styling, minZoom, hide layer when zoomed out, tap a feature, onFeatureClick, touchWidth, feature under the marker, layer order, polygon holes, antimeridian, attribution for GeoJSON data, addLayerToMap, GeoJSON on a map image
 
 `GeoJsonLayer` and `RemoteGeoJsonLayer` draw a GeoJSON document's points, lines and polygons on a `WayfinderMap`. This page covers where they are drawn, how they look, hiding them by zoom, and taps. Parsing and fetching are in [Parsing and Loading GeoJSON](DOC-0037-parsing-and-loading-geojson.md).
 
 ## The call
 
-Both are composables in a `WayfinderMap`'s trailing `overlay` lambda:
+Both are composables in a `WayfinderMap`'s trailing `overlay` lambda. `GeoJsonLayer` takes the document as text, or already parsed into aughtone-types' `GeoFeatureCollection`:
 
 ```kotlin
 WayfinderMap(state, layers = listOf(basemap)) {
@@ -16,21 +16,21 @@ WayfinderMap(state, layers = listOf(basemap)) {
         url = "https://data.example.com/trails.geojson",
         load = { url -> http.get(url).body<ByteArray>() },
         minZoom = 12f,
-        onFeatureClick = { feature -> select(feature.id) },
+        onFeatureClick = { feature -> select(feature.stringProperty("name")) },
     )
 }
 ```
 
 | Parameter | Default | What it does |
 |---|---|---|
-| `geoJson` (`GeoJsonLayer`) | required | The document, as text. |
+| `geoJson` or `data` (`GeoJsonLayer`) | required | The document, as text or as a `GeoFeatureCollection`. |
 | `url`, `load` (`RemoteGeoJsonLayer`) | required | Where the document is, and the app's function that fetches it. |
 | `style` | `GeoJsonStyle()` | One style for every polygon, line and point in the layer. |
 | `minZoom` | `0f` | Below this zoom, the layer is neither drawn nor tappable. |
 | `touchWidth` | `24.dp` | The width of the band around a line or point that a tap must land in. |
 | `onFeatureClick` | `null` | Gets the feature tapped. With `null`, the layer takes no taps. |
 
-There is no layer object to add to a map and no resource id: a layer is a composable in the overlay, and it takes a `String` or a URL.
+There is no layer object to add to a map and no resource id: a layer is a composable in the overlay, and it takes a `String`, a URL or a `GeoFeatureCollection`.
 
 ## Where it is drawn
 
@@ -56,23 +56,23 @@ A feature whose `geometry` is `null` draws nothing.
 
 Widths are in dp, so they stay the same on screen at every zoom. A transparent colour or a width of 0 leaves that part out: `fill = Color.Transparent` draws outlines only.
 
-There is no styling by property. Two looks are two layers: parse the document once, split its features, and draw each part with map-view's `GeoJson`, which takes a parsed `FeatureCollection`:
+There is no styling by property. Two looks are two layers: parse the document once, split its features, and draw each part with the `GeoJsonLayer` that takes a `GeoFeatureCollection`:
 
 ```kotlin
-val parsed by produceState<FeatureCollection?>(null, text) {
+val parsed by produceState<GeoFeatureCollection?>(null, text) {
     value = withContext(Dispatchers.Default) { parseGeoJsonOrNull(text) }
 }
 val (open, closed) = remember(parsed) {
-    parsed?.features.orEmpty().partition { it.properties["status"] == "open" }
-        .let { (a, b) -> FeatureCollection(a) to FeatureCollection(b) }
+    parsed?.features.orEmpty().partition { it.stringProperty("status") == "open" }
+        .let { (a, b) -> GeoFeatureCollection(a) to GeoFeatureCollection(b) }
 }
 WayfinderMap(state, layers = listOf(basemap)) {
-    GeoJson(open, style = GeoJsonStyle(stroke = Color(0xFF16A34A)))
-    GeoJson(closed, style = GeoJsonStyle(stroke = Color(0xFFDC2626)))
+    GeoJsonLayer(open, style = GeoJsonStyle(stroke = Color(0xFF16A34A)))
+    GeoJsonLayer(closed, style = GeoJsonStyle(stroke = Color(0xFFDC2626)))
 }
 ```
 
-`GeoJson`, `FeatureCollection` and `GeoJsonStyle` are map-view's, in `com.coderwise.libs.mapview.geojson`, and come with this module.
+`GeoJsonStyle` is this module's, in `com.oddlyclever.wayfinder.geojson`. `GeoFeatureCollection`, `GeoFeature` and `stringProperty` are aughtone-types', in `io.github.aughtone.types.geo`, and come with this module.
 
 ## Hiding a layer by zoom
 
@@ -82,7 +82,7 @@ Use `minZoom` rather than an `if` around the layer. A `RemoteGeoJsonLayer` fetch
 
 ## Taps
 
-With `onFeatureClick` set, a tap on a feature calls it with that `Feature`, whose `properties` and `id` are the document's. How their values are typed is in [Parsing and Loading GeoJSON](DOC-0037-parsing-and-loading-geojson.md).
+With `onFeatureClick` set, a tap on a feature calls it with that `GeoFeature`, whose `properties` and `id` are the document's. How their values are typed is in [Parsing and Loading GeoJSON](DOC-0037-parsing-and-loading-geojson.md).
 
 - **A tap anywhere inside a polygon counts.** A tap in one of its holes does not.
 - **A tap near a line or point counts within half of `touchWidth`** of it: 12 dp either side with the default 24 dp.
@@ -97,4 +97,4 @@ The map's credits ornament shows the sources of its tile layers only. GeoJSON la
 
 ## Live maps only
 
-This module draws on a live `WayfinderMap`. It does not draw GeoJSON on a map image from [wayfinder-frame](../wayfinder-frame/README.md): map-view's own `drawGeoJson`, for drawing without a composition, takes a `GeoJsonProjection`, which wayfinder-frame's `MapFrameProjection` does not implement.
+The layers draw on a live `WayfinderMap`. For drawing without a composition, `drawGeoJson(data, style, projection, minZoom)` draws a `GeoFeatureCollection` into any `DrawScope` through a `GeoJsonProjection`, the zoom and the projection a map image has. It does not yet draw on a map image from [wayfinder-frame](../wayfinder-frame/README.md), whose `MapFrameProjection` does not implement `GeoJsonProjection`.
