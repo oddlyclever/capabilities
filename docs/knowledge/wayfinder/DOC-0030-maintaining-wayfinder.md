@@ -9,7 +9,9 @@ Notes for working on the module itself: what it is pinned to, what it copies, an
 
 `mapView` in `gradle/libs.versions.toml` is the one version of map-view, currently 0.3.0. map-view's artifacts are released in lockstep, so the one version covers every artifact of it the wayfinder modules use. wayfinder follows every map-view release.
 
-map-view is 0.x, and wayfinder exposes `map-view`, `map-view-tiles` and `map-view-controls` as `api`, so their types are part of wayfinder's public API. A map-view release that changes them changes wayfinder's API, and the changelog entry for that release has to say so.
+map-view is 0.x, and wayfinder exposes `map-view` and `map-view-tiles` as `api`, so their types are part of wayfinder's public API. A map-view release that changes them changes wayfinder's API, and the changelog entry for that release has to say so.
+
+The ornaments in `com.oddlyclever.wayfinder.controls` are a copy of map-view-controls 0.3.0, Apache-2.0, taken when map-view planned to stop publishing it. Each file says so in its header and names what changed. They are wayfinder's to maintain now, and a fix to them in map-view does not reach wayfinder unless it is copied across.
 
 Java 21 is the version of every module in the repository, set by `javaVersion` in the catalog, because map-view's JVM classes are Java 21: an app using the map modules runs on 21 anyway.
 

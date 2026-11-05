@@ -10,14 +10,15 @@ The ornaments are the controls drawn over a map: a compass, an orientation toggl
 | Field | Default | What it is |
 |---|---|---|
 | `compass`, `compassAlignment` | on, top centre | the compass; tapping it turns the map back to north-up |
-| `compassStyle` | `Tape` | `Tape` is map-view's strip of headings across the map, for a map someone navigates by; `Rosette` is its small needle that always points north, for a map someone looks around on |
+| `compassStyle` | `Tape` | `Tape` is a strip of headings across the map, for a map someone navigates by; `Rosette` is its small needle that always points north, for a map someone looks around on |
 | `orientationToggle`, `orientationToggleAlignment` | off, top end | a button switching between north-up and course-up |
-| `scaleBar`, `scaleBarAlignment`, `scaleUnits` | on, bottom start, metric | map-view's scale bar |
-| `zoomButtons`, `zoomButtonsAlignment` | off, centre end | map-view's zoom buttons |
+| `scaleBar`, `scaleBarAlignment`, `scaleUnits` | on, bottom start, metric | a bar of a round distance, in `ScaleUnits.Metric` or `Imperial`, true at the middle of the map |
+| `zoomButtons`, `zoomButtonsAlignment` | off, centre end | zoom in and out a level a press, off at the ends of the zoom range |
 | `attribution`, `attributionAlignment` | on, bottom end | the credits the layers' sources ask for; leave it on wherever a licence requires attribution |
 | `attributionStyle` | `Collapsible` | `Collapsible` shows the credits when the map appears, then shrinks them to an "i"; `Full` keeps them in full |
 | `attributionTextSize` | 9 sp | the credits' text size |
 | `padding` | 8 dp | how far ornaments sit from the edges, to clear an app bar or a sheet |
+| `labels` | nothing set | the app's own words for the controls, over wayfinder's; see [Labels and languages](#labels-and-languages) |
 
 ## The compass
 
@@ -25,7 +26,7 @@ Tapping the `Tape` compass turns the map back to north and leaves course-up. The
 
 ## The orientation toggle
 
-The toggle shows a compass needle in north-up, its north half blue and its south half grey, and a white navigation arrowhead on blue in course-up. Tapping it switches between the two, and leaving course-up turns the map back to north. Its screen-reader description is in English: "North up: tap for course up" or "Course up: tap for north up".
+The toggle shows a compass needle in north-up, its north half blue and its south half grey, and a white navigation arrowhead on blue in course-up. Tapping it switches between the two, and leaving course-up turns the map back to north. To a screen reader it says what a tap does, in the device's language.
 
 With the `Tape` compass at the top, which spans the map's width, put the toggle somewhere other than a top corner, or it sits on the tape's end.
 
@@ -33,9 +34,30 @@ With the `Tape` compass at the top, which spans the map's width, put the toggle 
 
 Three composables are public for a screen that wants them somewhere other than over the map, such as in a top bar. Leave the matching `MapOrnaments` flag off and draw them there:
 
-- **`MapCompassTape(state, modifier, background)`** is the tape the ornament draws. It takes the width it is given. `background` is the tape's own plate, translucent white by default; pass `Color.Transparent` to draw it on a plate of the screen's.
-- **`OrientationToggle(state, modifier, size = 40.dp)`** is the toggle. Give it the size of the buttons beside it.
+- **`MapCompassTape(state, modifier, background, labels)`** is the tape the ornament draws. It takes the width it is given. `background` is the tape's own plate, translucent white by default; pass `Color.Transparent` to draw it on a plate of the screen's.
+- **`OrientationToggle(state, modifier, size = 40.dp, labels)`** is the toggle. Give it the size of the buttons beside it.
+
+Both say what they are in the device's language on their own. A screen that sets `labels` on the map's `MapOrnaments` passes the same ones here, so a control says the same thing wherever it is drawn.
 - **`OrientationIcon(courseUp, modifier)`** is only what the toggle shows, for a screen that draws its own button around it. It is drawn rather than taken from an icon set, so the module needs no icon dependency.
+
+## Labels and languages
+
+The ornaments name themselves in the device's language with no setup: what a screen reader says for each control, and the compass tape's points. The language is aughtone-types' `Locale.current`. wayfinder has its words in every language aughtone-types' `Locales` defines, chosen by the language's code whatever the region, so French in Canada gets French; Chinese is traditional in Taiwan, Hong Kong and Macau and simplified elsewhere. Inuktitut is the exception: it gets English until a speaker has checked a translation, as does any language aughtone does not define. Where a language has no settled short form for the points of the compass, the tape uses the international N, NE, E and so on.
+
+`MapOrnamentLabels` replaces any of them with the app's own, field by field. Every field is null unless set, and a null field keeps wayfinder's word:
+
+| Field | English | Used by |
+|---|---|---|
+| `zoomIn`, `zoomOut` | "Zoom in", "Zoom out" | the zoom buttons |
+| `north` | "North" | the `Rosette` compass |
+| `compass` | "Compass" | the `Tape` compass |
+| `credits` | "Map credits" | the "i" the credits shrink to |
+| `northUp`, `courseUp` | "North up: tap for course up", "Course up: tap for north up" | the orientation toggle, in each orientation |
+| `compassPoints` | N, NE, E, SE, S, SW, W, NW | the tape's points, from north clockwise; it must have eight |
+
+Set one for a language wayfinder does not cover, or where the app's own term for a control should win, and pass it as `MapOrnaments(labels = …)`. wayfinder's translations are in `OrnamentTranslations.kt`; a language is added there with all eight fields, and `MapOrnamentLabels`' KDoc says which languages there are.
+
+The scale bar needs none of this. Its distance is written in the device's locale by aughtone's `format-readable`, with that locale's digit grouping and decimal separator, so 1,000 ft in English is 1 000 ft in French. The unit symbols, m, km, ft and mi, are international and stay as they are. Metric picks its own prefix, so a bar shorter than a metre is in millimetres.
 
 ## Attribution
 

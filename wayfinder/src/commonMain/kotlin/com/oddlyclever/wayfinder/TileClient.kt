@@ -6,8 +6,8 @@ import com.coderwise.libs.mapview.TileKey
  * How wayfinder's layers get tile bytes: the app's HTTP client, keys and cache, behind one call.
  *
  * wayfinder fetches nothing itself. A layer asks for the tile at [key] from [source]; the app builds the URL with
- * `source.url(key)`, adds whatever headers it needs, and caches as it likes. map-view-cache's stores are keyed the same
- * way, by source and tile, so they go in front with no translation:
+ * `source.url(key)`, adds whatever headers it needs, and caches as it likes. `com.oddlyclever:wayfinder-cache`'s stores are
+ * keyed the same way, by source and tile, so they go in front with no translation:
  *
  * ```
  * val client = TileClient { source, key ->

@@ -19,7 +19,7 @@ kotlin {
 }
 ```
 
-wayfinder exposes map-view, map-view-tiles and map-view-controls as `api`, so their types (`LatLon`, `MapCameraState`, `TileKey`, `MapOverlayScope`) are available without declaring them. There is no dependency-injection container: everything is constructed directly, and Koin is not needed.
+wayfinder exposes map-view and map-view-tiles as `api`, so their types (`LatLon`, `MapCameraState`, `TileKey`, `MapOverlayScope`) are available without declaring them. There is no dependency-injection container: everything is constructed directly, and Koin is not needed.
 
 On the JVM, wayfinder needs Java 21, because map-view's classes are built for it.
 
@@ -56,7 +56,7 @@ Make the `TileClient` once, outside the composable, as here: it is compared by i
 
 ## How the modules fit together
 
-The root holds the map, its state, markers, polylines, ornaments, recorded tracks and the user's position, tile sources and clients, and camera helpers, but draws no basemap by itself. [wayfinder-vector](../docs/knowledge/wayfinder-vector/README.md) and [wayfinder-raster](../docs/knowledge/wayfinder-raster/README.md) add vector and raster basemaps, [wayfinder-geojson](../docs/knowledge/wayfinder-geojson/README.md) adds GeoJSON, [wayfinder-frame](../docs/knowledge/wayfinder-frame/README.md) draws a map to an image, and [wayfinder-headless](../docs/knowledge/wayfinder-headless/README.md) makes map images on a server. They meet at interfaces in the root, so none of them depends on another; [How the Wayfinder Modules Fit Together](../docs/knowledge/wayfinder/DOC-0023-how-the-wayfinder-modules-fit-together.md) has the details.
+The root holds the map, its state, markers, polylines, ornaments, recorded tracks and the user's position, tile sources and clients, and camera helpers, but draws no basemap by itself. [wayfinder-vector](../docs/knowledge/wayfinder-vector/README.md) and [wayfinder-raster](../docs/knowledge/wayfinder-raster/README.md) add vector and raster basemaps, [wayfinder-geojson](../docs/knowledge/wayfinder-geojson/README.md) adds GeoJSON, [wayfinder-frame](../docs/knowledge/wayfinder-frame/README.md) draws a map to an image, [wayfinder-headless](../docs/knowledge/wayfinder-headless/README.md) makes map images on a server, and [wayfinder-cache](../docs/knowledge/wayfinder-cache/README.md) caches tiles in front of the app's client. They meet at interfaces in the root, so none of them depends on another; [How the Wayfinder Modules Fit Together](../docs/knowledge/wayfinder/DOC-0023-how-the-wayfinder-modules-fit-together.md) has the details.
 
 ## Documentation
 
@@ -71,6 +71,10 @@ The full documentation is in the module's section of the [knowledge base](../doc
 - [Tracks and the User's Position](../docs/knowledge/wayfinder/DOC-0029-tracks-and-the-users-position.md): recorded tracks and the location marker, live and on a map frame.
 - [Maintaining wayfinder](../docs/knowledge/wayfinder/DOC-0030-maintaining-wayfinder.md): notes for working on the module itself.
 - The decisions behind its shape: [Shared Interfaces in the Root Module](../docs/knowledge/wayfinder/ADR-0013-shared-interfaces-in-the-root-module.md), [The App Fetches Every Tile](../docs/knowledge/wayfinder/ADR-0014-the-app-fetches-every-tile.md), [Camera Limits Corrected After the Move](../docs/knowledge/wayfinder/ADR-0015-camera-limits-corrected-after-the-move.md) and [Attribution That Collapses to an "i"](../docs/knowledge/wayfinder/ADR-0016-attribution-that-collapses-to-an-i.md).
+
+## Third-party code
+
+The map's ornaments, in `com.oddlyclever.wayfinder.controls`, are derived from map-view-controls 0.3.0, part of [map-view](https://github.com/coderwise/libs-mobile), under the Apache License 2.0. They were moved into wayfinder's package and made internal, with `ScaleUnits` moved to `com.oddlyclever.wayfinder`, their words translated, and the scale bar's distance written by aughtone's `format-readable`; each file's header says so.
 
 ## For coding agents
 

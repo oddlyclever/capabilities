@@ -54,7 +54,9 @@ kotlin {
                 // exposes Compose as api in turn, which is where this module's Compose comes from.
                 api(libs.mapview.base)
                 api(libs.mapview.tiles.core)
-                api(libs.mapview.controls)
+                // The scale bar's label, and the ornaments' words, in the reader's locale.
+                implementation(libs.aughtone.format.readable)
+                implementation(libs.aughtone.types)
                 // The map state's interaction settle and bounds tracking run on coroutines and flows.
                 implementation(libs.kotlinx.coroutines.core)
             }

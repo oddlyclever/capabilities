@@ -43,6 +43,6 @@ So when the tile server is down, `renderMapImage` still returns an image: the ro
 
 ## No cache
 
-The module keeps no tiles between calls. Each call requests every tile it needs, all at once, so a server that renders images on demand sends a burst of requests to the tile server for every image. Caching belongs in the `tiles` function: an in-memory or disk cache keyed by `TileKey` in front of the HTTP client. That is also where a rate limit, a timeout or a retry goes.
+The module keeps no tiles between calls. Each call requests every tile it needs, all at once, so a server that renders images on demand sends a burst of requests to the tile server for every image. Caching belongs in the `tiles` function: an in-memory or disk cache keyed by `TileKey` in front of the HTTP client, such as [wayfinder-cache](../wayfinder-cache/README.md)'s `cached`, which needs no Compose. That is also where a rate limit, a timeout or a retry goes.
 
 A cache is worth having for another reason: many tile services' usage policies ask for one, and some count every request against a quota.

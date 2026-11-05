@@ -13,6 +13,7 @@ wayfinder is a family of modules. `wayfinder`, the root, is the map an app shows
 | [`wayfinder-vector`](../wayfinder-vector/README.md) | A vector basemap; light and dark styles; vector tiles drawn as images on GPUs that cannot draw their paths |
 | [`wayfinder-raster`](../wayfinder-raster/README.md) | A raster basemap, decoded off the main thread and faded in |
 | [`wayfinder-geojson`](../wayfinder-geojson/README.md) | GeoJSON on the map, from text or a URL |
+| [`wayfinder-cache`](../wayfinder-cache/README.md) | A tile cache in front of the app's `TileClient`, on disk or in memory; Compose-free |
 | [`wayfinder-frame`](../wayfinder-frame/README.md) | Map frames: a map at one camera position and size, drawn to an image or to a painter that scales like a vector image, encoded as PNG or WebP |
 | [`wayfinder-headless`](../wayfinder-headless/README.md) | Map images on a server, JVM only, in one call |
 
@@ -20,7 +21,7 @@ The root draws no basemap by itself: a `WayfinderMap` with no `layers` shows no 
 
 ## How they connect
 
-`wayfinder-vector`, `wayfinder-raster`, `wayfinder-geojson` and `wayfinder-frame` each depend on the root and on nothing else in the family. `wayfinder-headless` is the exception: it is built from `wayfinder-frame`, `wayfinder-vector` and `wayfinder-raster`.
+`wayfinder-vector`, `wayfinder-raster`, `wayfinder-geojson` and `wayfinder-frame` each depend on the root and on nothing else in the family. `wayfinder-headless` is the exception: it is built from `wayfinder-frame`, `wayfinder-vector` and `wayfinder-raster`. `wayfinder-cache` depends on none of them, not even the root: it wraps the app's tile fetching, so it needs only map-view-core's `TileKey`.
 
 Three interfaces in the root are how the modules work together without depending on one another:
 
@@ -32,7 +33,9 @@ Why these live in the root is in [Shared Interfaces in the Root Module](ADR-0013
 
 ## What comes with the root
 
-wayfinder is built on [map-view](https://github.com/coderwise/libs-mobile), a tiled map for Compose Multiplatform, and exposes three of its artifacts as `api`: `map-view`, `map-view-tiles` and `map-view-controls`. Their types are part of wayfinder's own API, so `LatLon`, `MapCameraState`, `MapState`, `TileKey` and `MapOverlayScope`, in `com.coderwise.libs.mapview`, are available without declaring them. map-view exposes Compose in turn, which is where wayfinder's Compose comes from.
+wayfinder is built on [map-view](https://github.com/coderwise/libs-mobile), a tiled map for Compose Multiplatform, and exposes two of its artifacts as `api`: `map-view` and `map-view-tiles`. Their types are part of wayfinder's own API, so `LatLon`, `MapCameraState`, `MapState`, `TileKey` and `MapOverlayScope`, in `com.coderwise.libs.mapview`, are available without declaring them. map-view exposes Compose in turn, which is where wayfinder's Compose comes from.
+
+The map's ornaments, the compass, scale bar, zoom buttons and credits, are wayfinder's own. They began as map-view's `map-view-controls`, which wayfinder no longer depends on, and are internal to wayfinder apart from `ScaleUnits`, in `com.oddlyclever.wayfinder`.
 
 A coordinate is map-view's `LatLon(lat, lon)`. There is no `LatLng`.
 

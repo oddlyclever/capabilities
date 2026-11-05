@@ -17,12 +17,14 @@ A module that cannot support one of these says which and why, in its own README 
 | [`wayfinder-vector`](wayfinder-vector) | Light and dark styles for map-view's vector tiles, and vector tiles drawn to images on GPUs that cannot draw their paths. |
 | [`wayfinder-raster`](wayfinder-raster) | Raster basemaps for wayfinder: decoded off the main thread, and faded in as they arrive. |
 | [`wayfinder-geojson`](wayfinder-geojson) | GeoJSON on a wayfinder map, from text or a URL. |
+| [`wayfinder-cache`](wayfinder-cache) | A tile cache in front of the app's own tile client, on disk or in memory, with cache-first, network-first and offline modes. Compose-free, so a server can use it too. |
 | [`wayfinder-frame`](wayfinder-frame) | Map frames: a map at one camera position and size, drawn without a composition to an image or to a painter that scales like a vector image; PNG or WebP. |
 | [`wayfinder-headless`](wayfinder-headless) | Map images on a server in one call, WebP or PNG. **JVM only**: it bundles Skia's native libraries for servers. |
 | [`jsonlogic`](jsonlogic) | A clean-room [JSONLogic](https://jsonlogic.com) rule evaluator in pure common Kotlin: one rule, the same result on every target. |
 | [`platform`](platform) | What must exist once in a process: on Android, the application context and the activity in front, captured at start-up so no library has to ask for them; and `OsFamily`. |
 | [`media-image`](media-image) | Images downsized and encoded for an upload or a file, as WebP, JPEG or PNG, with the same call on every target. |
 | [`media-webp`](media-webp) | WebP encoding, lossy or lossless, with GPS position and capture time in the file; the same call on every target, with libwebp built in on Android and iOS. |
+| [`sundries-compose`](sundries-compose) | The Compose parts every app ends up writing for itself: `TextCopy`, text that copies itself, with the web fallback for plain http; modifier and test-tag helpers, colour and size conversions, window-size checks and glowing text. |
 
 ## How the modules are shaped
 

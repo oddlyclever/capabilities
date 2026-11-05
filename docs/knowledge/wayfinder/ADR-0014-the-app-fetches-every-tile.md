@@ -1,7 +1,7 @@
 # The App Fetches Every Tile
 
 ADR-0014 · 2026-11-04 · Status: accepted
-Keywords: why does wayfinder not download tiles, built-in HTTP client, Ktor dependency, tile URL with API key, tile headers, tile cache built in, offline tiles, TileClient, TileSource, map-view-cache, who owns the network, mechanism not policy
+Keywords: why does wayfinder not download tiles, built-in HTTP client, Ktor dependency, tile URL with API key, tile headers, tile cache built in, offline tiles, TileClient, TileSource, map-view-cache, wayfinder-cache, who owns the network, mechanism not policy
 
 ## Context
 
@@ -13,7 +13,7 @@ wayfinder fetches nothing itself.
 
 - **A `TileSource` describes a source and fetches nothing**: its id, URL template, zoom range, row numbering and credit.
 - **A `TileClient` is the app's fetching behind one call**, `fetch(source, key)`. The app builds the URL with `source.url(key)`, adds whatever headers it needs, uses its own HTTP client, and caches as it likes.
-- **Caching is left to the app.** map-view-cache's stores are keyed the same way, by source and tile, so they go in front of a client with no translation, but wayfinder does not depend on them.
+- **Caching is left to the app.** A cache's stores are keyed the same way, by source and tile, so they go in front of a client with no translation, but the root module does not depend on one. The stores were map-view's map-view-cache when this was decided; since 0.0.7 they are `wayfinder-cache`, a module of its own, which keeps this decision intact: an app that caches adds it.
 
 ## Consequences
 

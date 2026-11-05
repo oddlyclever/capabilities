@@ -1,7 +1,7 @@
 # Tile Sources and Tile Clients
 
 DOC-0028 · 2026-11-04
-Keywords: tile URL template, {z}/{x}/{y}, XYZ tiles, TMS tiles, tiles in wrong rows, flipped tiles, tile server API key, HTTP headers for tiles, Ktor client, blank map, map shows no tiles, tiles never load, tile errors swallowed, expired token, retry, tile cache, offline map, map-view-cache, FileTileStore, MemoryTileStore, CacheMode, CacheFirst, NetworkFirst, OfflineOnly, NoCache, zoom range, overzoom, TileSource, TileClient, Tile URL template is missing, attribution missing
+Keywords: tile URL template, {z}/{x}/{y}, XYZ tiles, TMS tiles, tiles in wrong rows, flipped tiles, tile server API key, HTTP headers for tiles, Ktor client, blank map, map shows no tiles, tiles never load, tile errors swallowed, expired token, retry, tile cache, offline map, wayfinder-cache, map-view-cache, FileTileStore, MemoryTileStore, CacheMode, CacheFirst, NetworkFirst, OfflineOnly, NoCache, zoom range, overzoom, TileSource, TileClient, Tile URL template is missing, attribution missing
 
 wayfinder fetches nothing itself. A `TileSource` describes where a layer's tiles come from, and a `TileClient` is the app's own fetching behind one call. The basemap modules take both and turn the bytes into tiles. Why the fetching is the app's is in [The App Fetches Every Tile](ADR-0014-the-app-fetches-every-tile.md).
 
@@ -59,7 +59,7 @@ val client = TileClient { source, key -> http.get(source.url(key)).body<ByteArra
 
 ## Caching
 
-Caching is the app's choice. map-view-cache (`com.coderwise.libs:map-view-cache`) fits in front of a client without translation, since its stores are keyed by source and tile too:
+Caching is the app's choice. [wayfinder-cache](../wayfinder-cache/README.md) (`com.oddlyclever:wayfinder-cache`) fits in front of a client without translation, since its stores are keyed by source and tile too:
 
 ```kotlin
 val store = FileTileStore(FileSystem.SYSTEM, cacheDir / "tiles", maxBytes = 200L * 1024 * 1024)
@@ -68,4 +68,4 @@ val client = TileClient { source, key ->
 }
 ```
 
-It also has a `MemoryTileStore`, and the modes `NetworkFirst`, `OfflineOnly` and `NoCache`. wayfinder does not depend on map-view-cache; an app that wants it adds it.
+It also has a `MemoryTileStore`, for the web, and the modes `NetworkFirst`, `OfflineOnly` and `NoCache`. The root module does not depend on it; an app that wants a cache adds it.

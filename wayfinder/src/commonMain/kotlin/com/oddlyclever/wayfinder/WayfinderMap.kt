@@ -38,13 +38,12 @@ import com.coderwise.libs.mapview.MapState
 import com.coderwise.libs.mapview.MapView
 import com.coderwise.libs.mapview.Polyline
 import com.coderwise.libs.mapview.TileKey
-import com.coderwise.libs.mapview.controls.CompassTape
-import com.coderwise.libs.mapview.controls.NorthButton
-import com.coderwise.libs.mapview.controls.CourseUp
-import com.coderwise.libs.mapview.controls.ScaleBar
-import com.coderwise.libs.mapview.controls.ScaleUnits
-import com.coderwise.libs.mapview.controls.ZoomButtons
 import com.coderwise.libs.mapview.mapGestures
+import com.oddlyclever.wayfinder.controls.CompassTape
+import com.oddlyclever.wayfinder.controls.CourseUp
+import com.oddlyclever.wayfinder.controls.NorthButton
+import com.oddlyclever.wayfinder.controls.ScaleBar
+import com.oddlyclever.wayfinder.controls.ZoomButtons
 
 /**
  * A map, with map-view drawing it: tiles from [layers], [polylines] and [markers] over them, and the ornaments a map
@@ -217,6 +216,11 @@ data class MapOrnaments(
     val attributionTextSize: TextUnit = 9.sp,
     /** How far the ornaments sit from the map's edges, to clear an app bar or a sheet. */
     val padding: Dp = 8.dp,
+    /**
+     * The app's own words for the ornaments, over wayfinder's. Every field is null unless set, and wayfinder's own words
+     * in the device's language fill the rest.
+     */
+    val labels: MapOrnamentLabels = MapOrnamentLabels(),
 )
 
 /**
@@ -278,15 +282,21 @@ class PlacedLayer(
 @Composable
 private fun BoxScope.Ornaments(state: WayfinderMapState, ornaments: MapOrnaments, credits: List<String>, onAttributionClick: (() -> Unit)?) {
     val edge = Modifier.padding(ornaments.padding)
+    val words = ornaments.labels.words()
     if (ornaments.compass) {
         when (ornaments.compassStyle) {
-            CompassStyle.Tape -> MapCompassTape(state, edge.align(ornaments.compassAlignment))
-            CompassStyle.Rosette -> NorthButton(state.camera, edge.align(ornaments.compassAlignment), alwaysVisible = true)
+            CompassStyle.Tape -> MapCompassTape(state, edge.align(ornaments.compassAlignment), labels = ornaments.labels)
+            CompassStyle.Rosette ->
+                NorthButton(state.camera, edge.align(ornaments.compassAlignment), alwaysVisible = true, label = words.north)
         }
     }
-    if (ornaments.orientationToggle) OrientationToggle(state, edge.align(ornaments.orientationToggleAlignment))
+    if (ornaments.orientationToggle) {
+        OrientationToggle(state, edge.align(ornaments.orientationToggleAlignment), labels = ornaments.labels)
+    }
     if (ornaments.scaleBar) ScaleBar(state.camera, edge.align(ornaments.scaleBarAlignment), units = ornaments.scaleUnits)
-    if (ornaments.zoomButtons) ZoomButtons(state.camera, edge.align(ornaments.zoomButtonsAlignment))
+    if (ornaments.zoomButtons) {
+        ZoomButtons(state.camera, edge.align(ornaments.zoomButtonsAlignment), words = words)
+    }
     if (ornaments.attribution && credits.isNotEmpty()) {
         MapAttribution(
             credits.joinToString(" · "),
@@ -295,6 +305,7 @@ private fun BoxScope.Ornaments(state: WayfinderMapState, ornaments: MapOrnaments
             ornaments.attributionTextSize,
             onAttributionClick,
             edge.align(ornaments.attributionAlignment),
+            creditsLabel = words.credits,
         )
     }
 }
@@ -302,28 +313,41 @@ private fun BoxScope.Ornaments(state: WayfinderMapState, ornaments: MapOrnaments
 /**
  * The compass tape [MapOrnaments] draws, for a screen that places it in its own layout, such as between the buttons of
  * a top bar. It takes the width it is given. Tapping it turns the map back to north-up. [background] is the tape's
- * own plate; pass [Color.Transparent] to draw it on a plate of the screen's.
+ * own plate; pass [Color.Transparent] to draw it on a plate of the screen's. Its name to a screen reader and its points
+ * are wayfinder's own in the device's language, unless [labels] sets them; pass the same labels as the map's
+ * [MapOrnaments].
  */
 @Composable
 fun MapCompassTape(
     state: WayfinderMapState,
     modifier: Modifier = Modifier,
     background: Color = Color.White.copy(alpha = 0.85f),
+    labels: MapOrnamentLabels? = null,
 ) {
+    val words = labels.words()
     CompassTape(
         state.camera,
         modifier,
         onClick = { state.orientation = Orientation.NorthUp; state.camera.rotateTo(0f) },
         background = background,
+        label = words.compass,
+        points = words.compassPoints,
     )
 }
 
 /**
  * The north-up/course-up button [MapOrnaments] draws, for a screen that places it in its own layout, such as at the
- * end of a top bar. It is [size] across; give it the size of the buttons beside it.
+ * end of a top bar. It is [size] across; give it the size of the buttons beside it. What a screen reader says for it
+ * is wayfinder's own in the device's language, unless [labels] sets it.
  */
 @Composable
-fun OrientationToggle(state: WayfinderMapState, modifier: Modifier = Modifier, size: Dp = 40.dp) {
+fun OrientationToggle(
+    state: WayfinderMapState,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp,
+    labels: MapOrnamentLabels? = null,
+) {
+    val words = labels.words()
     val courseUp = state.orientation == Orientation.CourseUp
     Box(
         modifier
@@ -334,7 +358,7 @@ fun OrientationToggle(state: WayfinderMapState, modifier: Modifier = Modifier, s
                 state.orientation = if (courseUp) Orientation.NorthUp else Orientation.CourseUp
                 if (courseUp) state.camera.rotateTo(0f)
             }
-            .semantics { contentDescription = if (courseUp) "Course up: tap for north up" else "North up: tap for course up" },
+            .semantics { contentDescription = if (courseUp) words.courseUp else words.northUp },
         contentAlignment = Alignment.Center,
     ) {
         OrientationIcon(courseUp = courseUp, modifier = Modifier.size(size * 0.55f))
