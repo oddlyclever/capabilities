@@ -60,7 +60,7 @@ To work on a module alongside an app, include this repository as a **composite b
 
 ```kotlin
 includeBuild("../capabilities") {
-    name = "oddlyclever-capabilities"
+    name = "capabilities"
     dependencySubstitution {
         substitute(module("com.oddlyclever:example")).using(project(":example"))
         // one line per module the app uses
