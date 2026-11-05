@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
+## [0.0.7] - 2026-11-04
+
 ### Added
 
 - **`sundries-compose`**, a new module: the Compose parts every app ends up writing for itself. `TextCopy` is text that copies itself when tapped, with a tick when copied and a warning when refused, one labelled button to a screen reader, and on the web a fallback for pages served over plain http, where browsers have no clipboard API; `rememberCopier` gives the same copying to an app's own controls. With it come conditional modifiers, optional test tags, colour and size conversions, window-size checks, glowing text and `rawStringResource`, which reads a raw text file with the app's own resource reader. Its package is `com.oddlyclever.sundries`.
@@ -27,6 +29,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 - **`jsonlogic`**: its agent skill is now an [Agent Skill](https://agentskills.io/specification) named `com-oddlyclever-jsonlogic`, shipped in every sources jar at `commonMain/skills/com-oddlyclever-jsonlogic/`. The old `META-INF/ai-skills/` file in the JVM jar is gone.
 - **`wayfinder`**: the map's ornaments are wayfinder's own and it no longer depends on map-view-controls, which map-view plans to stop publishing. They are a copy of map-view-controls 0.3.0 and look and behave the same. **Source-incompatible:** `ScaleUnits` moves to `com.oddlyclever.wayfinder`, so `import com.coderwise.libs.mapview.controls.ScaleUnits` becomes `import com.oddlyclever.wayfinder.ScaleUnits`. An app that called map-view-controls itself, such as `ZoomButtons`, `CompassTape` or `turnTo`, was getting it through wayfinder and now has to depend on `com.coderwise.libs:map-view-controls:0.3.0` directly, or use `MapOrnaments`, `MapCompassTape` and `OrientationToggle`.
 - **`wayfinder`**: the scale bar writes its distance in the device's locale, with that locale's digit grouping and decimal separator, through aughtone's `format-readable`, which wayfinder now depends on, with `aughtone-types`. In English a bar of a thousand feet now reads `1,000 ft`, and a bar shorter than a metre is in millimetres.
+- **Continuous integration:** the tests run on GitHub's hosted macOS runner, in place of a self-hosted Mac.
 - **Building from source:** the Kotlin compiler gets 6 GB in `gradle.properties`, up from 3 GB, which ran out of memory linking the wayfinder modules' JS and Wasm test bundles.
 
 ## [0.0.6] - 2026-11-01
@@ -71,7 +74,8 @@ The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but no
 - **Android:** API level 24 or later. An app that calls one of these modules' inline functions compiles with `jvmTarget` 21.
 - **Built with:** Kotlin 2.4.21, Compose Multiplatform 1.12.2 (Skiko 0.150.2) and map-view 0.3.0.
 
-[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.6...develop
+[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.7...develop
+[0.0.7]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.7
 [0.0.6]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.6
 [0.0.5]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.5
 [0.0.4]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.4
