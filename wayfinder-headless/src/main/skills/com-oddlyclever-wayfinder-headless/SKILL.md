@@ -46,9 +46,9 @@ val png: ByteArray = renderMapImage(
 )
 ```
 
-`LatLon` and `TileKey` are map-view's, in `com.coderwise.libs.mapview`. The rest has defaults: WebP at quality 90, the light vector style, names on, `zoomRange = 0..14`, `padding = 48.dp`, and `line = HeadlessLineStyle(color, width, casing, casingWidth)`, a violet line over a dark casing.
+`LatLon` and `TileKey` are map-view's, in `com.coderwise.libs.mapview`. The rest has defaults: WebP at quality 90, the light vector style, names on, `zoomRange = 0..14`, `maxZoom = 17f`, `padding = 48.dp`, and `line = HeadlessLineStyle(color, width, casing, casingWidth)`, a violet line over a dark casing.
 
-The camera frames every coordinate inside the padding, no closer than the last level of `zoomRange`, so a single point shows the streets around it. The first point of the first line is marked as the start in green, the last point of the last line as the end in red, and `points` as waypoints in blue; on a loop the start and end share one marker, and with no lines the points are marked as places. Each piece of `lines` is drawn on its own, so a route in pieces never jumps straight across a gap.
+The camera frames every coordinate inside the padding, no closer than `maxZoom`, street level (17) by default, so a short route fills the image and a single point shows the streets around it. The first point of the first line is marked as the start in green, the last point of the last line as the end in red, and `points` as waypoints in blue; on a loop the start and end share one marker, and with no lines the points are marked as places. Each piece of `lines` is drawn on its own, so a route in pieces never jumps straight across a gap.
 
 ## Invariants and traps
 
@@ -62,7 +62,7 @@ The camera frames every coordinate inside the padding, no closer than the last l
 
 **The style comes from `MapStyles`.** `style = MapStyles.Dark` draws a dark map; `MapStyles` is in `com.oddlyclever.wayfinder.vector`, which comes with this module, along with map-view's `VectorStyle` for a style of your own.
 
-**`zoomRange` is the levels your source has.** Tiles are requested only inside it, and the camera goes no closer than its last level. The default stops at 14, so a raster source that goes to 19 is never shown closer than 14 unless `zoomRange` says so.
+**`zoomRange` is the levels your source has; `maxZoom` is how close the camera goes.** Tiles are requested only inside `zoomRange`, and past its last level the deepest tiles are magnified: vector tiles stay sharp, raster tiles soften. The default stops at 14, so a raster source that goes to 19 is magnified from 14 unless `zoomRange` says `0..19`.
 
 **Skia's native library is bundled for Linux and macOS, on x64 and arm64, and nothing else.** On Windows the first render fails with Skiko's `LibraryLoadException`, saying the native dependency is missing. On any other operating system or architecture Skiko fails with an `Unknown OS` or `Unknown arch` error, which is a `java.lang.Error`, so a `catch (e: Exception)` does not catch it.
 

@@ -32,6 +32,7 @@ It is a `suspend` function, so it is called from a coroutine, such as a Ktor rou
 | `style` | `MapStyles.Light` | The style vector tiles are drawn in. |
 | `names` | `true` | Whether vector tiles' names are drawn: places, roads, water, rivers, peaks and points of interest. |
 | `zoomRange` | `0..14` | The levels the tile source has. |
+| `maxZoom` | `17f` | The closest the camera goes. |
 | `padding` | `48.dp` | The space kept between the coordinates and the image's edges. |
 | `line` | violet over a dark casing | `HeadlessLineStyle(color, width, casing, casingWidth)`. |
 
@@ -45,9 +46,9 @@ It is a `suspend` function, so it is called from a coroutine, such as a Ktor rou
 
 ## The camera
 
-The camera frames every coordinate in `lines` and `points` inside `padding`, and goes no closer than the last level of `zoomRange`. A single point, or a short route, therefore shows the streets around it rather than filling the image with one block. The map is always north-up.
+The camera frames every coordinate in `lines` and `points` inside `padding`, and goes no closer than `maxZoom`, street level (17) by default. A short route therefore fills the image, and a single point shows the streets around it rather than one block. The map is always north-up.
 
-`zoomRange` is the levels the tile source has. Tiles are only requested inside it, so a raster source that goes to level 19 is never shown closer than 14 unless `zoomRange` says `0..19`.
+`zoomRange` is the levels the tile source has, and `maxZoom` is how close the camera goes; they are separate limits. Tiles are only requested inside `zoomRange`. When the camera is closer than its last level, the deepest tiles are magnified: vector tiles stay sharp and raster tiles soften. A raster source that goes to level 19 is magnified from 14 unless `zoomRange` says `0..19`.
 
 ## Lines and markers
 
