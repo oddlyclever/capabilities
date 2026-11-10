@@ -39,7 +39,7 @@ So when the tile server is down, `renderMapImage` still returns an image: the ro
 
 ## Zoom range
 
-`zoomRange` is the levels the source has, `0..14` by default, which is where most vector tile servers stop. Tiles are only requested inside it, and the camera goes no closer than its last level. A raster source with more levels needs a wider range, such as `zoomRange = 0..19`.
+`zoomRange` is the levels the source has, `0..14` by default, which is where most vector tile servers stop. Tiles are only requested inside it. The camera can go closer, to `maxZoom`, and then the deepest tiles are magnified, which keeps vector tiles sharp and softens raster ones. A raster source with more levels needs a wider range, such as `zoomRange = 0..19`, to be drawn from its own deeper tiles.
 
 ## No cache
 

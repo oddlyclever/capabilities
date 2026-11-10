@@ -13,7 +13,8 @@ plugins {
 group = libs.versions.group.get()
 version = libs.versions.versionName.get()
 
-// GeoJSON on a wayfinder map, from text or from a URL fetched by the app's own load function, drawn by map-view-geojson.
+// GeoJSON on a wayfinder map, from text, from a URL fetched by the app's own load function, or as aughtone-types' GeoJSON
+// model, drawn by the module's own copy of map-view-geojson.
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
@@ -50,8 +51,9 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":wayfinder"))
-                // api: FeatureCollection, GeoJsonStyle and the overlay are map-view-geojson's.
-                api(libs.mapview.geojson)
+                // api: GeoFeatureCollection and GeoFeature, the model the layers take and give back, are aughtone's.
+                api(libs.aughtone.types)
+                implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.coroutines.core)
             }
         }
@@ -65,6 +67,7 @@ kotlin {
         jvmTest {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation(libs.compose.ui.test)
             }
         }
     }
@@ -107,7 +110,7 @@ mavenPublishing {
 
     pom {
         name = "wayfinder-geojson"
-        description = "GeoJSON layers on wayfinder maps, from text or a URL, drawn by map-view-geojson."
+        description = "GeoJSON layers on wayfinder maps, from text, a URL or aughtone-types' GeoJSON model."
         inceptionYear = "2026"
         url = "https://github.com/oddlyclever/capabilities"
         licenses {

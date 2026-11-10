@@ -16,7 +16,7 @@ A module that cannot support one of these says which and why, in its own README 
 | [`wayfinder`](wayfinder) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the map, its state, markers, polylines, controls, recorded tracks and the user's position. The root of the wayfinder family. |
 | [`wayfinder-vector`](wayfinder-vector) | Light and dark styles for map-view's vector tiles, and vector tiles drawn to images on GPUs that cannot draw their paths. |
 | [`wayfinder-raster`](wayfinder-raster) | Raster basemaps for wayfinder: decoded off the main thread, and faded in as they arrive. |
-| [`wayfinder-geojson`](wayfinder-geojson) | GeoJSON on a wayfinder map, from text or a URL. |
+| [`wayfinder-geojson`](wayfinder-geojson) | GeoJSON on a wayfinder map, from text, a URL or aughtone-types' GeoJSON model. |
 | [`wayfinder-cache`](wayfinder-cache) | A tile cache in front of the app's own tile client, on disk or in memory, with cache-first, network-first and offline modes. Compose-free, so a server can use it too. |
 | [`wayfinder-frame`](wayfinder-frame) | Map frames: a map at one camera position and size, drawn without a composition to an image or to a painter that scales like a vector image; PNG or WebP. |
 | [`wayfinder-headless`](wayfinder-headless) | Map images on a server in one call, WebP or PNG. **JVM only**: it bundles Skia's native libraries for servers. |
@@ -41,7 +41,7 @@ A module that cannot support one of these says which and why, in its own README 
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.oddlyclever:example:0.0.7")
+            implementation("com.oddlyclever:example:0.0.8")
         }
     }
 }
@@ -60,7 +60,7 @@ To work on a module alongside an app, include this repository as a **composite b
 
 ```kotlin
 includeBuild("../capabilities") {
-    name = "oddlyclever-capabilities"
+    name = "capabilities"
     dependencySubstitution {
         substitute(module("com.oddlyclever:example")).using(project(":example"))
         // one line per module the app uses

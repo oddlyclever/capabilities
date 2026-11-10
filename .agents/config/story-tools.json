@@ -12,6 +12,5 @@
     "check": true,
     "skillsRepo": "bpappin/skills",
     "skillsBranch": "master"
-  },
-  "wikiShortPageNames": true
+  }
 }

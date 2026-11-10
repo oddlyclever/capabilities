@@ -17,7 +17,7 @@ description: >-
   com.oddlyclever:wayfinder-frame.
 license: Apache-2.0
 metadata:
-  version: "0.0.7"
+  version: "0.0.8"
   repository: https://github.com/oddlyclever/capabilities
 ---
 
@@ -46,9 +46,9 @@ val png: ByteArray = renderMapImage(
 )
 ```
 
-`LatLon` and `TileKey` are map-view's, in `com.coderwise.libs.mapview`. The rest has defaults: WebP at quality 90, the light vector style, names on, `zoomRange = 0..14`, `padding = 48.dp`, and `line = HeadlessLineStyle(color, width, casing, casingWidth)`, a violet line over a dark casing.
+`LatLon` and `TileKey` are map-view's, in `com.coderwise.libs.mapview`. The rest has defaults: WebP at quality 90, the light vector style, names on, `zoomRange = 0..14`, `maxZoom = 17f`, `padding = 48.dp`, and `line = HeadlessLineStyle(color, width, casing, casingWidth)`, a violet line over a dark casing.
 
-The camera frames every coordinate inside the padding, no closer than the last level of `zoomRange`, so a single point shows the streets around it. The first point of the first line is marked as the start in green, the last point of the last line as the end in red, and `points` as waypoints in blue; on a loop the start and end share one marker, and with no lines the points are marked as places. Each piece of `lines` is drawn on its own, so a route in pieces never jumps straight across a gap.
+The camera frames every coordinate inside the padding, no closer than `maxZoom`, street level (17) by default, so a short route fills the image and a single point shows the streets around it. The first point of the first line is marked as the start in green, the last point of the last line as the end in red, and `points` as waypoints in blue; on a loop the start and end share one marker, and with no lines the points are marked as places. Each piece of `lines` is drawn on its own, so a route in pieces never jumps straight across a gap.
 
 ## Invariants and traps
 
@@ -62,7 +62,7 @@ The camera frames every coordinate inside the padding, no closer than the last l
 
 **The style comes from `MapStyles`.** `style = MapStyles.Dark` draws a dark map; `MapStyles` is in `com.oddlyclever.wayfinder.vector`, which comes with this module, along with map-view's `VectorStyle` for a style of your own.
 
-**`zoomRange` is the levels your source has.** Tiles are requested only inside it, and the camera goes no closer than its last level. The default stops at 14, so a raster source that goes to 19 is never shown closer than 14 unless `zoomRange` says so.
+**`zoomRange` is the levels your source has; `maxZoom` is how close the camera goes.** Tiles are requested only inside `zoomRange`, and past its last level the deepest tiles are magnified: vector tiles stay sharp, raster tiles soften. The default stops at 14, so a raster source that goes to 19 is magnified from 14 unless `zoomRange` says `0..19`.
 
 **Skia's native library is bundled for Linux and macOS, on x64 and arm64, and nothing else.** On Windows the first render fails with Skiko's `LibraryLoadException`, saying the native dependency is missing. On any other operating system or architecture Skiko fails with an `Unknown OS` or `Unknown arch` error, which is a `java.lang.Error`, so a `catch (e: Exception)` does not catch it.
 
@@ -78,8 +78,9 @@ The camera frames every coordinate inside the padding, no closer than the last l
 
 ## What moved, and what it used to be called
 
-`wayfinder-headless` was first released in 0.0.3 and its API has not changed since, so no published version had another shape.
+`wayfinder-headless` was first released in 0.0.3 and its API has only grown since, so code written for an earlier version still compiles.
 
+- **Since 0.0.8, `maxZoom` is how close the camera fits, 17 by default.** Before it the camera stopped at the last level of `zoomRange`, 14 by default, so a route under about a kilometre sat small in the middle of the image. Code that widened `zoomRange` past the source's levels to get closer can narrow it back and leave the closeness to `maxZoom`.
 - **Since 0.0.7, `style` can be passed.** In 0.0.3 to 0.0.6 the vector module was not exposed, so `MapStyles` was an unresolved reference and passing `style` failed with "Cannot access class 'com.coderwise.libs.mapview.tiles.vector.VectorStyle'" unless `com.oddlyclever:wayfinder-vector` was also a dependency.
 - **There is no tile URL setting.** The library makes no HTTP requests: `tiles` is a function from a `TileKey` to bytes, written with your own client, keys and cache.
 - **The result is encoded bytes, not a bitmap.** `renderMapImage` returns a `ByteArray` in `format`; there is no `ImageBitmap` or `BufferedImage` to encode afterwards. The formats are `ImageFormat.Webp` and `ImageFormat.Png`, and there is no JPEG.

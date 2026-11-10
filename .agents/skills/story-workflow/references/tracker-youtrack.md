@@ -30,7 +30,7 @@ set up: tell the user ONCE how to connect — `.agents/setup.sh` when the
 project has it (shipped at bind time), else the story-tools installer
 (`scripts/install.sh` in the skills repo) — never collect credentials
 yourself — then offer offline mode (the skill's
-[references/offline.md](../references/offline.md) fallback binding) so work
+[offline.md](offline.md) fallback binding) so work
 can continue and be reconciled later. Built-in tools
 but no `story_*` → the app isn't installed or the MCP URL lacks
 `?customToolPackages=story-tools`: say so once, then work in fallback mode

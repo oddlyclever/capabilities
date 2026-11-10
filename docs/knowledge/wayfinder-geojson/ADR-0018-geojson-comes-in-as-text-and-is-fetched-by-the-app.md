@@ -18,6 +18,6 @@ GeoJSON reaches an app from many places: a file shipped with it, a server's resp
 - Any source of GeoJSON works with no adapter, including [h3spatial](../h3spatial/README.md)'s cell outlines.
 - A remote layer uses the app's HTTP client, so its credentials, caching, retries and timeouts are the app's to set, in `load`.
 - A network failure costs the layer, never the app, and `load` needs no catch of its own.
-- Failures are silent. There is no error callback: an app that wants to know why a layer is missing logs inside `load`, or calls map-view's `parseGeoJson`, which throws with the reason.
-- A document already parsed by another JSON library is encoded to text before it is drawn, and parsed again.
+- Failures are silent. There is no error callback: an app that wants to know why a layer is missing logs inside `load`, or calls `parseGeoJson`, which throws with the reason.
+- A document already parsed by another JSON library is encoded to text before it is drawn, and parsed again. One already in aughtone-types' model is not: [The GeoJSON Model Is aughtone-types'](ADR-0022-the-geojson-model-is-aughtone-types.md) added a `GeoJsonLayer` that takes it, beside the one that takes text.
 - Before 0.0.7, a `load` that threw escaped the layer and crashed the app. Since then it draws nothing, as one that returns `null` does.

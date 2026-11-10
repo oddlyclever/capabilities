@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a connection to the project's issue tracker (see the tracker binding for specifics; YouTrack needs MCP, Cloud or Server 2025.3+)
 metadata:
   author: bpappin
-  version: "1.29"
+  version: "1.30"
 ---
 
 # Story Workflow
@@ -106,8 +106,8 @@ Check the story against it. Where a trigger matches, say in your plan how the ho
 
 - Priority is read from context, set by triage/planning. Never change a
   story's priority on your own; suggest a change to the user instead.
-- Topical tags are Title Case, human-readable ("Trust Insights", not
-  "trust-insights") and mark feature-level grouping. Component ownership
+- Topical tags are Title Case, human-readable ("Offline Sync", not
+  "offline-sync") and mark feature-level grouping. Component ownership
   belongs in the Subsystem field (shown in context) - never duplicate
   subsystem names as tags.
 - **Human-added tags are data.** A tag you don't recognize is someone's

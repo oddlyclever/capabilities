@@ -1,57 +1,57 @@
 # Parsing and Loading GeoJSON
 
 DOC-0037 · 2026-11-04
-Keywords: parseGeoJsonOrNull, parseGeoJson, "Not GeoJSON", GeoJSON layer shows nothing, layer missing, invalid GeoJSON, longitude latitude order, coordinates swapped, shapes in the wrong place, properties as Double, ClassCastException Int, feature id number, bbox, crs, altitude, fetch GeoJSON from a URL, RemoteGeoJsonLayer not loading, network error, retry, cache GeoJSON, UTF-8, large GeoJSON file dropped frames, parse off the main thread, kotlinx.serialization GeoJSON, H3 cells to GeoJSON
+Keywords: parseGeoJsonOrNull, parseGeoJson, GeoFeatureCollection, GeoFeature, aughtone-types, stringProperty, JsonObject properties, ring not closed, linear ring four positions, GeoJSON layer shows nothing, layer missing, invalid GeoJSON, longitude latitude order, coordinates swapped, shapes in the wrong place, properties as Int, feature id number, JsonPrimitive id, bbox, crs, altitude, fetch GeoJSON from a URL, RemoteGeoJsonLayer not loading, network error, retry, cache GeoJSON, UTF-8, large GeoJSON file dropped frames, parse off the main thread, kotlinx.serialization GeoJSON, H3 cells to GeoJSON
 
-GeoJSON reaches the map as text, either given to `GeoJsonLayer` or fetched by `RemoteGeoJsonLayer` through the app's `load`. This page covers what the parser accepts, what the parsed model looks like, how a remote layer fetches, and why a layer can be missing without an error.
+GeoJSON reaches the map as text, either given to `GeoJsonLayer` or fetched by `RemoteGeoJsonLayer` through the app's `load`, or already parsed into aughtone-types' model. This page covers what the parser accepts, what the parsed model looks like, how a remote layer fetches, and why a layer can be missing without an error.
 
 ## What it reads
 
-`parseGeoJsonOrNull(text)` parses a document and returns a `FeatureCollection`, or `null` for text that is not GeoJSON. `GeoJsonLayer` parses the same way. The document may be:
+`parseGeoJsonOrNull(text)` parses a document into aughtone-types' `GeoFeatureCollection`, or returns `null` for text that is not GeoJSON. `GeoJsonLayer` parses the same way. The document may be:
 
 - a `FeatureCollection`,
 - a single `Feature`, which comes back as a collection of one,
 - a bare geometry, which comes back as a collection of one feature with no properties.
 
-Every geometry type is read: `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon` and `GeometryCollection`. A feature whose `geometry` is `null` is allowed, as the specification allows it, and draws nothing. `bbox`, `crs` and other members the model has no place for are ignored.
+Every geometry type is read: `Point`, `MultiPoint`, `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon` and `GeometryCollection`. A feature whose `geometry` is `null` or missing is allowed and draws nothing. `bbox` is kept on the model; `crs` and other members the specification does not define are ignored. A byte order mark before the document is skipped, and anything after it is an error.
 
-A byte order mark before the document is skipped. Anything after it is an error, and so is nesting deeper than 256 levels, so a hostile file of brackets is an error rather than a stack overflow.
+The parser holds GeoJSON to RFC 7946, as aughtone-types' model does. **A line needs at least two positions, and a polygon ring at least four, ending where it starts.** A file with a ring left open, which some tools write, is not GeoJSON here, and draws nothing.
 
 ### Positions are longitude first
 
-GeoJSON writes a position as `[longitude, latitude]`, with an optional altitude, and the parser reads it that way. The altitude is ignored. In the parsed model a position is a map-view `LatLon(lat, lon)`, latitude first, as everywhere else on the map.
+GeoJSON writes a position as `[longitude, latitude]`, with an optional altitude, and the model keeps it in that order: a `GeoPoint`'s `coordinates` are `[longitude, latitude, altitude?]`, and it has `longitude`, `latitude` and `altitude` to read them by name. Altitude is kept, and ignored when drawing. Build a `GeoPoint(longitude = …, latitude = …)` with named arguments: both are `Double`, so swapping them compiles.
 
 Coordinates written latitude first parse without complaint and draw in the wrong place.
 
 ## The parsed model
 
-The model is map-view's, in `com.coderwise.libs.mapview.geojson`, and comes with this module: `FeatureCollection(features)`, `Feature(geometry, properties, id)`, and the `Geometry` types.
+The model is aughtone-types', in `io.github.aughtone.types.geo`, and comes with this module: `GeoFeatureCollection(features)`, `GeoFeature(geometry, properties, id)`, and the `GeoGeometry` types `GeoPoint`, `GeoMultiPoint`, `GeoLineString`, `GeoMultiLineString`, `GeoPolygon`, `GeoMultiPolygon` and `GeometryCollection`. They are `@Serializable`, so an app can encode them back to GeoJSON with kotlinx.serialization.
 
-- **`properties`** is a `Map<String, Any?>` of plain values: `String`, `Double`, `Boolean`, `null`, `List` and `Map`. Every number is a `Double`, whole or not, so `properties["count"] as? Int` is `null`. Read it as `(properties["count"] as? Double)?.toInt()`. A feature with no `properties`, or one that is not an object, has an empty map.
-- **`id`** is a `String?`. GeoJSON allows a string or a number. A whole number is written without a fraction, so `7` becomes `"7"`, not `"7.0"`; a number with a fraction keeps it. Any other kind of `id` is `null`.
+- **`properties`** is a `JsonObject?`, the document's values as they were written. Read one with `stringProperty`, `intProperty`, `doubleProperty`, `booleanProperty`, `objectProperty` or `arrayProperty`, which return `null` for a key that is absent or of another kind: `feature.intProperty("count")` reads `3` as `3`. A feature with no `properties` has `null`.
+- **`id`** is a `JsonPrimitive?`, since GeoJSON allows a string or a number. `id?.content` is its text, as written: `7` is `"7"` and `7.0` is `"7.0"`.
 
 ## Why a layer shows nothing
 
 A layer draws nothing, and reports nothing, when:
 
-- **The text is not GeoJSON.** Any parse failure is no layer at all. One bad position anywhere, such as one with no latitude, fails the whole document.
+- **The text is not GeoJSON.** Any parse failure is no layer at all, and one bad geometry anywhere, such as a position with no latitude or a ring that is not closed, fails the whole document.
 - **`load` returns `null` or throws,** for a remote layer.
 - **The map is zoomed out past `minZoom`.** See [Drawing GeoJSON on a Map](DOC-0036-drawing-geojson-on-a-map.md).
 
-To see why a document does not parse, call map-view's `parseGeoJson(text)`, in `com.coderwise.libs.mapview.geojson`. It throws `IllegalArgumentException` with a message that starts "Not GeoJSON:", says what it found, and gives the offset in the text where it can. To see why a remote layer is missing, log inside `load`.
+To see why a document does not parse, call `parseGeoJson(text)`, which throws `IllegalArgumentException` with kotlinx.serialization's or aughtone-types' reason. To see why a remote layer is missing, log inside `load`.
 
 ## Parsing on the main thread
 
 `GeoJsonLayer` parses its text during composition, once for each distinct text, and keeps the result while the text is unchanged. For a small document that costs nothing noticeable. A large one costs a dropped frame or more when it first appears.
 
-For a large document, parse it off the main thread and draw the result with map-view's `GeoJson`, which takes a parsed `FeatureCollection`:
+For a large document, parse it off the main thread and draw the result with the `GeoJsonLayer` that takes a `GeoFeatureCollection`:
 
 ```kotlin
-val parsed by produceState<FeatureCollection?>(null, text) {
+val parsed by produceState<GeoFeatureCollection?>(null, text) {
     value = withContext(Dispatchers.Default) { parseGeoJsonOrNull(text) }
 }
 WayfinderMap(state, layers = listOf(basemap)) {
-    parsed?.let { GeoJson(it, style = GeoJsonStyle()) }
+    parsed?.let { GeoJsonLayer(it, style = GeoJsonStyle()) }
 }
 ```
 
@@ -78,6 +78,6 @@ Since 0.0.7, a `load` that throws draws nothing. Before it, the exception escape
 
 ## GeoJSON from another library
 
-GeoJSON comes in as a `String`, so a library that produces it needs no dependency on wayfinder, and wayfinder none on it. The outlines of H3 cells from [h3spatial](../h3spatial/README.md) are one example: its GeoJSON text goes straight into `GeoJsonLayer`. A document built with a JSON library is encoded to text first.
+GeoJSON comes in as a `String`, so a library that produces it needs no dependency on wayfinder, and wayfinder none on it. The outlines of H3 cells from [h3spatial](../h3spatial/README.md) are one example: its GeoJSON text goes straight into `GeoJsonLayer`. A library that already speaks aughtone-types' model hands over its `GeoFeatureCollection` with no text in between.
 
-The module does not write, edit or validate GeoJSON, and has no serializer for any JSON library's types.
+The module does not write or edit GeoJSON; aughtone-types' model and kotlinx.serialization do that.

@@ -13,7 +13,7 @@ description: >-
   no-cache modes.
 license: Apache-2.0
 metadata:
-  version: "0.0.7"
+  version: "0.0.8"
   repository: https://github.com/oddlyclever/capabilities
 ---
 

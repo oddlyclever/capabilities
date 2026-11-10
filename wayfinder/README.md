@@ -12,8 +12,8 @@ First released in 0.0.3, and not yet published to Maven Central. Its API is 0.x 
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.oddlyclever:wayfinder:0.0.7")
-            implementation("com.oddlyclever:wayfinder-vector:0.0.7")   // for a vector basemap
+            implementation("com.oddlyclever:wayfinder:0.0.8")
+            implementation("com.oddlyclever:wayfinder-vector:0.0.8")   // for a vector basemap
         }
     }
 }

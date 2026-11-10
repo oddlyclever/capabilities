@@ -120,10 +120,10 @@ falls back to the directory stem, de-hyphenated and title-cased, so
 | `requirements/` | Product Requirements | PRD narratives + Stories tables of tracker IDs (never AC) |
 | `specifications/` | Specifications | How a thing IS - architecture, component specs; update in place. May be **binding**: where the project says so, code contradicting a specification is a bug in the code, not a stale document. The section's `README.md` is where that is declared. Numbered `DOC-`, sharing the sequence with `documents/` |
 | `research/` | Research | Investigations - question, trail, findings. Postmortems and worked case studies are kinds of investigation and belong here, as files or as a sub-group if there are enough to warrant one |
-| `reference/` | Reference | External facts: vendors, prospects, regulations, domain material - and the **Domain Glossary** (the project's canonical terms; `AGENTS.md` at the repo root points at it so agents find it without a path) |
+| `reference/` | Reference | External facts: vendors, prospects, domain material - and the **Domain Glossary** (the project's canonical terms; `AGENTS.md` at the repo root points at it so agents find it without a path) |
 | `guides/` | Developer Guides | How-to - onboarding, environment, CI. Numbered `DOC-`, sharing the sequence with `documents/` |
 | `testing/` | Quality Assurance | Durable feature test plans - a folder per feature, its README the index, one article per sequence. A *run* is a tracker record where the project has a tracker wired, and never a document either way |
-| `compliance/` | Mandates & Compliance | Legal/regulatory rules the work must satisfy |
+| `compliance/` | Mandates & Compliance | Legal/regulatory rules the work must satisfy, and the project's mapping of each one onto what the code does. **Regulations live here, not in `reference/`** - they are not external facts kept close, they are rules with consequences, and a reader looking for what binds the project looks in one place. A `regulations/` directory is the same section under an older name: the installer's KB migration renames it onto `compliance/` |
 | `support/` | Support | Support knowledge, runbooks, customer-facing material |
 | `documents/` | Documents | Informational pages that explain the project - what it is, why it exists, how the pieces relate. Numbered `DOC-0001-…`, and maintained in place rather than dated and closed. Also the honest home for a KB document that fits no other section |
 
@@ -220,10 +220,7 @@ outside engineering has one version, in PD, and that is the normal case.
   vendors when they become active.
 - **Quality Assurance vs story QA**: per-story Gherkin lives in the
   story's `## QA` section; the KB section holds what spans stories.
-- **Mandate vs procedure**: the rule ("PIPEDA requires consent") and the
-  project's response ("how we check for it") are separate documents that
-  cite each other. Both live in the KB; they just sit in different
-  sections with different audiences.
+- **Mandate vs mapping vs procedure**: three documents, not one. The *rule* ("PIPEDA 4.3 requires consent") and the project's *mapping* of it onto the code ("consent is captured at signup, stored in `consents`, withdrawable from settings") both live in `compliance/` - an auditor reads them together, and a mapping filed away from the rule it maps is a register nobody finds. The *procedure* ("how to run the consent audit") is a how-to and belongs in `guides/`. All three cite each other.
 
 ## No status frontmatter
 

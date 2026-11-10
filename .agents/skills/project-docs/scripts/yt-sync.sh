@@ -7,9 +7,10 @@
 # in YouTrack and the tree follows. The one exception: a NEW local file's
 # location chooses its parent article at birth.
 #
-# Files and section directories are ID-prefixed like the stories snapshot
-# (PROJ-A-12_title-slug.md); new local files are renamed to match once their
-# article exists.
+# Leaf files are ID-prefixed like the stories snapshot
+# (PROJ-A-12_title-slug.md) and are renamed to match once their article
+# exists. Section directories are NOT - they are named for the section, with
+# the id living in the README.md inside.
 #
 # Usage: yt-sync.sh [KB_DIR] [options]
 #   KB_DIR          sync domain (default ./docs/knowledge)
@@ -579,15 +580,31 @@ def settle_name(aid):
     p = e['path']
     fake = {'id': aid, 'idReadable': e.get('idReadable'), 'summary': e.get('summary')}
     if os.path.basename(p) == 'README.md':
+        # A section's directory is named the way the pull side names it -
+        # dir_name, no id - or the very next sync moves it back and every
+        # file inside shows up as moved twice in git history.
         old_dir = os.path.dirname(p)
         if old_dir == KB: return
-        new_dir = os.path.join(os.path.dirname(old_dir), art_name(fake))
+        base = dir_name(fake)
+        new_dir = os.path.join(os.path.dirname(old_dir), base)
+        if new_dir != old_dir and os.path.exists(new_dir):
+            # Two sibling sections resolving to one directory name. Take the
+            # suffix rather than moving onto the existing directory, which
+            # would nest inside it. assign() decides the same collision by
+            # sorted summary, so where two sections share a TITLE this agrees
+            # with it - the newborn has the higher id and sorts last either
+            # way. Where two different titles collapse to one name through
+            # SECTION_DIRS, birth order and sort order can disagree, and that
+            # pair settles on the second sync instead of the first. Rare
+            # enough to leave; it is correct either way, just not immediate.
+            new_dir = os.path.join(os.path.dirname(old_dir),
+                                   f"{base}-{fake.get('idReadable') or fake['id']}")
         if new_dir == old_dir: return
         if not DRY: shutil.move(old_dir, new_dir)
         for e2 in smap.values():
             if e2['path'] == old_dir or e2['path'].startswith(old_dir + os.sep):
                 e2['path'] = new_dir + e2['path'][len(old_dir):]
-        report['Notes'].append(f'renamed {old_dir}/ -> {new_dir}/ (ID prefix)')
+        report['Notes'].append(f'renamed {old_dir}/ -> {new_dir}/ (section name)')
     else:
         newp = os.path.join(os.path.dirname(p), art_name(fake) + '.md')
         if newp == p: return

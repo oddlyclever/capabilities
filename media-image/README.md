@@ -7,7 +7,7 @@ Images downsized and encoded for an upload or a file: a photo from the camera or
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:media-image:0.0.7")
+implementation("com.oddlyclever:media-image:0.0.8")
 ```
 
 It depends on [media-webp](../media-webp), which encodes the WebP, and on Android on [platform](../platform), which supplies the application context, so `ImageProcessor()` needs nothing passed in. On the JVM it needs Skia's native library at run time, which a Compose desktop app already has; [How Each Target Works](../docs/knowledge/media-image/DOC-0015-how-each-target-works.md) says what anything else adds.

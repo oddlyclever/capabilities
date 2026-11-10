@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.coderwise.libs.mapview.LatLon
 import com.coderwise.libs.mapview.TileKey
 import com.coderwise.libs.mapview.tiles.vector.VectorStyle
+import com.oddlyclever.wayfinder.CameraPosition
+import com.oddlyclever.wayfinder.DEFAULT_FIT_MAX_ZOOM
 import com.oddlyclever.wayfinder.MapFrameLayer
 import com.oddlyclever.wayfinder.MapFrameTile
 import com.oddlyclever.wayfinder.fit
@@ -58,11 +60,13 @@ class HeadlessLineStyle(
  *
  * - **The image** is [width] by [height] at [scale]: 600 by 400 at scale 2 is a 1200 by 800 image for screens that
  *   need it, with lines and markers twice as thick.
- * - **The camera** frames every coordinate inside [padding], no closer than the last level of [zoomRange], so a single
- *   point shows the streets around it.
- * - **Tiles** may be images (PNG, JPEG or WebP) or vector tiles, told apart by their bytes; vector tiles are drawn in
- *   [style], with their place, road, water, peak and point-of-interest names unless [names] is off. A tile [tiles]
- *   cannot supply is drawn from its nearest ancestor.
+ * - **The camera** frames every coordinate inside [padding], no closer than [maxZoom], so a short route fills the image
+ *   and a single point shows the streets around it. [maxZoom] is how close the camera goes, not how deep the tiles go:
+ *   past the last level of [zoomRange] the deepest tiles are magnified, which keeps vector tiles sharp and softens
+ *   raster ones.
+ * - **Tiles** may be images (PNG, JPEG or WebP) or vector tiles, told apart by their bytes, and are only requested at
+ *   the levels of [zoomRange]; vector tiles are drawn in [style], with their place, road, water, peak and
+ *   point-of-interest names unless [names] is off. A tile [tiles] cannot supply is drawn from its nearest ancestor.
  * - **Lines** are drawn one by one, so a route in pieces never jumps straight from one piece to the next. The first
  *   point of the first line is marked as the start and the last point of the last as the end, and [points] as
  *   waypoints; with no lines, [points] are marked as places. The lines' own points are never marked.
@@ -89,13 +93,13 @@ suspend fun renderMapImage(
     zoomRange: IntRange = DEFAULT_ZOOM_RANGE,
     padding: Dp = 48.dp,
     line: HeadlessLineStyle = HeadlessLineStyle(),
+    maxZoom: Float = DEFAULT_FIT_MAX_ZOOM,
 ): ByteArray {
     val everything = lines.flatten() + points
-    require(everything.isNotEmpty()) { "Nothing to draw: no lines and no points." }
     val size = IntSize((width * scale).roundToInt(), (height * scale).roundToInt())
     require(size.width > 0 && size.height > 0) { "An image needs a size; got $width x $height at scale $scale." }
     val density = Density(scale)
-    val position = fit(everything, size, density, padding, maxZoom = zoomRange.last.toFloat())
+    val position = imageCamera(everything, size, density, padding, maxZoom)
     val ends = TrackStyle(line = LineStyle.None, speed = SpeedStyle.None, heading = HeadingMarker.None, showAccuracy = false)
 
     val measurer = if (names) TextMeasurer(createFontFamilyResolver(), density, LayoutDirection.Ltr) else null
@@ -110,8 +114,17 @@ suspend fun renderMapImage(
     }
 }
 
-/** How far in a server image goes: street level, where most tile servers' vector tiles stop. */
+/**
+ * The tile levels a server image requests: up to 14, where most tile servers' vector tiles stop. It limits how deep the
+ * tiles go, not how close the camera goes, which is [renderMapImage]'s `maxZoom`.
+ */
 val DEFAULT_ZOOM_RANGE = 0..14
+
+/** The camera [renderMapImage] draws from: every coordinate fitted inside [padding], north-up, no closer than [maxZoom]. */
+internal fun imageCamera(everything: List<LatLon>, size: IntSize, density: Density, padding: Dp, maxZoom: Float): CameraPosition {
+    require(everything.isNotEmpty()) { "Nothing to draw: no lines and no points." }
+    return fit(everything, size, density, padding, maxZoom = maxZoom)
+}
 
 private fun DrawScope.drawLine(points: List<LatLon>, projection: MapFrameProjection, style: HeadlessLineStyle) {
     if (points.size < 2) return

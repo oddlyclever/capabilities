@@ -6,6 +6,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
+## [0.0.8] - 2026-11-10
+
+### Added
+
+- **`wayfinder-geojson`**: a `GeoJsonLayer` that takes a `GeoFeatureCollection`, for a collection the app built or parsed itself, drawn with no text in between; and `parseGeoJson`, which throws with the reason a document does not parse.
+- **`wayfinder-headless`**: `renderMapImage` takes `maxZoom`, how close the camera may fit, 17 by default. It is separate from `zoomRange`, which now only limits the tile levels requested.
+
+### Fixed
+
+- **`wayfinder-headless`**: a static image of a short route fills the frame. The camera used to stop at the last level of `zoomRange`, 14 by default, so a route under about a kilometre sat small in the middle of the image; it now fits as close as `maxZoom` and magnifies the deepest tiles past `zoomRange`, which keeps vector tiles sharp and softens raster ones. A single point still shows the streets around it, and long routes frame as before.
+
+### Changed
+
+- **`wayfinder`, `wayfinder-geojson`**: built on aughtone-types 4.2.0, up from 4.1.0, and format-readable 4.3.0, up from 4.2.1.
+- **`wayfinder-geojson`**: GeoJSON is aughtone-types' model, and the module no longer depends on map-view-geojson, which it drew through. The drawing and hit-testing are a copy of map-view-geojson 0.3.0 and draw the same. **Source-incompatible:** `FeatureCollection`, `Feature` and `Geometry` from `com.coderwise.libs.mapview.geojson` become `GeoFeatureCollection`, `GeoFeature` and the `GeoGeometry` types from `io.github.aughtone.types.geo`, whose positions are `[longitude, latitude]` lists; `GeoJsonStyle` moves to `com.oddlyclever.wayfinder.geojson`; map-view's `GeoJson(data)` composable becomes `GeoJsonLayer(data)`; and `onFeatureClick` gets a `GeoFeature`, whose properties are a `JsonObject` read with `stringProperty`, `intProperty` and their siblings. Parsing follows RFC 7946 more strictly: a line of one position, or a polygon ring that is not closed or has fewer than four positions, fails the document, which then draws nothing.
+
 ## [0.0.7] - 2026-11-04
 
 ### Added
@@ -74,7 +90,8 @@ The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but no
 - **Android:** API level 24 or later. An app that calls one of these modules' inline functions compiles with `jvmTarget` 21.
 - **Built with:** Kotlin 2.4.21, Compose Multiplatform 1.12.2 (Skiko 0.150.2) and map-view 0.3.0.
 
-[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.7...develop
+[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.8...develop
+[0.0.8]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.8
 [0.0.7]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.7
 [0.0.6]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.6
 [0.0.5]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.5
