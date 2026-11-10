@@ -5,7 +5,7 @@ license: MIT
 compatibility: Standalone for authoring. The project-docs skill owns where docs live and the tracker KB sync; run its sync after writing if the project has one.
 metadata:
   author: bpappin
-  version: "1.4"
+  version: "1.5"
 ---
 
 # Architecture Decision Records (to-adr)
@@ -52,9 +52,12 @@ reasoning is available for about an hour and then it is reconstruction.
 ## Writing it
 
 Start from the project-docs template
-(`assets/templates/adr.md` in that skill) and keep to its four sections.
-Number sequentially, zero-padded, with a slug in the filename:
+(`assets/templates/adr.md` in that skill) and keep to its four sections -
+Context, Decision, Consequences, Corrections. Number sequentially,
+zero-padded, with a slug in the filename:
 `0007-postgres-over-dynamo.md`.
+
+**One optional fifth section, which a decision earns rather than inherits.** `## Regulatory Alignment` carries a compliance mapping, and belongs only on a decision that touches personal data, automated decision-making or something else an active regulation reaches. The regulatory-compliance skill writes it; delete the section everywhere else. It is optional on purpose - an expectation that every ADR carries one fails every ADR about a build tool, and an audit that fails everything gets ignored.
 
 **Keep the number out of the heading.** The heading is the title alone —
 `# Postgres over DynamoDB`, not `# ADR-0007: Postgres over DynamoDB`. It

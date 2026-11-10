@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a connection to the project's issue tracker (see the tracker binding; YouTrack today).
 metadata:
   author: bpappin
-  version: "1.28"
+  version: "1.29"
 ---
 
 # Triage
@@ -166,7 +166,7 @@ a value, say so and ask.
    deliberately adds a new one. Check for near-duplicates before proposing
    a new value ("CMS-Server" when "CMS Server" exists); adding one is a
    project-settings change and may need an admin. Curate topical tags:
-   Title Case, human-readable ("Trust Insights"),
+   Title Case, human-readable ("Offline Sync"),
    **chosen from the tags the project already uses** - freeform is not
    permission to invent one. A genuinely new tag is a human decision:
    name it, say why nothing existing fits, and get confirmation before

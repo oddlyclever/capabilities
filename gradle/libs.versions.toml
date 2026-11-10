@@ -30,12 +30,12 @@ mapView = "0.3.0"
 # :wayfinder-cache's file store, in common code over whatever file system the app hands it.
 okio = "3.18.2"
 # :wayfinder writes the scale bar's label in the reader's locale with it.
-aughtone-format = "4.2.1"
+aughtone-format = "4.3.0"
 # :wayfinder finds the reader's locale with it, and :wayfinder-geojson's model is its GeoJSON. The version
 # format-readable is built against.
-aughtone-types = "4.1.0"
-# :wayfinder-geojson decodes GeoJSON text into aughtone-types' model with it. The version aughtone's format modules
-# bring, so the build resolves one version.
+aughtone-types = "4.2.0"
+# :wayfinder-geojson decodes GeoJSON text into aughtone-types' model with it. At least the version aughtone-types
+# brings (1.11.0 for 4.2.0), so the build resolves this one.
 kotlinxSerialization = "1.12.0"
 kotlinxCoroutines = "1.11.0"
 # :media-image's web target: the DOM, for <img> and <canvas>.

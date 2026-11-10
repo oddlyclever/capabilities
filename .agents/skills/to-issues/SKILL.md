@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a connection to the project's issue tracker (see the tracker binding; YouTrack today).
 metadata:
   author: bpappin
-  version: "1.18"
+  version: "1.19"
 ---
 
 # To Issues
@@ -136,7 +136,7 @@ Priority, Subsystem, and Estimation as approved, tag every story `triaged`
 slices `ready-for-agent`, tag
 `needs-gherkin` where a slice has strict rules or planned test automation,
 and apply one shared **topical tag** to the whole batch - Title Case,
-human-readable, usually the feature or PRD name ("Trust Insights") - so the
+human-readable, usually the feature or PRD name ("Offline Sync") - so the
 slices group together in searches and board swimlanes. Reuse the project's
 existing topical tags where one fits; never invent near-duplicates. If a
 target release was confirmed, set Fix versions on each story.

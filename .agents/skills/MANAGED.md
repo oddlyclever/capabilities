@@ -8,16 +8,16 @@ lost, silently, at the next run.
 
 | Skill | Version |
 |---|---|
-| story-workflow | 1.29 |
+| story-workflow | 1.30 |
 | story-reconcile | 0.31 |
-| to-issues | 1.18 |
-| triage | 1.28 |
-| project-docs | 1.42 |
+| to-issues | 1.19 |
+| triage | 1.29 |
+| project-docs | 1.44 |
 | to-prd | 1.6 |
-| to-adr | 1.4 |
+| to-adr | 1.5 |
 | to-rad | 1.5 |
 | grill-with-docs | 2.1 |
-| regulatory-compliance | 1.2 |
+| regulatory-compliance | 1.3 |
 | handoff | 1.3 |
 | housekeeping | 1.7 |
 | zoom-out | 1.1 |

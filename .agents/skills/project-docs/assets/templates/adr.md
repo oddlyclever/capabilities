@@ -23,6 +23,17 @@ What was decided, actively phrased.
 
 What becomes easier, what becomes harder, what we gave up.
 
+## Regulatory Alignment
+
+<!-- OPTIONAL, and only where the decision touches personal data, automated
+     decision-making, or anything else an active regulation reaches. A
+     decision about a build tool does not get this section - delete it.
+     Where it applies, the regulatory-compliance skill generates the table
+     from its alignment template: one per deployment, with the status
+     vocabulary (Addressed / Partly / Gap / Needs review) and the line
+     saying it is an engineering assessment and unreviewed. Never write
+     "compliant" or a pass here. Delete the section if it does not apply. -->
+
 ## Corrections
 
 <!-- Substantive corrections to the facts above, oldest first: one dated line
