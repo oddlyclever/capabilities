@@ -6,7 +6,7 @@ Report it privately, through GitHub: on this repository's **Security** tab, choo
 
 A useful report says:
 
-- which module and version it affects, such as `com.oddlyclever:media-image:0.0.7`
+- which module and version it affects, such as `com.oddlyclever:media-image:0.0.8`
 - what an attacker could do with it, and what they need first, such as control of an image or a tile response the app loads
 - how to reproduce it: a failing test, a sample input, or the steps
 

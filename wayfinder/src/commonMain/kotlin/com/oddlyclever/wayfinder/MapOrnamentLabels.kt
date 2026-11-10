@@ -11,9 +11,10 @@ import io.github.aughtone.types.locale.Locale
  * [OrientationToggle] where a screen places those itself.
  *
  * Every field is null unless set, and a null field keeps wayfinder's own word in the device's language, as aughtone's
- * `Locale.current` reports it. wayfinder has its words in every language aughtone-types' `Locales` defines except
- * Inuktitut, which is English until a speaker has checked a translation, and uses English for any language it does not
- * have. Set a field to use the app's own term for a control, or to cover a language wayfinder does not. The scale
+ * `Locale.current` reports it. wayfinder has its words in 53 languages and uses English for any language it does not
+ * have. Inuktitut and the other Canadian Indigenous languages aughtone-types knows, such as Cree and Ojibwe, are English
+ * for now, until translations checked by speakers are added.
+ * Set a field to use the app's own term for a control, or to cover a language wayfinder does not. The scale
  * bar's distance is not here: it is written in the device's locale on its own.
  *
  * @property zoomIn and [zoomOut] are the zoom buttons.

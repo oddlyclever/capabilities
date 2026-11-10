@@ -17,7 +17,7 @@ description: >-
   com.oddlyclever:wayfinder-frame.
 license: Apache-2.0
 metadata:
-  version: "0.0.7"
+  version: "0.0.8"
   repository: https://github.com/oddlyclever/capabilities
 ---
 
@@ -78,8 +78,9 @@ The camera frames every coordinate inside the padding, no closer than `maxZoom`,
 
 ## What moved, and what it used to be called
 
-`wayfinder-headless` was first released in 0.0.3 and its API has not changed since, so no published version had another shape.
+`wayfinder-headless` was first released in 0.0.3 and its API has only grown since, so code written for an earlier version still compiles.
 
+- **Since 0.0.8, `maxZoom` is how close the camera fits, 17 by default.** Before it the camera stopped at the last level of `zoomRange`, 14 by default, so a route under about a kilometre sat small in the middle of the image. Code that widened `zoomRange` past the source's levels to get closer can narrow it back and leave the closeness to `maxZoom`.
 - **Since 0.0.7, `style` can be passed.** In 0.0.3 to 0.0.6 the vector module was not exposed, so `MapStyles` was an unresolved reference and passing `style` failed with "Cannot access class 'com.coderwise.libs.mapview.tiles.vector.VectorStyle'" unless `com.oddlyclever:wayfinder-vector` was also a dependency.
 - **There is no tile URL setting.** The library makes no HTTP requests: `tiles` is a function from a `TileKey` to bytes, written with your own client, keys and cache.
 - **The result is encoded bytes, not a bitmap.** `renderMapImage` returns a `ByteArray` in `format`; there is no `ImageBitmap` or `BufferedImage` to encode afterwards. The formats are `ImageFormat.Webp` and `ImageFormat.Png`, and there is no JPEG.

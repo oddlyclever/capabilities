@@ -7,7 +7,7 @@ A tile cache for wayfinder maps, in front of the app's own `TileClient`: a store
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:wayfinder-cache:0.0.7")
+implementation("com.oddlyclever:wayfinder-cache:0.0.8")
 ```
 
 The package is `com.oddlyclever.wayfinder.cache`. It depends on map-view-core for `TileKey` and on okio, both as `api`, and not on Compose or on `wayfinder` itself, so a server drawing map images with `wayfinder-headless` can use it as well as an app. There is no dependency-injection container.

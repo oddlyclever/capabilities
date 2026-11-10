@@ -9,7 +9,7 @@ The Compose Multiplatform parts every app ends up writing for itself: text that 
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:sundries-compose:0.0.7")
+implementation("com.oddlyclever:sundries-compose:0.0.8")
 ```
 
 There is nothing to set up and no dependency-injection container.

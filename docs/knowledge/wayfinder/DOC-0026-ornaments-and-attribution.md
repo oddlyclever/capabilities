@@ -42,7 +42,7 @@ Both say what they are in the device's language on their own. A screen that sets
 
 ## Labels and languages
 
-The ornaments name themselves in the device's language with no setup: what a screen reader says for each control, and the compass tape's points. The language is aughtone-types' `Locale.current`. wayfinder has its words in every language aughtone-types' `Locales` defines, chosen by the language's code whatever the region, so French in Canada gets French; Chinese is traditional in Taiwan, Hong Kong and Macau and simplified elsewhere. Inuktitut is the exception: it gets English until a speaker has checked a translation, as does any language aughtone does not define. Where a language has no settled short form for the points of the compass, the tape uses the international N, NE, E and so on.
+The ornaments name themselves in the device's language with no setup: what a screen reader says for each control, and the compass tape's points. The language is aughtone-types' `Locale.current`. wayfinder has its words in 53 languages, chosen by the language's code whatever the region, so French in Canada gets French; Chinese is traditional in Taiwan, Hong Kong and Macau and simplified elsewhere. Inuktitut and the other Canadian Indigenous languages aughtone-types knows, such as the Cree and Ojibwe it added in 4.2.0, get English for now, until translations checked by speakers are added; an app that needs them sooner sets `MapOrnamentLabels`. Any other language gets English too. Where a language has no settled short form for the points of the compass, the tape uses the international N, NE, E and so on.
 
 `MapOrnamentLabels` replaces any of them with the app's own, field by field. Every field is null unless set, and a null field keeps wayfinder's word:
 

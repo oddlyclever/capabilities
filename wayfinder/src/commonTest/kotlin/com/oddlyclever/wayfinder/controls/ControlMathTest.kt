@@ -10,10 +10,13 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import com.oddlyclever.wayfinder.ScaleUnits
-import io.github.aughtone.readable.Locales
+import io.github.aughtone.types.locale.localeFor
 
 /** The arithmetic behind the controls: the short way round, the compass tape's marks and the scale bar's round numbers. */
 class ControlMathTest {
+
+    private val English = requireNotNull(localeFor("en-US")) { "aughtone-types has no en-US" }
+    private val French = requireNotNull(localeFor("fr-FR")) { "aughtone-types has no fr-FR" }
 
     // --- shortestTurn --------------------------------------------------------------------------
 
@@ -35,7 +38,7 @@ class ControlMathTest {
     @Test
     fun `a metric bar is a round number of metres no wider than the room`() {
         // 4.78 m a dp and 120 dp of room is 573 m; the round number under that is 500.
-        val bar = assertNotNull(scaleBarSize(4.7773, 120f, ScaleUnits.Metric, Locales.English))
+        val bar = assertNotNull(scaleBarSize(4.7773, 120f, ScaleUnits.Metric, English))
         assertEquals("500 m", bar.label)
         assertEquals(500f / 4.7773f, bar.width, 1e-2f)
         assertTrue(bar.width <= 120f)
@@ -43,44 +46,44 @@ class ControlMathTest {
 
     @Test
     fun `metres give way to kilometres at a thousand`() {
-        assertEquals("1 km", scaleBarSize(9.0, 120f, ScaleUnits.Metric, Locales.English)?.label) // 1080 m of room
-        assertEquals("500 m", scaleBarSize(8.0, 120f, ScaleUnits.Metric, Locales.English)?.label) // 960 m
-        assertEquals("200 km", scaleBarSize(2000.0, 120f, ScaleUnits.Metric, Locales.English)?.label) // 240 km
+        assertEquals("1 km", scaleBarSize(9.0, 120f, ScaleUnits.Metric, English)?.label) // 1080 m of room
+        assertEquals("500 m", scaleBarSize(8.0, 120f, ScaleUnits.Metric, English)?.label) // 960 m
+        assertEquals("200 km", scaleBarSize(2000.0, 120f, ScaleUnits.Metric, English)?.label) // 240 km
     }
 
     @Test
     fun `an imperial bar counts feet until a mile and then miles`() {
         // 573 m is 1880 ft.
-        assertEquals("1,000 ft", scaleBarSize(4.7773, 120f, ScaleUnits.Imperial, Locales.English)?.label)
+        assertEquals("1,000 ft", scaleBarSize(4.7773, 120f, ScaleUnits.Imperial, English)?.label)
         // 20 m a dp over 120 dp is 2400 m, a mile and a half.
-        assertEquals("1 mi", scaleBarSize(20.0, 120f, ScaleUnits.Imperial, Locales.English)?.label)
-        assertEquals("5 mi", scaleBarSize(80.0, 120f, ScaleUnits.Imperial, Locales.English)?.label) // 6 miles
+        assertEquals("1 mi", scaleBarSize(20.0, 120f, ScaleUnits.Imperial, English)?.label)
+        assertEquals("5 mi", scaleBarSize(80.0, 120f, ScaleUnits.Imperial, English)?.label) // 6 miles
     }
 
     @Test
     fun `the bar is the length it says and not the length of the room`() {
         // 1 mile is 1609.344 m.
-        val bar = assertNotNull(scaleBarSize(20.0, 120f, ScaleUnits.Imperial, Locales.English))
+        val bar = assertNotNull(scaleBarSize(20.0, 120f, ScaleUnits.Imperial, English))
         assertEquals(1609.344f / 20f, bar.width, 1e-2f)
     }
 
     @Test
     fun `zoomed far in a bar counts millimetres`() {
-        assertEquals("500 mm", scaleBarSize(0.005, 120f, ScaleUnits.Metric, Locales.English)?.label) // 0.6 m of room
+        assertEquals("500 mm", scaleBarSize(0.005, 120f, ScaleUnits.Metric, English)?.label) // 0.6 m of room
     }
 
     @Test
     fun `the number is written the way the locale writes numbers`() {
-        val label = scaleBarSize(4.7773, 120f, ScaleUnits.Imperial, Locales.French)?.label
+        val label = scaleBarSize(4.7773, 120f, ScaleUnits.Imperial, French)?.label
         assertTrue(label != null && label != "1,000 ft" && label.endsWith(" ft"), "a French bar of 1000 ft, got \"$label\"")
     }
 
     @Test
     fun `nothing sensible to draw is no bar`() {
-        assertNull(scaleBarSize(0.0, 120f, ScaleUnits.Metric, Locales.English))
-        assertNull(scaleBarSize(Double.NaN, 120f, ScaleUnits.Metric, Locales.English))
-        assertNull(scaleBarSize(Double.POSITIVE_INFINITY, 120f, ScaleUnits.Metric, Locales.English))
-        assertNull(scaleBarSize(5.0, 0f, ScaleUnits.Metric, Locales.English))
+        assertNull(scaleBarSize(0.0, 120f, ScaleUnits.Metric, English))
+        assertNull(scaleBarSize(Double.NaN, 120f, ScaleUnits.Metric, English))
+        assertNull(scaleBarSize(Double.POSITIVE_INFINITY, 120f, ScaleUnits.Metric, English))
+        assertNull(scaleBarSize(5.0, 0f, ScaleUnits.Metric, English))
     }
 
     @Test

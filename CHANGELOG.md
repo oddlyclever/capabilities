@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
+## [0.0.8] - 2026-11-10
+
 ### Added
 
 - **`wayfinder-geojson`**: a `GeoJsonLayer` that takes a `GeoFeatureCollection`, for a collection the app built or parsed itself, drawn with no text in between; and `parseGeoJson`, which throws with the reason a document does not parse.
@@ -88,7 +90,8 @@ The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but no
 - **Android:** API level 24 or later. An app that calls one of these modules' inline functions compiles with `jvmTarget` 21.
 - **Built with:** Kotlin 2.4.21, Compose Multiplatform 1.12.2 (Skiko 0.150.2) and map-view 0.3.0.
 
-[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.7...develop
+[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.8...develop
+[0.0.8]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.8
 [0.0.7]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.7
 [0.0.6]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.6
 [0.0.5]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.5

@@ -41,7 +41,7 @@ A module that cannot support one of these says which and why, in its own README 
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.oddlyclever:example:0.0.7")
+            implementation("com.oddlyclever:example:0.0.8")
         }
     }
 }

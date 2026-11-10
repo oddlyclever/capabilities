@@ -1,8 +1,9 @@
 package com.oddlyclever.wayfinder
 
 // wayfinder's own words for its ornaments, one entry per language: a language code, or a code and region where the
-// region changes the writing, as Taiwan's traditional Chinese does. Every language aughtone-types' Locales defines is
-// here except Inuktitut, which falls back to English until a translation can be checked by a speaker. Kept as Kotlin
+// region changes the writing, as Taiwan's traditional Chinese does: 53 languages, Chinese in both scripts. Inuktitut
+// and the other Canadian Indigenous languages aughtone-types knows, such as the Cree and Ojibwe added in 4.2.0, fall
+// back to English for now, until translations can be checked by speakers, as does any other language. Kept as Kotlin
 // rather than Compose resources for two reasons: on the web, resources load asynchronously, so a label would be empty
 // until its file arrived; and resources pick a language for themselves, where these follow aughtone-types'
 // Locale.current, as the scale bar's number does. Resource files suit translators better; move to them if the
