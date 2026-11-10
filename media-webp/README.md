@@ -7,7 +7,7 @@ WebP encoding for Kotlin Multiplatform: lossy or lossless, with GPS position and
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:media-webp:0.0.7")
+implementation("com.oddlyclever:media-webp:0.0.8")
 ```
 
 There is no dependency-injection container and nothing to initialise. Android and iOS encode with a libwebp built into this library. On the JVM and the web it uses Skia, which a Compose app already has; anything else adds Skia's native library itself, as [Platform Notes](../docs/knowledge/media-webp/DOC-0018-platform-notes.md) describes.

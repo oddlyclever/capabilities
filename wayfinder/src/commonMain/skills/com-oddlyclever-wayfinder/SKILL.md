@@ -16,7 +16,7 @@ description: >-
   without a composition is com.oddlyclever:wayfinder-frame.
 license: Apache-2.0
 metadata:
-  version: "0.0.7"
+  version: "0.0.8"
   repository: https://github.com/oddlyclever/capabilities
 ---
 
@@ -126,7 +126,7 @@ For course-up, set `state.orientation = Orientation.CourseUp` and keep `state.he
 
 - **Since 0.0.7, layers made from equal arguments are the same layer.** Before it, every call to `vectorBasemap` or `rasterBasemap` was a new layer, and one made inside a composable lost its tiles on every recomposition; code that made layers once for that reason still works.
 - **Since 0.0.7, `rememberWayfinderMapState` is saved across an activity's recreation.** Before it, a rotation put the camera back where it started.
-- **Since 0.0.7, the ornaments speak the device's language.** What each control is called to a screen reader, and the compass tape's points, are in the device's language with no setup, for every language aughtone-types defines but Inuktitut, and English otherwise; before, they were English only. `MapOrnaments(labels = MapOrnamentLabels(...))` replaces any of them field by field, and `MapCompassTape` and `OrientationToggle` take the same `labels`. The scale bar's distance follows the device's locale too.
+- **Since 0.0.7, the ornaments speak the device's language.** What each control is called to a screen reader, and the compass tape's points, are in the device's language with no setup, in 53 languages, and English otherwise; before, they were English only. Inuktitut and the other Canadian Indigenous languages aughtone-types knows, such as the Cree and Ojibwe it added in 4.2.0, get English for now, until translations checked by speakers are added; an app that needs them sooner sets `labels`. `MapOrnaments(labels = MapOrnamentLabels(...))` replaces any of them field by field, and `MapCompassTape` and `OrientationToggle` take the same `labels`. The scale bar's distance follows the device's locale too.
 - **Since 0.0.7, `ScaleUnits` is `com.oddlyclever.wayfinder.ScaleUnits`.** It was map-view's, in `com.coderwise.libs.mapview.controls`, and wayfinder no longer brings map-view-controls: `ZoomButtons`, `ScaleBar`, `NorthButton`, `CompassTape`, `CourseUp`, `Attribution` and `turnTo` from that package do not resolve through wayfinder. Use `MapOrnaments`, `MapCompassTape` and `OrientationToggle`, or depend on `com.coderwise.libs:map-view-controls:0.3.0` directly.
 
 - **It is not Google Maps Compose or MapLibre.** There is no `GoogleMap`, `CameraPositionState`, `Marker(state = ...)` child composable or style URL. The map is `WayfinderMap`, the camera is `WayfinderMapState`, markers are `MapMarker` values in the `markers` list, a coordinate is map-view's `LatLon(lat, lon)`, not `LatLng`, and tiles come from a `TileSource` and the app's `TileClient`.

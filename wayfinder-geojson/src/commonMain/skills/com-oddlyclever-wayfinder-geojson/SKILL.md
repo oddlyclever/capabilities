@@ -15,7 +15,7 @@ description: >-
   before drawing it, and draws a collection an app built in code.
 license: Apache-2.0
 metadata:
-  version: "0.0.7"
+  version: "0.0.8"
   repository: https://github.com/oddlyclever/capabilities
 ---
 
@@ -92,7 +92,7 @@ WayfinderMap(state, layers = listOf(basemap)) {
 
 `wayfinder-geojson` was first released in 0.0.3, so no earlier versions exist.
 
-- **After 0.0.7, the model is aughtone-types', not map-view's.** `FeatureCollection` is `GeoFeatureCollection`, `Feature` is `GeoFeature`, `Geometry.Polygon` is `GeoPolygon` and so on, in `io.github.aughtone.types.geo`; positions are `[longitude, latitude]` lists rather than `LatLon`. `GeoJsonStyle` moved from `com.coderwise.libs.mapview.geojson` to `com.oddlyclever.wayfinder.geojson`, and map-view's `GeoJson(data)` composable is `GeoJsonLayer(data)`. `onFeatureClick` gets a `GeoFeature`, whose properties are read with `stringProperty` and its siblings. `parseGeoJson` is this module's and throws the reason without the "Not GeoJSON:" prefix map-view's had. A ring left open, or a line of one position, no longer parses.
+- **Since 0.0.8, the model is aughtone-types', not map-view's.** `FeatureCollection` is `GeoFeatureCollection`, `Feature` is `GeoFeature`, `Geometry.Polygon` is `GeoPolygon` and so on, in `io.github.aughtone.types.geo`; positions are `[longitude, latitude]` lists rather than `LatLon`. `GeoJsonStyle` moved from `com.coderwise.libs.mapview.geojson` to `com.oddlyclever.wayfinder.geojson`, and map-view's `GeoJson(data)` composable is `GeoJsonLayer(data)`. `onFeatureClick` gets a `GeoFeature`, whose properties are read with `stringProperty` and its siblings. `parseGeoJson` is this module's and throws the reason without the "Not GeoJSON:" prefix map-view's had. A ring left open, or a line of one position, no longer parses.
 
 - **Since 0.0.7, a `load` that throws draws nothing.** Before it, the exception escaped `RemoteGeoJsonLayer`'s effect and crashed the app, so code written for 0.0.6 caught inside `load`; that still works.
 

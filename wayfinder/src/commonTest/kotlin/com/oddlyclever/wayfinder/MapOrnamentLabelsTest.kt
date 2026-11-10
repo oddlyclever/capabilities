@@ -1,6 +1,6 @@
 package com.oddlyclever.wayfinder
 
-import io.github.aughtone.readable.Locales
+import io.github.aughtone.types.locale.localeFor
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -28,8 +28,8 @@ class MapOrnamentLabelsTest {
     }
 
     @Test
-    fun `every language aughtone defines has words but Inuktitut which is English`() {
-        // The languages of aughtone's Locales, which has no list of its own to iterate.
+    fun `every language wayfinder translates has words and Canadian Indigenous languages are English`() {
+        // The 53 languages wayfinder has words for, listed here so a dropped entry fails.
         val languages = listOf(
             "af", "nl", "de", "da", "nb", "nn", "sv", "is", "fr", "es", "it", "pt", "ca", "gl", "ro", "ru", "uk", "be",
             "pl", "cs", "sk", "bg", "hr", "sr", "mk", "sl", "lt", "lv", "ja", "zh", "ko", "th", "vi", "id", "ms", "hi",
@@ -38,8 +38,9 @@ class MapOrnamentLabelsTest {
         for (language in languages) {
             assertNotEquals(EnglishOrnamentWords, ornamentWordsFor(language), "words for \"$language\"")
         }
-        assertEquals("Zoom avant", ornamentWordsFor(Locales.SwissFrench).zoomIn, "a Locale from aughtone")
+        assertEquals("Zoom avant", ornamentWordsFor(requireNotNull(localeFor("fr-CH"))).zoomIn, "a Locale from aughtone-types")
         assertEquals(EnglishOrnamentWords, ornamentWordsFor("iu", "CA"), "Inuktitut")
+        assertEquals(EnglishOrnamentWords, ornamentWordsFor("cr", "CA"), "Cree, until a translation checked by speakers is added")
     }
 
     @Test

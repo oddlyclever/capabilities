@@ -7,7 +7,7 @@ GeoJSON on a [wayfinder](../wayfinder) map, from text, from a URL, or already in
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:wayfinder-geojson:0.0.7")
+implementation("com.oddlyclever:wayfinder-geojson:0.0.8")
 ```
 
 It exposes `wayfinder` and aughtone-types as `api`, so `GeoFeatureCollection`, `GeoFeature` and the geometry types, in `io.github.aughtone.types.geo`, are available without declaring them. There is no dependency-injection container.
