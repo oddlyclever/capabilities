@@ -22,3 +22,7 @@ internal actual suspend fun fetchBytes(uri: String): ByteArray? = try {
 } catch (e: Throwable) {
     null
 }
+
+// A Kotlin/JS ByteArray is an Int8Array, so it is a blob part as it is.
+internal actual fun ByteArray.toBlob(type: String): Blob =
+    Blob(arrayOf(this), org.w3c.files.BlobPropertyBag(type = type))

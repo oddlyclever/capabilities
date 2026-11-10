@@ -6,6 +6,7 @@ import org.w3c.files.Blob
 import kotlin.coroutines.resume
 import kotlinx.coroutines.await
 import org.khronos.webgl.get
+import org.khronos.webgl.set
 
 internal actual suspend fun HTMLCanvasElement.encodeToBlob(type: String, quality: Double): Blob? =
     suspendCancellableCoroutine { continuation ->
@@ -26,4 +27,12 @@ internal actual suspend fun fetchBytes(uri: String): ByteArray? = try {
     }
 } catch (e: Throwable) {
     null
+}
+
+internal actual fun ByteArray.toBlob(type: String): Blob {
+    val array = org.khronos.webgl.Int8Array(size)
+    for (i in indices) array[i] = this[i]
+    val parts = JsArray<JsAny?>()
+    parts[0] = array
+    return Blob(parts, org.w3c.files.BlobPropertyBag(type = type))
 }

@@ -46,4 +46,4 @@ Every platform's encoder writes the image with no metadata, so the EXIF this add
 
 The module's own reader takes the EXIF from a JPEG's APP1 segment, a WebP's `EXIF` chunk or a PNG's `eXIf` chunk, in either byte order, and accepts a WebP whose EXIF carries the `Exif\0\0` prefix that the specification leaves out but some writers add. It never fails a compression: a source with no EXIF, or EXIF it cannot make sense of, reads as upright with nothing recorded. On Android, EXIF that ExifInterface cannot read is treated the same way.
 
-**In the browser, the source is fetched a second time** to read its EXIF, since the `<img>` that decodes it does not expose its bytes. That happens only when `keepMetadata` is true. If the fetch fails, the image is still produced, and the metadata is silently left out.
+**In the browser, a location is fetched a second time** to read its EXIF, since the `<img>` that decodes it does not expose its bytes. That happens only when `keepMetadata` is true, and never for the bytes form, whose EXIF is read from the bytes given. If the fetch fails, the image is still produced, and the metadata is silently left out.

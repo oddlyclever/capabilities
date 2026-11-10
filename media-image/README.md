@@ -25,11 +25,21 @@ upload(image.bytes, contentType = image.contentType)            // image.width a
 
 Images only get smaller, photos come out upright, and `contentType` is the format that was actually written. Failures come back in the `Result` as a typed `ImageProcessingException`, and `compressImageWithFallback` tries a list of formats in turn. The result carries no metadata unless you pass `keepMetadata = true`, which keeps the source's location and capture time.
 
+An image already in memory goes in as its bytes, `compressImage(bytes)`, and `readSource(uri)` gives a location's bytes. `imageKindOf(bytes)` says what an image is without decoding it, so an SVG or an animated GIF, which converting would rasterize or flatten to one frame, can be kept as it is:
+
+```kotlin
+val original = processor.readSource(uri).getOrElse { failure -> return handle(failure) }
+when (val kind = imageKindOf(original)) {
+    ImageKind.Svg, ImageKind.AnimatedGif -> upload(original, contentType = kind.contentType)
+    else -> processor.compressImage(original).onSuccess { upload(it.bytes, it.contentType) }
+}
+```
+
 ## Documentation
 
 The full documentation is in the module's section of the [knowledge base](../docs/knowledge/media-image/README.md), which is mirrored to the repository's wiki:
 
-- [Compressing an Image](../docs/knowledge/media-image/DOC-0013-compressing-an-image.md): every parameter, what `uri` may be, the typed failures, and the fallback.
+- [Compressing an Image](../docs/knowledge/media-image/DOC-0013-compressing-an-image.md): every parameter, what `uri` may be, compressing from bytes, the typed failures, the fallback, and telling what an image is.
 - [Keeping Location and Capture Time](../docs/knowledge/media-image/DOC-0014-keeping-location-and-capture-time.md): what `keepMetadata` keeps and where it is written.
 - [How Each Target Works](../docs/knowledge/media-image/DOC-0015-how-each-target-works.md): the decoders and encoders on each target, and what each needs from the app.
 - [No Metadata Unless Asked](../docs/knowledge/media-image/ADR-0007-no-metadata-unless-asked.md), [The Format Asked For, or a Typed Failure](../docs/knowledge/media-image/ADR-0008-the-format-asked-for-or-a-typed-failure.md) and [WebP Through media-webp on Every Target](../docs/knowledge/media-image/ADR-0009-webp-through-media-webp-on-every-target.md): why the module is built the way it is.

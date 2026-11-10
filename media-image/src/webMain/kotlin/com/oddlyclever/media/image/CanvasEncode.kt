@@ -18,3 +18,6 @@ internal expect suspend fun HTMLCanvasElement.encodeToBlob(type: String, quality
  * also differs between js and wasmJs.
  */
 internal expect suspend fun fetchBytes(uri: String): ByteArray?
+
+/** [this] as a `Blob` of [type], for an object URL an `<img>` can load. The `Blob` constructor's binding differs between js and wasmJs. */
+internal expect fun ByteArray.toBlob(type: String): Blob

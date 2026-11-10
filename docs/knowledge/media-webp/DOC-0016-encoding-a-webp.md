@@ -65,7 +65,7 @@ A failure throws. The call never returns an empty or cut-short file, which is ho
 | `WebpException` | the encoder refused the image, or returned bytes that are not a WebP |
 | `WebpException` | on iOS, a `UIImage` with no bitmap behind it |
 
-**A WebP is at most 16383 pixels a side.** A larger image is refused when the `RgbaPixels` is made, which happens inside `Bitmap.encodeToWebp` and `UIImage.encodeToWebp` too. Downsize first; [media-image](../media-image/README.md) does that from a file.
+**A WebP is at most 16383 pixels a side.** A larger image is refused when the `RgbaPixels` is made, which happens inside `Bitmap.encodeToWebp` and `UIImage.encodeToWebp` too. Downsize first; [media-image](../media-image/README.md) does that from a file or from the encoded bytes.
 
 ## Threading
 
@@ -73,4 +73,4 @@ Encoding is blocking and CPU-bound, tens of milliseconds for a photo, so call it
 
 ## What it does not do
 
-It encodes; it does not decode a WebP, read a file's EXIF back, resize, crop, or write animated WebP or XMP. Pixels are encoded as given: a `Bitmap` decoded from a camera JPEG holds the sensor's orientation, so it encodes sideways unless it is turned first. Opening a photo from a file or a URI, downsizing it and standing it upright is [media-image](../media-image/README.md).
+It encodes; it does not decode a WebP, read a file's EXIF back, resize, crop, or write animated WebP or XMP. Pixels are encoded as given: a `Bitmap` decoded from a camera JPEG holds the sensor's orientation, so it encodes sideways unless it is turned first. Opening a photo from a file, a URI or its encoded bytes, downsizing it and standing it upright is [media-image](../media-image/README.md).

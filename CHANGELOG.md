@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
+### Added
+
+- **`media-image`**: `compressImage` and `compressImageWithFallback` take an encoded image as a `ByteArray` as well as a location, with the same parameters, results and failures; a failure from bytes names its source `"<bytes>"`. `ImageProcessor.readSource(uri)` returns the bytes at a location, from exactly the locations `compressImage` reads. `imageKindOf(bytes)` tells an SVG, an animated GIF, a GIF, WebP, PNG or JPEG from its bytes without decoding it, as an `ImageKind` with the content type to store it under, so an image that converting would rasterize or flatten to one frame can be kept as it is.
+
 ## [0.0.8] - 2026-11-10
 
 ### Added

@@ -12,8 +12,8 @@ description: >-
   capture date and time, and the software name; adds, replaces or strips the
   EXIF of an existing WebP from any encoder, such as a server or Skia; and
   gives the same tags as a bare EXIF block for a JPEG or PNG. For opening a
-  photo file or URI, downsizing it or choosing JPEG or PNG, see
-  com.oddlyclever:media-image.
+  photo file or URI, or an encoded JPEG or PNG already in memory, downsizing it
+  or choosing JPEG or PNG, see com.oddlyclever:media-image.
 license: Apache-2.0
 metadata:
   version: "0.0.8"
@@ -98,4 +98,4 @@ The shapes an agent is likely to guess instead do not exist here:
 
 ## What it is not for
 
-It encodes; it does not decode WebP, read a file's EXIF back, resize, or crop. Opening an image from a file, a URI or a URL, downsizing it, standing it upright and choosing between WebP, JPEG and PNG is `com.oddlyclever:media-image`, package `com.oddlyclever.media.image`. Animated WebP and XMP metadata are not written.
+It encodes; it does not decode WebP, read a file's EXIF back, resize, or crop. Opening an image from a file, a URI or a URL, or from its encoded bytes, downsizing it, standing it upright and choosing between WebP, JPEG and PNG is `com.oddlyclever:media-image`, package `com.oddlyclever.media.image`. Animated WebP and XMP metadata are not written.
