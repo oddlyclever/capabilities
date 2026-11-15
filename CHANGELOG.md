@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
+## [0.0.9] - 2026-11-15
+
 ### Added
 
 - **`media-image`**: `compressImage` and `compressImageWithFallback` take an encoded image as a `ByteArray` as well as a location, with the same parameters, results and failures; a failure from bytes names its source `"<bytes>"`. `ImageProcessor.readSource(uri)` returns the bytes at a location, from exactly the locations `compressImage` reads. `imageKindOf(bytes)` tells an SVG, an animated GIF, a GIF, WebP, PNG or JPEG from its bytes without decoding it, as an `ImageKind` with the content type to store it under, so an image that converting would rasterize or flatten to one frame can be kept as it is.
@@ -94,7 +96,8 @@ The first release, as `com.oddlyclever:<module>:0.0.3`. It is tagged here but no
 - **Android:** API level 24 or later. An app that calls one of these modules' inline functions compiles with `jvmTarget` 21.
 - **Built with:** Kotlin 2.4.21, Compose Multiplatform 1.12.2 (Skiko 0.150.2) and map-view 0.3.0.
 
-[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.8...develop
+[Unreleased]: https://github.com/oddlyclever/capabilities/compare/v0.0.9...develop
+[0.0.9]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.9
 [0.0.8]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.8
 [0.0.7]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.7
 [0.0.6]: https://github.com/oddlyclever/capabilities/releases/tag/v0.0.6

@@ -16,7 +16,7 @@ description: >-
   without a composition is com.oddlyclever:wayfinder-frame.
 license: Apache-2.0
 metadata:
-  version: "0.0.8"
+  version: "0.0.9"
   repository: https://github.com/oddlyclever/capabilities
 ---
 
