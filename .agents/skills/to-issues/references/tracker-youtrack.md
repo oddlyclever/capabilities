@@ -7,8 +7,8 @@ story-tools installer - never collected in chat.
 | Operation | YouTrack command |
 |---|---|
 | Create a story | `create_issue` (MCP predefined) in the config's project, body in canonical format |
-| Link a blocker | `link_issues` with "depends on" (fallback: note the ID under a "Blocked by" line in the body) |
-| Link to a parent issue | `link_issues` "subtask of" when the source was an epic/issue; otherwise reference it in `## References` |
+| Link a blocker | `story_link(issueId=<blocked>, linkType="depends on", otherIssueId=<blocker>)` - the slice that has to wait is the subject. Built-in fallback and the direction trap: **Linking**, below. (No link tool at all: note the ID under a "Blocked by" line in the body) |
+| Link to a parent issue | `story_link(issueId=<slice>, linkType="subtask of", otherIssueId=<parent>)` when the source was an epic/issue - the new slice is the subject, never the parent. See **Linking**. Otherwise reference it in `## References` |
 | Tag AFK-ready slices | `manage_issue_tags` → `ready-for-agent` |
 | Tag strict-rule slices | `manage_issue_tags` → `needs-gherkin` (gates completion on a `## QA` Gherkin section) |
 | Topical batch tag | `manage_issue_tags` → the Title Case feature/PRD name (e.g. `Offline Sync`); query later with `tag: {Offline Sync}` |
@@ -19,3 +19,12 @@ story-tools installer - never collected in chat.
 | Set Subsystem | `update_issue` → Subsystem (from the listed values; new values are a deliberate, admin-level addition) |
 | Set Priority | `update_issue` → Priority (Show-stopper/Critical/Major/Normal/Minor) |
 | Set Estimation | `update_issue` → Estimation (e.g. `4h`, `1d`; requires time tracking enabled - the installer turns it on, or Project Settings > Time Tracking) |
+
+## Linking
+
+**A link is a sentence with the subject first: "PROJ-2 subtask of PROJ-1", "PROJ-3 depends on PROJ-4".** The child is the subject of `subtask of`, the blocked issue of `depends on`, the later report of `duplicates`. Say the sentence to yourself before you call anything.
+
+- **With the story-tools app, 0.6.0 or later:** `story_link(issueId, linkType, otherIssueId)` takes the sentence in that order, and its result repeats the sentence as read back from the issue. If `story_link` is not in your tool list, the app is older or not installed.
+- **With only the built-in tool:** `link_issues` makes **`targetIssueId` the subject**. `link_issues(targetIssueId=PROJ-2, linkType="subtask of", issueToLinkId=PROJ-1)` gives "PROJ-2 subtask of PROJ-1". Its parameter descriptions read the other way round - "the issue to link from" is the *object* - and following them reverses every directed link: the parent becomes the subtask, the blocker becomes the blocked.
+- **Then read it back.** `get_issue` on the subject, and check the link is listed the way you meant. The built-in tool answers with link counts for the target and nothing else, so its reply does not show which way the link went.
+- **A link that went in backwards** is removed with `story_unlink(issueId, linkType, otherIssueId)`, naming the sentence as it wrongly stands; then make the right one. Without the app nothing can remove a link: tell the user exactly which link is wrong so they can delete it, and do not leave it for them to find.

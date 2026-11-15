@@ -15,7 +15,8 @@ the story-tools installer - never collected in chat.
 | Group work by topic | The project's own groupings live in the **Topical Tags** field, values listed in `.agents/config/dimensions.md`. Reuse one before adding. To add: append a line to `.agents/config/topical-tags.md` (the agents' list - it is committed and reviewed), then `story-reconcile/scripts/yt-pull.sh --dimensions-only --push-tags` carries it into the tracker. Nothing constrains what a tag looks like; name it so it groups the work usefully. Server tags are for cross-cutting state and one-off delivery batches; a grouping that will still mean something in six months belongs here. |
 | Set Subsystem | `update_issue` → Subsystem (component ownership; list values first, confirm before setting) |
 | Set release | `update_issue` → Fix versions (query later with `Fix versions: 1.2`); the field and its version values are project settings - if absent, note it for the maintainer, don't approximate with a tag |
-| Link related issues | `link_issues` - always the most specific type: `duplicates` (then close the duplicate), `depends on` (ordering), `subtask of` (parent epic/feature), `discovered from` (provenance), `relates to` only when nothing sharper fits |
+| Link related issues | `story_link(issueId, linkType, otherIssueId)`, read as a sentence - always the most specific type: `duplicates` (the later report is the subject; then close it), `depends on` (the issue that waits is the subject), `subtask of` (the child is the subject), `discovered from` (the new issue is the subject), `relates to` only when nothing sharper fits. Built-in fallback and the direction trap: **Linking**, below |
+| Remove a wrong link | `story_unlink(issueId, linkType, otherIssueId)` - a link you made in this session, or one the user asked you to remove |
 | Post triage notes / briefs | `add_issue_comment` |
 | Put AC into the description | `story_add_ac` per item, or careful `get_issue` → edit → `update_issue` (canonical `## Acceptance Criteria` section) |
 | Close (wontfix) | `update_issue` - set the resolution: State → Won't fix (and Stage → done column where the project has both fields) |
@@ -28,3 +29,12 @@ a one-time admin step (Project Settings > Fields > add the default Type
 field); until it exists, the tag fallback keeps working. If the team later
 prefers a custom "Triage" field over the state tags, only this table
 changes.
+
+## Linking
+
+**A link is a sentence with the subject first: "PROJ-2 subtask of PROJ-1", "PROJ-3 depends on PROJ-4".** The child is the subject of `subtask of`, the blocked issue of `depends on`, the later report of `duplicates`. Say the sentence to yourself before you call anything.
+
+- **With the story-tools app, 0.6.0 or later:** `story_link(issueId, linkType, otherIssueId)` takes the sentence in that order, and its result repeats the sentence as read back from the issue. If `story_link` is not in your tool list, the app is older or not installed.
+- **With only the built-in tool:** `link_issues` makes **`targetIssueId` the subject**. `link_issues(targetIssueId=PROJ-2, linkType="subtask of", issueToLinkId=PROJ-1)` gives "PROJ-2 subtask of PROJ-1". Its parameter descriptions read the other way round - "the issue to link from" is the *object* - and following them reverses every directed link: the parent becomes the subtask, the blocker becomes the blocked.
+- **Then read it back.** `get_issue` on the subject, and check the link is listed the way you meant. The built-in tool answers with link counts for the target and nothing else, so its reply does not show which way the link went.
+- **A link that went in backwards** is removed with `story_unlink(issueId, linkType, otherIssueId)`, naming the sentence as it wrongly stands; then make the right one. Without the app nothing can remove a link: tell the user exactly which link is wrong so they can delete it, and do not leave it for them to find.

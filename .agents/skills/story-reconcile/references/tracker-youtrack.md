@@ -9,7 +9,7 @@ from the story-tools installer connections (never collected in chat).
 | Search for MATCH candidates | `search_issues` (MCP) with the project key from the config |
 | Create a NEW story | `create_issue` (MCP predefined) in the config's project, body in canonical format |
 | Add approved missing AC to a MATCHED story | `story_add_ac` - this is its sanctioned use. If the story-tools app isn't installed: careful `get_issue` → append `- [ ]` line → `update_issue` |
-| Link a created story to its source | `link_issues` (relates-to), when a source story exists |
+| Link a created story to its source | `story_link(issueId=<created>, linkType="relates to", otherIssueId=<source>)` when a source story exists; without the story-tools app (0.6.0 or later), `link_issues`. `relates to` reads the same both ways, so order cannot go wrong here. For any directed type it can: `link_issues` makes **`targetIssueId` the subject** of the sentence ("target *subtask of* issueToLink"), the opposite of what its parameter descriptions suggest - read the link back with `get_issue` |
 
 Snapshot dir convention: `docs/stories/`. Commit it if the team wants
 offline/PR-visible reference, or gitignore it - ask once.
