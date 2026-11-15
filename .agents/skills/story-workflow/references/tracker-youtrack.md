@@ -14,7 +14,9 @@ YouTrack app; YouTrack's built-in MCP tools are always present alongside.
 | `story.context` | `story_get_story_context` | `get_issue` → parse `## Acceptance Criteria` (`- [ ]`/`- [x]`, in order), `## References`, `## QA` yourself |
 | `ac.toggle` | `story_update_ac(index, textPrefix, done)` - refuses on drift | `get_issue` fresh → flip exactly one checkbox in the description → `update_issue` with the full text. Re-read immediately before writing; you have no drift guard |
 | `ac.add` | `story_add_ac(text)` | Same read-modify-write, appending a `- [ ]` line |
-| `work.discovered` | `story_add_discovered_work(summary, description)` - **pass the issue id explicitly**; omitted, it uses your focused story, which may be in another project - links "discovered from" (falls back to relates-to + `discovered` tag) | `create_issue` in the same project (canonical format) + `link_issues` relates-to the current story |
+| `work.discovered` | `story_add_discovered_work(summary, description)` - **pass the issue id explicitly**; omitted, it uses your focused story, which may be in another project - links "discovered from" (falls back to relates-to + `discovered` tag) | `create_issue` in the same project (canonical format) + `link_issues` relates-to the current story (`relates to` reads the same both ways; for any other link type see **Linking**) |
+| Link two issues | `story_link(issueId, linkType, otherIssueId)`, read as a sentence: "PROJ-2 subtask of PROJ-1" | `link_issues`, where `targetIssueId` is the subject - see **Linking** |
+| Remove a wrong link | `story_unlink(issueId, linkType, otherIssueId)` | None - tell the user which link is wrong |
 | `story.completeCheck` | `story_complete_story` - checks AC, `needs-gherkin` tag vs `## QA` | Parse AC yourself: all checked? tag present but no QA section? Report; don't close otherwise |
 | `story.next` | `search_issues`: `project: {KEY} tag: {ready-for-agent} #Unresolved sort by: priority asc` (drop the tag term if the project doesn't use triage) | same |
 | Stage on pickup | predefined `update_issue` - Stage → the in-progress column (read real values via `story_project_dimensions`; fallback: `.agents/config/dimensions.md` from the last pull, else ask once) | same, values from the snapshot or board |
@@ -22,6 +24,15 @@ YouTrack app; YouTrack's built-in MCP tools are always present alongside.
 | Priority / Estimation set (planning, triage only) | predefined `update_issue` field commands | same |
 
 Focus is safe in read-only mode (it writes only your own app-scoped marker).
+
+## Linking
+
+**A link is a sentence with the subject first: "PROJ-2 subtask of PROJ-1", "PROJ-3 depends on PROJ-4".** The child is the subject of `subtask of`, the blocked issue of `depends on`, the later report of `duplicates`. Say the sentence to yourself before you call anything.
+
+- **With the story-tools app, 0.6.0 or later:** `story_link(issueId, linkType, otherIssueId)` takes the sentence in that order, and its result repeats the sentence as read back from the issue. If `story_link` is not in your tool list, the app is older or not installed.
+- **With only the built-in tool:** `link_issues` makes **`targetIssueId` the subject**. `link_issues(targetIssueId=PROJ-2, linkType="subtask of", issueToLinkId=PROJ-1)` gives "PROJ-2 subtask of PROJ-1". Its parameter descriptions read the other way round - "the issue to link from" is the *object* - and following them reverses every directed link: the parent becomes the subtask, the blocker becomes the blocked.
+- **Then read it back.** `get_issue` on the subject, and check the link is listed the way you meant. The built-in tool answers with link counts for the target and nothing else, so its reply does not show which way the link went.
+- **A link that went in backwards** is removed with `story_unlink(issueId, linkType, otherIssueId)`, naming the sentence as it wrongly stands; then make the right one. Without the app nothing can remove a link: tell the user exactly which link is wrong so they can delete it, and do not leave it for them to find.
 
 ## Detecting what's available
 

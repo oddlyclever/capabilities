@@ -12,6 +12,7 @@ import com.oddlyclever.media.webp.encodeToWebp
 import com.oddlyclever.platform.AppContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -48,29 +49,58 @@ actual class ImageProcessor(private val context: Context) {
         maxDimension: Int,
         quality: Int,
         keepMetadata: Boolean,
+    ): Result<ProcessedImage> =
+        // Opened afresh for each read rather than read whole, so a large photo is streamed through the subsampling
+        // decoder and never held in memory as its file.
+        compress(uri, format, maxDimension, quality, keepMetadata) { openSafeInputStream(parse(uri)) }
+
+    actual suspend fun compressImage(
+        bytes: ByteArray,
+        format: ImageFormat,
+        maxDimension: Int,
+        quality: Int,
+        keepMetadata: Boolean,
+    ): Result<ProcessedImage> = compress(BytesSource, format, maxDimension, quality, keepMetadata) { ByteArrayInputStream(bytes) }
+
+    actual suspend fun readSource(uri: String): Result<ByteArray> = withContext(Dispatchers.IO) {
+        try {
+            val bytes = openSafeInputStream(parse(uri))?.use { it.readBytes() }
+            if (bytes != null) Result.success(bytes) else Result.failure(ImageProcessingException.SourceUnreadable(uri))
+        } catch (e: Exception) {
+            Result.failure(ImageProcessingException.SourceUnreadable(uri, e))
+        }
+    }
+
+    private fun parse(uri: String): Uri = if (uri.startsWith("/")) Uri.fromFile(File(uri)) else Uri.parse(uri)
+
+    /**
+     * Decodes what [open] gives, which it is asked for three times: for the bounds, for the subsampled pixels and for
+     * the EXIF. [source] is what a failure names.
+     */
+    private suspend fun compress(
+        source: String,
+        format: ImageFormat,
+        maxDimension: Int,
+        quality: Int,
+        keepMetadata: Boolean,
+        open: () -> InputStream?,
     ): Result<ProcessedImage> = withContext(Dispatchers.IO) {
         // The whole body is guarded: decode and native encode can throw (OOM in
         // particular), and previously those propagated to the caller on Android while
         // the JVM target swallowed them. Both now report through Result.
         try {
-            val parsedUri = if (uri.startsWith("/")) {
-                Uri.fromFile(File(uri))
-            } else {
-                Uri.parse(uri)
-            }
-
             // 1. Decode bounds
             val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
 
-            val inputStream1 = openSafeInputStream(parsedUri)
-                ?: return@withContext Result.failure(ImageProcessingException.SourceUnreadable(uri))
+            val inputStream1 = open()
+                ?: return@withContext Result.failure(ImageProcessingException.SourceUnreadable(source))
             inputStream1.use { BitmapFactory.decodeStream(it, null, options) }
 
             val originalWidth = options.outWidth
             val originalHeight = options.outHeight
 
             if (originalWidth <= 0 || originalHeight <= 0) {
-                return@withContext Result.failure(ImageProcessingException.DecodeFailed(uri))
+                return@withContext Result.failure(ImageProcessingException.DecodeFailed(source))
             }
 
             // 2. Calculate inSampleSize
@@ -87,14 +117,14 @@ actual class ImageProcessor(private val context: Context) {
             options.inJustDecodeBounds = false
             options.inSampleSize = inSampleSize
 
-            val inputStream2 = openSafeInputStream(parsedUri)
-                ?: return@withContext Result.failure(ImageProcessingException.SourceUnreadable(uri))
+            val inputStream2 = open()
+                ?: return@withContext Result.failure(ImageProcessingException.SourceUnreadable(source))
             val sampledBitmap = inputStream2.use { BitmapFactory.decodeStream(it, null, options) }
-                ?: return@withContext Result.failure(ImageProcessingException.DecodeFailed(uri))
+                ?: return@withContext Result.failure(ImageProcessingException.DecodeFailed(source))
 
             // 4. Scale precisely, and stand the photo upright in the same pass: BitmapFactory ignores the EXIF
             // orientation, so a photo taken with the phone held sideways decodes sideways.
-            val exif = openSafeInputStream(parsedUri)?.use { readExif(it) } ?: SourceExif()
+            val exif = open()?.use { readExif(it) } ?: SourceExif()
             val scale = if (sampledBitmap.width > maxDimension || sampledBitmap.height > maxDimension) {
                 maxDimension.toFloat() / max(sampledBitmap.width, sampledBitmap.height).toFloat()
             } else {
@@ -146,7 +176,7 @@ actual class ImageProcessor(private val context: Context) {
                 )
             )
         } catch (e: Throwable) {
-            Log.e(TAG, "Image processing failed for $uri as ${format.contentType}", e)
+            Log.e(TAG, "Image processing failed for $source as ${format.contentType}", e)
             Result.failure(ImageProcessingException.EncodeFailed(format, e))
         }
     }

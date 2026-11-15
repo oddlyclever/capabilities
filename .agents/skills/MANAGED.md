@@ -8,10 +8,10 @@ lost, silently, at the next run.
 
 | Skill | Version |
 |---|---|
-| story-workflow | 1.30 |
-| story-reconcile | 0.31 |
-| to-issues | 1.19 |
-| triage | 1.29 |
+| story-workflow | 1.31 |
+| story-reconcile | 0.32 |
+| to-issues | 1.20 |
+| triage | 1.30 |
 | project-docs | 1.44 |
 | to-prd | 1.6 |
 | to-adr | 1.5 |

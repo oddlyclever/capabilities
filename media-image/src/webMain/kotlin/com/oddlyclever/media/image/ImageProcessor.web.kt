@@ -10,6 +10,7 @@ import org.khronos.webgl.get
 import org.w3c.dom.CanvasRenderingContext2D
 import org.w3c.dom.HTMLCanvasElement
 import org.w3c.dom.HTMLImageElement
+import org.w3c.dom.url.URL
 import org.w3c.files.Blob
 import org.w3c.files.FileReader
 import kotlin.coroutines.resume
@@ -34,14 +35,59 @@ actual class ImageProcessor {
         maxDimension: Int,
         quality: Int,
         keepMetadata: Boolean,
+    ): Result<ProcessedImage> = compress(uri, uri, null, format, maxDimension, quality, keepMetadata)
+
+    /**
+     * Hands [bytes] to the same `<img>` path through an object URL the page makes itself, so it is same-origin and
+     * never taints the canvas. The `Blob` is typed as what [imageKindOf] finds, which an `<img>` needs for an SVG.
+     */
+    actual suspend fun compressImage(
+        bytes: ByteArray,
+        format: ImageFormat,
+        maxDimension: Int,
+        quality: Int,
+        keepMetadata: Boolean,
+    ): Result<ProcessedImage> {
+        if (bytes.isEmpty()) return Result.failure(ImageProcessingException.DecodeFailed(BytesSource))
+        val url = URL.createObjectURL(bytes.toBlob(imageKindOf(bytes)?.contentType ?: ""))
+        return try {
+            // An <img> reports bytes it cannot decode as an error, the same as one it cannot load. Bytes in hand were
+            // read, so either way they failed to decode.
+            val result = compress(url, BytesSource, bytes, format, maxDimension, quality, keepMetadata)
+            if (result.exceptionOrNull() is ImageProcessingException.SourceUnreadable) {
+                Result.failure(ImageProcessingException.DecodeFailed(BytesSource))
+            } else {
+                result
+            }
+        } finally {
+            URL.revokeObjectURL(url)
+        }
+    }
+
+    /** Fetched as the page would fetch it, so it reads the same `blob:`, `data:` and same-origin URLs an `<img>` loads. */
+    actual suspend fun readSource(uri: String): Result<ByteArray> =
+        fetchBytes(uri)?.let { Result.success(it) } ?: Result.failure(ImageProcessingException.SourceUnreadable(uri))
+
+    /**
+     * Loads [uri] into an `<img>` and does the rest; [label] is what a failure names, and [sourceBytes] are the bytes
+     * behind [uri] when the caller already has them, so the metadata is not fetched again.
+     */
+    private suspend fun compress(
+        uri: String,
+        label: String,
+        sourceBytes: ByteArray?,
+        format: ImageFormat,
+        maxDimension: Int,
+        quality: Int,
+        keepMetadata: Boolean,
     ): Result<ProcessedImage> {
         val image = loadImage(uri)
-            ?: return Result.failure(ImageProcessingException.SourceUnreadable(uri))
+            ?: return Result.failure(ImageProcessingException.SourceUnreadable(label))
 
         val srcWidth = image.naturalWidth
         val srcHeight = image.naturalHeight
         if (srcWidth <= 0 || srcHeight <= 0) {
-            return Result.failure(ImageProcessingException.DecodeFailed(uri))
+            return Result.failure(ImageProcessingException.DecodeFailed(label))
         }
 
         // Fit inside the box while preserving aspect ratio; never upscale.
@@ -64,7 +110,7 @@ actual class ImageProcessor {
 
         // The browser has already stood the photo upright: <img> applies the EXIF orientation. Only the metadata
         // needs the source's own bytes, so they are read only when it is kept.
-        val metadata = if (keepMetadata) fetchBytes(uri)?.let { SourceExifReader.read(it).metadata } else null
+        val metadata = if (keepMetadata) (sourceBytes ?: fetchBytes(uri))?.let { SourceExifReader.read(it).metadata } else null
 
         if (format == ImageFormat.Webp) return encodeWebp(context, width, height, quality).map { it.copy(bytes = embedMetadata(it.bytes, format, metadata)) }
 

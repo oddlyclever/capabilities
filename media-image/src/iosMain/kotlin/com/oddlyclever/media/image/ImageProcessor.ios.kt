@@ -3,6 +3,7 @@ package com.oddlyclever.media.image
 import com.oddlyclever.media.webp.GpsLocation
 import com.oddlyclever.media.webp.WebpMetadata
 import com.oddlyclever.media.webp.encodeToWebp
+import platform.CoreFoundation.CFDataRef
 import platform.CoreFoundation.CFDictionaryRef
 import platform.CoreFoundation.CFRelease
 import platform.CoreFoundation.CFRetain
@@ -23,7 +24,7 @@ import platform.posix.memcpy
  * Decodes, shrinks and turns upright with ImageIO, checks transparency with Core Graphics, and encodes WebP with
  * media-webp and JPEG and PNG with UIKit.
  */
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 actual class ImageProcessor {
 
     actual suspend fun compressImage(
@@ -33,23 +34,62 @@ actual class ImageProcessor {
         quality: Int,
         keepMetadata: Boolean,
     ): Result<ProcessedImage> = withContext(Dispatchers.Default) {
-        val url = if (uri.startsWith("file://")) NSURL(string = uri) else NSURL.fileURLWithPath(uri)
-        val path = url.path
+        // UIKit answers a missing file and one that is not an image alike, so look for the file first.
+        val url = existingFile(uri)
             ?: return@withContext Result.failure(ImageProcessingException.SourceUnreadable(uri))
 
-        // UIKit answers a missing file and one that is not an image alike, so look for the file first.
-        if (!NSFileManager.defaultManager.fileExistsAtPath(path)) {
-            return@withContext Result.failure(ImageProcessingException.SourceUnreadable(uri))
-        }
-
-        // ImageIO decodes, shrinks and stands the photo upright in one pass, from the file, so a 48-megapixel photo is
-        // never decoded whole. UIImage would decode it whole, and its CGImage ignores the EXIF orientation.
+        // From the file rather than its bytes: ImageIO reads only what the thumbnail needs, so the file is never in
+        // memory whole either.
         val urlRef = CFBridgingRetain(url)
         val source = CGImageSourceCreateWithURL(urlRef as CFURLRef?, null)
         CFRelease(urlRef)
+        compress(source, uri, format, maxDimension, quality, keepMetadata)
+    }
+
+    actual suspend fun compressImage(
+        bytes: ByteArray,
+        format: ImageFormat,
+        maxDimension: Int,
+        quality: Int,
+        keepMetadata: Boolean,
+    ): Result<ProcessedImage> = withContext(Dispatchers.Default) {
+        if (bytes.isEmpty()) return@withContext Result.failure(ImageProcessingException.DecodeFailed(BytesSource))
+        val data = bytes.usePinned { NSData.create(bytes = it.addressOf(0), length = bytes.size.toULong()) }
+        val dataRef = CFBridgingRetain(data)
+        val source = CGImageSourceCreateWithData(dataRef as CFDataRef?, null)
+        CFRelease(dataRef)
+        compress(source, BytesSource, format, maxDimension, quality, keepMetadata)
+    }
+
+    actual suspend fun readSource(uri: String): Result<ByteArray> = withContext(Dispatchers.Default) {
+        val data = existingFile(uri)?.path?.let { NSData.dataWithContentsOfFile(it) }
+        if (data != null) Result.success(data.toByteArray()) else Result.failure(ImageProcessingException.SourceUnreadable(uri))
+    }
+
+    /** The file [uri] names, a `file://` URI or a path, or null when there is no such file. */
+    private fun existingFile(uri: String): NSURL? {
+        val url = if (uri.startsWith("file://")) NSURL(string = uri) else NSURL.fileURLWithPath(uri)
+        val path = url.path ?: return null
+        return if (NSFileManager.defaultManager.fileExistsAtPath(path)) url else null
+    }
+
+    /**
+     * Decodes [source], which this releases, and does the rest; [label] is what a failure names.
+     *
+     * ImageIO decodes, shrinks and stands the photo upright in one pass, so a 48-megapixel photo is never decoded
+     * whole. UIImage would decode it whole, and its CGImage ignores the EXIF orientation.
+     */
+    private fun compress(
+        source: CGImageSourceRef?,
+        label: String,
+        format: ImageFormat,
+        maxDimension: Int,
+        quality: Int,
+        keepMetadata: Boolean,
+    ): Result<ProcessedImage> {
         if (source == null || CGImageSourceGetCount(source) == 0uL) {
             source?.let { CFRelease(it) }
-            return@withContext Result.failure(ImageProcessingException.DecodeFailed(uri))
+            return Result.failure(ImageProcessingException.DecodeFailed(label))
         }
 
         val properties = CGImageSourceCopyPropertiesAtIndex(source, 0u, null)?.let { CFBridgingRelease(it) as? Map<*, *> }.orEmpty()
@@ -68,7 +108,7 @@ actual class ImageProcessor {
         val cgImage = if (longest > 0) CGImageSourceCreateThumbnailAtIndex(source, 0u, thumbnailOptions as CFDictionaryRef?) else null
         CFRelease(thumbnailOptions)
         CFRelease(source)
-        if (cgImage == null) return@withContext Result.failure(ImageProcessingException.DecodeFailed(uri))
+        if (cgImage == null) return Result.failure(ImageProcessingException.DecodeFailed(label))
         val metadata = if (keepMetadata) metadataOf(properties) else null
 
         val newWidth = CGImageGetWidth(cgImage).toDouble()
@@ -89,7 +129,7 @@ actual class ImageProcessor {
         CGColorSpaceRelease(colorSpace)
         if (context == null) {
             CGImageRelease(cgImage)
-            return@withContext Result.failure(ImageProcessingException.EncodeFailed(format))
+            return Result.failure(ImageProcessingException.EncodeFailed(format))
         }
 
         val resizedCGImage = try {
@@ -97,13 +137,13 @@ actual class ImageProcessor {
             CGContextDrawImage(context, CGRectMake(0.0, 0.0, newWidth, newHeight), cgImage)
             // A declared alpha channel is often unused, so look at the pixels before refusing an alpha-less format.
             if (!format.supportsAlpha && cgImage.mayHaveAlpha() && context.hasNonOpaquePixels()) {
-                return@withContext Result.failure(ImageProcessingException.AlphaNotRepresentable(format))
+                return Result.failure(ImageProcessingException.AlphaNotRepresentable(format))
             }
             CGBitmapContextCreateImage(context)
         } finally {
             CGContextRelease(context)
             CGImageRelease(cgImage)
-        } ?: return@withContext Result.failure(ImageProcessingException.EncodeFailed(format))
+        } ?: return Result.failure(ImageProcessingException.EncodeFailed(format))
 
         val resizedUIImage = UIImage.imageWithCGImage(resizedCGImage)
         CGImageRelease(resizedCGImage)
@@ -115,14 +155,14 @@ actual class ImageProcessor {
                 ImageFormat.Png -> UIImagePNGRepresentation(resizedUIImage)?.toByteArray()
             }
         } catch (e: Exception) {
-            return@withContext Result.failure(ImageProcessingException.EncodeFailed(format, e))
+            return Result.failure(ImageProcessingException.EncodeFailed(format, e))
         }
 
         if (bytes == null || bytes.isEmpty()) {
-            return@withContext Result.failure(ImageProcessingException.EncodeFailed(format))
+            return Result.failure(ImageProcessingException.EncodeFailed(format))
         }
 
-        Result.success(
+        return Result.success(
             ProcessedImage(
                 bytes = embedMetadata(bytes, format, metadata),
                 contentType = format.contentType,

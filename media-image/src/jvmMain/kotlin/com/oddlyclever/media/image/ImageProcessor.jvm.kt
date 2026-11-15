@@ -34,21 +34,42 @@ actual class ImageProcessor {
         maxDimension: Int,
         quality: Int,
         keepMetadata: Boolean,
+    ): Result<ProcessedImage> = readSource(uri).fold(
+        // Skia decodes from memory, so the file is read whole either way and the bytes form loses nothing here.
+        onSuccess = { compress(it, uri, format, maxDimension, quality, keepMetadata) },
+        onFailure = { Result.failure(it) },
+    )
+
+    actual suspend fun compressImage(
+        bytes: ByteArray,
+        format: ImageFormat,
+        maxDimension: Int,
+        quality: Int,
+        keepMetadata: Boolean,
+    ): Result<ProcessedImage> = compress(bytes, BytesSource, format, maxDimension, quality, keepMetadata)
+
+    actual suspend fun readSource(uri: String): Result<ByteArray> = withContext(Dispatchers.IO) {
+        try {
+            val file = if (uri.startsWith("file://")) File(URI(uri)) else File(uri)
+            Result.success(file.readBytes())
+        } catch (e: Exception) {
+            Result.failure(ImageProcessingException.SourceUnreadable(uri, e))
+        }
+    }
+
+    /** Decodes [encoded] and does the rest; [source] is what a failure names. */
+    private suspend fun compress(
+        encoded: ByteArray,
+        source: String,
+        format: ImageFormat,
+        maxDimension: Int,
+        quality: Int,
+        keepMetadata: Boolean,
     ): Result<ProcessedImage> = withContext(Dispatchers.IO) {
-        val file = try {
-            if (uri.startsWith("file://")) File(URI(uri)) else File(uri)
-        } catch (e: Exception) {
-            return@withContext Result.failure(ImageProcessingException.SourceUnreadable(uri, e))
-        }
-        val encoded = try {
-            file.readBytes()
-        } catch (e: Exception) {
-            return@withContext Result.failure(ImageProcessingException.SourceUnreadable(uri, e))
-        }
         val image = try {
             Image.makeFromEncoded(encoded)
         } catch (e: Exception) {
-            return@withContext Result.failure(ImageProcessingException.DecodeFailed(uri, e))
+            return@withContext Result.failure(ImageProcessingException.DecodeFailed(source, e))
         }
 
         try {

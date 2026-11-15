@@ -7,7 +7,7 @@ A clean-room, dependency-free [JSONLogic](https://jsonlogic.com) rule evaluator 
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:jsonlogic:0.0.8")
+implementation("com.oddlyclever:jsonlogic:0.0.9")
 ```
 
 The package is `com.oddlyclever.jsonlogic`. It depends on the Kotlin standard library only.

@@ -4,7 +4,7 @@ The full documentation of [`media-image`](../../../media-image/README.md): image
 
 ## Using it
 
-- [Compressing an Image](DOC-0013-compressing-an-image.md): every parameter, what `uri` may be on each target, what the result promises, the typed failures, and the fallback.
+- [Compressing an Image](DOC-0013-compressing-an-image.md): every parameter, what `uri` may be on each target, compressing from bytes, what the result promises, the typed failures, the fallback, and telling an SVG or an animated GIF to keep as it is.
 - [Keeping Location and Capture Time](DOC-0014-keeping-location-and-capture-time.md): why nothing is kept by default, what `keepMetadata` keeps, where it is written in each format, and how the source's EXIF is read.
 - [How Each Target Works](DOC-0015-how-each-target-works.md): the decoder and encoders on Android, iOS, the JVM and the web, what each needs from the app, and where they differ.
 
