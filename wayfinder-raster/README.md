@@ -7,7 +7,7 @@ Raster tiles for [wayfinder](../wayfinder): a raster basemap for `WayfinderMap`,
 ## Install
 
 ```kotlin
-implementation("com.oddlyclever:wayfinder-raster:0.0.8")
+implementation("com.oddlyclever:wayfinder-raster:0.0.9")
 ```
 
 It exposes `wayfinder` and map-view-tiles-raster as `api`. There is no dependency-injection container.
