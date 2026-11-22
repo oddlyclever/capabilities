@@ -19,11 +19,13 @@ YouTrack app; YouTrack's built-in MCP tools are always present alongside.
 | Remove a wrong link | `story_unlink(issueId, linkType, otherIssueId)` | None - tell the user which link is wrong |
 | `story.completeCheck` | `story_complete_story` - checks AC, `needs-gherkin` tag vs `## QA` | Parse AC yourself: all checked? tag present but no QA section? Report; don't close otherwise |
 | `story.next` | `search_issues`: `project: {KEY} tag: {ready-for-agent} #Unresolved sort by: priority asc` (drop the tag term if the project doesn't use triage) | same |
-| Stage on pickup | predefined `update_issue` - Stage → the in-progress column (read real values via `story_project_dimensions`; fallback: `.agents/config/dimensions.md` from the last pull, else ask once) | same, values from the snapshot or board |
+| Stage on pickup | predefined `update_issue` - Stage → the in-progress column (read real values via `story_project_dimensions` with the story's `issueId` or the config's `projectKey`; fallback: `.agents/config/dimensions.md` from the last pull, else ask once) | same, values from the snapshot or board |
 | State change on completion | predefined `update_issue` - boards with a testing/review column: Stage → that column (a human moves it to done after verification); otherwise Stage → done column. Stage+State projects also set State → resolution (e.g. Fixed); single-field projects set that field | same |
 | Priority / Estimation set (planning, triage only) | predefined `update_issue` field commands | same |
 
 Focus is safe in read-only mode (it writes only your own app-scoped marker).
+
+**Use the argument names in this table exactly.** From app 0.7.0 every `story_*` tool refuses an argument name it does not declare and lists the names it takes. An older app drops the unknown name without a word, and with no issue named the tool then acts on your focused story - which is one value per account, not per project, so it may be a story in another project.
 
 ## Linking
 
