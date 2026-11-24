@@ -4,17 +4,17 @@ description: >-
   Shrink a photo for upload in Kotlin Multiplatform: open an image file, a
   content:// URI, a blob URL or encoded bytes already in memory, downsize it
   to a maximum width and height (resize, scale down, compress, make a
-  thumbnail), stand it upright from its
-  EXIF orientation, and encode it as WebP, JPEG or PNG, with the same suspend
-  call on Android, iOS, the JVM and the browser. Use instead of writing
-  BitmapFactory inSampleSize, ImageIO thumbnail or canvas resizing code for
-  each platform. Returns the bytes, the MIME content type and the final size
-  in a Result with typed failures, refuses JPEG for an image with
-  transparency, falls back from one format to the next, and strips EXIF by
-  default for privacy, removing the geotag, or keeps only the GPS location and
-  capture time when asked. Tells an SVG or an animated GIF from its bytes, to
-  upload it as it is rather than rasterize it or lose its frames. For encoding
-  a Bitmap, UIImage or raw pixels to WebP, see com.oddlyclever:media-webp.
+  thumbnail), stand it upright from its EXIF orientation, and encode it as
+  WebP, JPEG or PNG, with the same suspend call on Android, iOS, macOS, the
+  JVM and the browser. Use instead of writing BitmapFactory inSampleSize,
+  ImageIO thumbnail or canvas resizing code for each platform. Returns the
+  bytes, the MIME content type and the final size in a Result with typed
+  failures, refuses JPEG for an image with transparency, falls back from one
+  format to the next, and strips EXIF by default for privacy, removing the
+  geotag, or keeps only the GPS location and capture time when asked. Tells
+  an SVG or an animated GIF from its bytes, to upload it as it is rather
+  than rasterize it or lose its frames. For encoding a Bitmap, UIImage or
+  raw pixels to WebP, see com.oddlyclever:media-webp.
 license: Apache-2.0
 metadata:
   version: "0.0.9"
@@ -27,11 +27,11 @@ metadata:
 
 ## What it solves
 
-A photo from the camera or the gallery is too big to send: tens of megapixels, stored sideways with an EXIF flag saying how to turn it, and carrying where it was taken. This takes the image's location or its bytes, decodes it without holding the full-size photo in memory where the platform allows, scales it down so its longest side fits, turns it the way it is meant to be seen, and encodes it in the format asked for, reporting the format it actually wrote. Each target uses its own decoder: `BitmapFactory` with subsampling on Android, ImageIO on iOS, Skia on the JVM, and an `<img>` and a `<canvas>` in the browser. WebP is encoded by the same library everywhere, with libwebp built in on Android and iOS; JPEG and PNG use each platform's own encoder.
+A photo from the camera or the gallery is too big to send: tens of megapixels, stored sideways with an EXIF flag saying how to turn it, and carrying where it was taken. This takes the image's location or its bytes, decodes it without holding the full-size photo in memory where the platform allows, scales it down so its longest side fits, turns it the way it is meant to be seen, and encodes it in the format asked for, reporting the format it actually wrote. Each target uses its own decoder: `BitmapFactory` with subsampling on Android, ImageIO on iOS and macOS, Skia on the JVM, and an `<img>` and a `<canvas>` in the browser. WebP is encoded by the same library everywhere, with libwebp built in on Android, iOS and macOS; JPEG and PNG use each platform's own encoder. There is no Linux or Windows build.
 
 ## How it is meant to be used
 
-Construct an `ImageProcessor` directly and call `compressImage`, which is a suspend function returning a `Result`. It moves its work off the calling thread on Android, iOS and the JVM.
+Construct an `ImageProcessor` directly and call `compressImage`, which is a suspend function returning a `Result`. It moves its work off the calling thread on Android, iOS, macOS and the JVM.
 
 ```kotlin
 import com.oddlyclever.media.image.ImageFormat
@@ -81,7 +81,7 @@ when (val kind = imageKindOf(original)) {
 }
 ```
 
-What `uri` may be differs by target. Android: a `content://` URI, a `file://` URI, or an absolute path starting with `/`. iOS and the JVM: a `file://` URI or a path. The browser: anything an `<img>` loads from this origin, such as a `blob:` URL from a file input, a `data:` URL or a same-origin URL.
+What `uri` may be differs by target. Android: a `content://` URI, a `file://` URI, or an absolute path starting with `/`. iOS, macOS and the JVM: a `file://` URI or a path. The browser: anything an `<img>` loads from this origin, such as a `blob:` URL from a file input, a `data:` URL or a same-origin URL.
 
 ## Invariants and traps
 
@@ -89,7 +89,7 @@ What `uri` may be differs by target. Android: a `content://` URI, a `file://` UR
 
 **Store `contentType`, not the format you asked for.** After a fallback the bytes may be JPEG or PNG though WebP came first. `ProcessedImage` has `bytes`, `contentType`, `width` and `height` only: there is no `format` or `fileExtension` on it. The extension is on `ImageFormat`: `ImageFormat.entries.first { it.contentType == image.contentType }.fileExtension` gives `webp`, `jpg` or `png`.
 
-**Only a local file or a URI the platform opens itself works as a location.** An `https://` URL on Android, iOS or the JVM is not downloaded and fails as `SourceUnreadable`, and so does a relative path on Android; download it with your own client and pass the bytes. On iOS, a photo-library asset or a picker's item provider is not a path; pass its data as bytes.
+**Only a local file or a URI the platform opens itself works as a location.** An `https://` URL on Android, iOS, macOS or the JVM is not downloaded and fails as `SourceUnreadable`, and so does a relative path on Android; download it with your own client and pass the bytes. On iOS, a photo-library asset or a picker's item provider is not a path; pass its data as bytes.
 
 **In the browser, a cross-origin image fails as an encoding error, not as unreadable.** It loads, but taints the canvas, so the browser refuses to give its pixels back: WebP and PNG fail as `EncodeFailed`, and JPEG as `AlphaNotRepresentable`, because pixels that cannot be checked are treated as possibly transparent. Load it from this origin, or as a `blob:` URL. A missing source and one that is not an image both arrive as `SourceUnreadable` there, not as `DecodeFailed`.
 

@@ -18,8 +18,8 @@ class WebpException(message: String, cause: Throwable? = null) : Exception(messa
 /**
  * These pixels as a WebP file.
  *
- * Encoding is done by libwebp built into this library on Android and iOS, and by Skia's libwebp on the JVM and the
- * web, so the output does not depend on the version of Android or the device maker's build. A failure throws; it
+ * Encoding is done by libwebp built into this library on Android and every native target (iOS, macOS, Linux and
+ * Windows), and by Skia's libwebp on the JVM and the web, so the output does not depend on the version of Android or the device maker's build. A failure throws; it
  * never returns an empty or truncated file, which is what Android's own encoder has been seen to do.
  *
  * It is CPU-bound and can take tens of milliseconds for a photo, so call it off the main thread.

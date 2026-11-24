@@ -10,7 +10,7 @@ data class H3LatLng(val lat: Double, val lng: Double)
  * Each platform binds H3 by a different mechanism with its own idea of failure — a Java exception,
  * a C error code, a JS throw — and some (h3-js) return sentinel values instead of failing. Without
  * a common type the failure contract would differ per target silently, and a caller must be able to
- * catch one exception and know invalid input is covered on Android, iOS, JVM, JS and wasmJs alike.
+ * catch one exception and know invalid input is covered on every target alike.
  *
  * @param code The H3 core error code (1..15, see h3geo.org/docs/library/errors) when the platform
  *   supplied one; `null` when the failure did not originate in the H3 core library.

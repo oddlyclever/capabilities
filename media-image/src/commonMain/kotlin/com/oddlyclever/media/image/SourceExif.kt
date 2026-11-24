@@ -29,7 +29,7 @@ internal class SourceExif(
 
 /**
  * Reads the EXIF of a JPEG (its APP1 segment), a WebP (its `EXIF` chunk) or a PNG (its `eXIf` chunk), in either byte
- * order. Used where the platform offers no EXIF reader of its own; Android and iOS read with theirs, which also
+ * order. Used where the platform offers no EXIF reader of its own; Android, iOS and macOS read with theirs, which also
  * understand HEIC.
  *
  * It never throws: a source with no EXIF, or EXIF it cannot make sense of, reads as upright with nothing recorded.

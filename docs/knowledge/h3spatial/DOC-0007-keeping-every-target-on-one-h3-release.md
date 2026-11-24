@@ -28,7 +28,7 @@ Vertex-mode bindings are a candidate follow-on at that point, not before. Drawin
 
 ## The vendored C source
 
-The H3 C library is vendored, unmodified, under [`native/h3lib`](../../../h3spatial/native/h3lib), and the iOS static libraries built from it are committed, so consumers need no CMake and no network access to an upstream checkout. Only iOS compiles it: the JVM and Android use Uber's published artifacts, and the web uses `h3-js`.
+The H3 C library is vendored, unmodified, under [`native/h3lib`](../../../h3spatial/native/h3lib), and the native static libraries built from it are committed, so consumers need no CMake and no network access to an upstream checkout. Only iOS compiles it: the JVM and Android use Uber's published artifacts, and the web uses `h3-js`.
 
 Updating takes two scripts, run in order and committed together, from the repository root:
 
@@ -42,7 +42,7 @@ Updating takes two scripts, run in order and committed together, from the reposi
 
 [`update-source.sh <h3-tag> <h3-java-tag>`](../../../h3spatial/native/update-source.sh) re-vendors the C source, regenerates the agreement test fixtures from H3's test data at the same tag, and rewrites `native/PROVENANCE`. It also checks that the given h3-java release was built against that H3 tag, from h3-java's `h3version.properties`, and refuses to continue otherwise. That release is what `com.uber:h3` and `com.uber:h3-android` must be, so the check keeps iOS on the same H3 as the JVM and Android. It needs `git` and `python3`. Never hand-edit anything it writes: it replaces each file wholesale, so a local edit is silently lost on the next update.
 
-[`build-natives.sh`](../../../h3spatial/native/build-natives.sh) rebuilds both committed `libh3.a` files, for `iosArm64` and `iosSimulatorArm64`, plus the generated cinterop header. It builds for iOS 14.0 and later. It finds CMake itself, from the `CMAKE` environment variable, the newest CMake in the Android SDK, or the `PATH`, in that order, and fails with "cmake not found" if there is none. It builds from clean every time.
+[`build-natives.sh`](../../../h3spatial/native/build-natives.sh) rebuilds every committed `libh3.a`, for `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `linuxX64`, `linuxArm64` and `mingwX64`, plus the generated cinterop header, into `src/nativeInterop/cinterop/h3`. `build-natives.sh ios` or `build-natives.sh desktop` rebuilds only one group. The desktop targets are compiled with Kotlin/Native's own clang and sysroots from `~/.konan`, which Gradle downloads the first time it builds one of them. It builds for iOS 14.0 and later. It finds CMake itself, from the `CMAKE` environment variable, the newest CMake in the Android SDK, or the `PATH`, in that order, and fails with "cmake not found" if there is none. It builds from clean every time.
 
 The header and the library must come from the same version: a stale header against a newer library compiles cleanly and fails at runtime. So the header is copied from the build rather than kept by hand, and `native/h3lib/include/h3api.h`, which CMake generates from `h3api.h.in`, is git-ignored; a committed copy of it is how this module once lost track of its own H3 version.
 
@@ -52,4 +52,4 @@ When checking a rebuild against what is committed, compare exported symbols, not
 
 ## Cinterop commonization
 
-The repository's `gradle.properties` enables cinterop commonization (`kotlin.mpp.enableCInteropCommonization=true`). The shared iOS source set imports the cinterop `h3` package, and without commonization the metadata compilation that publishing needs cannot see that package.
+The repository's `gradle.properties` enables cinterop commonization (`kotlin.mpp.enableCInteropCommonization=true`). The shared native source set imports the cinterop `h3` package, and without commonization the metadata compilation that publishing needs cannot see that package.

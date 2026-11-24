@@ -2,15 +2,17 @@
 name: com-oddlyclever-jsonlogic
 description: >-
   Evaluate JSONLogic rules in Kotlin Multiplatform: decide true or false, or
-  compute a value, from a rule stored as JSON data, with the same answer on the
-  JVM, Android, iOS, JS and Wasm. Use instead of writing a rules engine, a
-  feature-flag or eligibility check, a pricing or discount rule, form
-  validation or a filter that must be stored, sent between client and server,
-  or edited without shipping code. Covers comparisons, and/or/not, if-then-else,
-  variables read from nested data by dotted path, missing-field checks,
-  arithmetic, min/max, string concatenation and substrings, membership, and
-  map/filter/reduce/all/some/none over lists, plus custom operators of your own.
-  Takes rules and data as plain maps and lists; it does not parse JSON text.
+  compute a value, from a rule stored as JSON data, with the same answer on
+  the JVM, Android, iOS, JS, Wasm and native macOS, Linux and Windows. Use
+  instead of writing a rules engine, a feature-flag or eligibility check, a
+  pricing or discount rule, form validation or a filter that must be stored,
+  sent between client and server, or edited without shipping code. Covers
+  comparisons, and/or/not, if-then-else, variables read from nested data by
+  dotted path, missing-field checks, arithmetic, min/max, string
+  concatenation and substrings, membership, and
+  map/filter/reduce/all/some/none over lists, plus custom operators of your
+  own. Takes rules and data as plain maps and lists; it does not parse JSON
+  text.
 license: Apache-2.0
 metadata:
   version: "0.0.9"

@@ -2,16 +2,16 @@
 name: com-oddlyclever-h3spatial
 description: >-
   Put latitude/longitude points into Uber H3 hexagonal grid cells in Kotlin
-  Multiplatform, with the same cell IDs on the JVM, Android, iOS, JS and Wasm.
-  Use to bucket or bin locations into hexagons, as a spatial index or
-  geohash-style area key, for heatmaps, density maps and counts per area, to
-  find nearby cells and neighbours (k-ring, grid disk), measure grid distance
-  between cells, roll cells up to a coarser parent or down to their children
-  for zoom levels, get a cell's centre point or boundary polygon, check whether
-  an H3 index string is valid, and draw cells on a map as GeoJSON polygons.
-  Cells are plain canonical H3 hex strings that match any other H3 tool, and
-  every invalid input throws one exception type, with H3's error code, on
-  every platform.
+  Multiplatform, with the same cell IDs on the JVM, Android, iOS, JS, Wasm
+  and native macOS, Linux and Windows. Use to bucket or bin locations into
+  hexagons, as a spatial index or geohash-style area key, for heatmaps,
+  density maps and counts per area, to find nearby cells and neighbours
+  (k-ring, grid disk), measure grid distance between cells, roll cells up to
+  a coarser parent or down to their children for zoom levels, get a cell's
+  centre point or boundary polygon, check whether an H3 index string is
+  valid, and draw cells on a map as GeoJSON polygons. Cells are plain
+  canonical H3 hex strings that match any other H3 tool, and every invalid
+  input throws one exception type, with H3's error code, on every platform.
 license: Apache-2.0
 metadata:
   version: "0.0.9"
@@ -24,7 +24,7 @@ metadata:
 
 ## What it solves
 
-Grouping locations into areas: counting events per neighbourhood for a heatmap, keying records by the area they fall in, finding what is near a point without computing distances, or coarsening a set of areas as a map zooms out. It uses Uber's H3 grid, so a cell computed here is the same cell any other H3 tool computes for that point. Each target calls Uber's own H3 rather than a reimplementation (`com.uber:h3` on the JVM, `com.uber:h3-android` on Android, the H3 C library compiled into the iOS artifacts, `h3-js` on JS and Wasm), all of one pinned H3 release, and every target is tested against H3's own reference data, so a phone and a server put a point in the same cell and report the same centre.
+Grouping locations into areas: counting events per neighbourhood for a heatmap, keying records by the area they fall in, finding what is near a point without computing distances, or coarsening a set of areas as a map zooms out. It uses Uber's H3 grid, so a cell computed here is the same cell any other H3 tool computes for that point. Each target calls Uber's own H3 rather than a reimplementation (`com.uber:h3` on the JVM, `com.uber:h3-android` on Android, the H3 C library compiled into the iOS, macOS, Linux and Windows artifacts, `h3-js` on JS and Wasm), all of one pinned H3 release, and every target is tested against H3's own reference data, so a phone and a server put a point in the same cell and report the same centre.
 
 ## How it is meant to be used
 

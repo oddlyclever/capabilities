@@ -2,7 +2,7 @@
 
 What must exist exactly once in a process. On Android, that is the application context and the activity in front, captured at process start so no library has to ask for them. On every target, it is `OsFamily`.
 
-**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs. The application context and the activity are Android only; the other targets have `OsFamily`.
+**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs · macOS (arm64) · Linux (x64, arm64) · Windows (x64). The application context and the activity are Android only; the other targets have `OsFamily`.
 
 ## Install
 

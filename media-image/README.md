@@ -2,7 +2,7 @@
 
 Images downsized and encoded for an upload or a file: a photo from the camera or the gallery made small enough to send, as WebP, JPEG or PNG, with the same call on every target.
 
-**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
+**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs · macOS (arm64). Not Linux or Windows: neither has an image codec in the operating system, and this module bundles none.
 
 ## Install
 

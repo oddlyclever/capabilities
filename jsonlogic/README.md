@@ -2,7 +2,7 @@
 
 A clean-room, dependency-free [JSONLogic](https://jsonlogic.com) rule evaluator in pure common Kotlin. One implementation on every target, so a rule evaluates to the same result wherever it runs, by construction.
 
-**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
+**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs · macOS (arm64) · Linux (x64, arm64) · Windows (x64)
 
 ## Install
 

@@ -10,13 +10,13 @@ Each target decodes and resizes with what the platform has, and encodes WebP wit
 | Target | Decodes and resizes with | WebP | JPEG and PNG |
 |---|---|---|---|
 | Android | `BitmapFactory`, subsampling while decoding so a large photo never sits in memory whole, turned upright from ExifInterface's orientation | media-webp, libwebp built in | `Bitmap.compress` |
-| iOS | ImageIO, which decodes, shrinks and turns upright in one pass, so a large photo is never decoded whole | media-webp, libwebp built in | UIKit |
+| iOS, macOS | ImageIO, which decodes, shrinks and turns upright in one pass, so a large photo is never decoded whole | media-webp, libwebp built in | ImageIO |
 | JVM | Skia, which also reads WebP sources and turns them upright as it decodes | media-webp, Skia | Skia |
 | JS, wasmJs | an `<img>`, which the browser turns upright, and an offscreen `<canvas>` | media-webp, Skia | the canvas |
 
 WebP goes through media-webp everywhere rather than through each platform's encoder; [WebP Through media-webp on Every Target](ADR-0009-webp-through-media-webp-on-every-target.md) says why.
 
-Given bytes rather than a location, every target feeds the same decoder from memory, so the result is the same either way. What differs is memory: the location form streams a large photo on Android and iOS, and the bytes form has the whole file in memory from the start. `readSource` reads the whole file on every target.
+Given bytes rather than a location, every target feeds the same decoder from memory, so the result is the same either way. What differs is memory: the location form streams a large photo on Android, iOS and macOS, and the bytes form has the whole file in memory from the start. `readSource` reads the whole file on every target.
 
 ## Android
 
@@ -27,18 +27,21 @@ Given bytes rather than a location, every target feeds the same decoder from mem
 - **JPEG and PNG** come from `Bitmap.compress`, PNG at full quality.
 - **From bytes,** each of the three reads is a fresh stream over the array, so the subsampling decoder still never holds the full-size pixels, though the encoded file is in memory throughout.
 
-## iOS
+## iOS and macOS
+
+The two share one implementation, of ImageIO and Core Graphics only, with nothing from UIKit or AppKit. There is no Linux or Windows build: neither operating system has an image codec of its own, and this module bundles none.
+
 
 - **Decoding** goes through ImageIO, which decodes, shrinks and stands the photo upright in one pass, from the file, so a 48-megapixel photo is never decoded whole. It is never asked for a size larger than the source, so a small image is not scaled up.
-- **A missing file is checked for first,** because UIKit answers a missing file and one that is not an image alike; the first is `SourceUnreadable` and the second `DecodeFailed`.
+- **A missing file is checked for first,** because ImageIO answers a missing file and one that is not an image alike; the first is `SourceUnreadable` and the second `DecodeFailed`.
 - **Transparency** is checked in a Core Graphics bitmap context. An image that declares no alpha channel is not scanned.
-- **JPEG and PNG** come from UIKit's `UIImageJPEGRepresentation`, at `quality / 100`, and `UIImagePNGRepresentation`.
+- **JPEG and PNG** come from ImageIO's image destination, JPEG at `quality / 100`: the same encoders UIKit's `UIImageJPEGRepresentation` and `UIImagePNGRepresentation` call, which macOS does not have.
 - **From bytes,** ImageIO reads the image from memory with the same single pass, so a large photo is still never decoded whole.
 
 ## JVM
 
 - **Skia's native library must be on the classpath at run time.** A Compose desktop app has it already; anything else adds `org.jetbrains.skiko:skiko-awt-runtime-<os>-<arch>` at the Skiko version its Compose brings. Without it, nothing decodes. On Linux, Skia also needs `libGL.so.1`, `libX11.so.6` and `libEGL.so.1`, from the `libgl1`, `libx11-6` and `libegl1` packages on Debian or Ubuntu.
-- **Skia reads JPEG, PNG, WebP, GIF and BMP,** so a WebP can be resized as well as written. A HEIC file fails as `DecodeFailed` here, while iOS's ImageIO decodes it.
+- **Skia reads JPEG, PNG, WebP, GIF and BMP,** so a WebP can be resized as well as written. A HEIC file fails as `DecodeFailed` here, while ImageIO on iOS and macOS decodes it.
 - **Resizing** draws with mipmapped sampling, so a large reduction averages the pixels it drops instead of aliasing them.
 - **The whole source file is read into memory** before decoding, so a location and its bytes cost the same here.
 

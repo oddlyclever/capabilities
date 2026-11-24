@@ -8,6 +8,15 @@ Every module's coordinates are `com.oddlyclever:<module>`, and every module buil
 
 A module that cannot support one of these says which and why, in its own README and in the module list below.
 
+Some modules also build for native desktop, for command-line tools and desktop apps built without a JVM: **macOS (arm64)**, and where nothing they depend on stands in the way, **Linux (x64, arm64)** and **Windows (x64)**. There is no macOS x64 build, because Kotlin is retiring that target. Each module's README lists its own targets:
+
+| Module | macOS | Linux | Windows |
+|---|---|---|---|
+| `h3spatial`, `jsonlogic`, `media-webp`, `platform` | yes | yes | yes |
+| `media-image` | yes | no: no image codec in the operating system | no: same |
+| `sundries-compose` | yes | no: Compose UI does not build for it | no: same |
+| `wayfinder` and every `wayfinder-*` module | no: map-view builds for no native desktop target | no: same | no: same |
+
 ## Modules
 
 | Module | What it does |
@@ -55,6 +64,7 @@ What a consuming app needs:
 - **On Android, API level 24 or later**, and an app that calls one of the modules' inline functions compiles with `jvmTarget` 21.
 - **On iOS**, arm64 devices or the arm64 simulator.
 - **On the web**, a browser: the JS and wasmJs targets are built for it, not for Node.js.
+- **On native desktop**, macOS 12 or later on Apple silicon, or Linux with glibc 2.19 or later on x64 (2.25 on arm64), the same as Kotlin/Native's own.
 
 To work on a module alongside an app, include this repository as a **composite build**, which picks up local edits with no publish step. In the consuming project's `settings.gradle.kts`:
 
@@ -78,7 +88,7 @@ The app keeps depending on the same coordinates, and Gradle builds them from you
 
 `check` compiles every target and runs every module's tests. A single module is `./gradlew :<module>:check`.
 
-The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Every module builds and targets Java 21, set once by `javaVersion` in `gradle/libs.versions.toml`. Building the iOS targets needs a Mac with Xcode.
+The toolchain is Kotlin 2.4.21, Android Gradle Plugin 9.4.1 and Gradle 9.8.0. Gradle provisions the JDK 21 it runs on. Every module builds and targets Java 21, set once by `javaVersion` in `gradle/libs.versions.toml`. Building the iOS and macOS targets needs a Mac with Xcode. A Mac also builds the Linux and Windows targets, but runs only the macOS tests natively; the Linux test executables run in a Linux container.
 
 ## License
 

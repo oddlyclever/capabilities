@@ -28,7 +28,7 @@ metadata:
 
 On Android, code deep inside an app or a library keeps needing a `Context`, or the activity on screen to ask for a permission or show a system sheet, and threading them through every constructor spreads a `Context` parameter up the whole call graph. This module captures the application context and follows the activity in front once, at process start, so any class can take them as a default and its callers pass nothing. There is one holder per process on purpose: two libraries each keeping their own static context means two initializers and two statics, and whichever is read next may be the empty one.
 
-What each target gets differs. Android has `AppContext`, `ActivityProvider`, `PlatformInitializer` and `OsFamily`. The JVM, iOS, JS and wasmJs targets have only `OsFamily` and its two checks, `isVisibleIf` and `isVisibleUnless`.
+What each target gets differs. Android has `AppContext`, `ActivityProvider`, `PlatformInitializer` and `OsFamily`. The JVM, iOS, JS and wasmJs targets, and the native macOS, Linux and Windows ones, have only `OsFamily` and its two checks, `isVisibleIf` and `isVisibleUnless`.
 
 ## How it is meant to be used
 

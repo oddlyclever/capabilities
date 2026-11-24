@@ -31,9 +31,9 @@ kotlin {
 }
 ```
 
-**Targets:** `jvm` · `android` · `js` (browser) · `wasmJs` (browser) · `iosArm64` · `iosSimulatorArm64`.
+**Targets:** `jvm` · `android` · `js` (browser) · `wasmJs` (browser) · `iosArm64` · `iosSimulatorArm64` · `macosArm64` · `linuxX64` · `linuxArm64` · `mingwX64`.
 
-Every target binds Uber's own H3, all of one pinned release, and none needs setup: `com.uber:h3` on the JVM, `com.uber:h3-android` on Android, the H3 C library linked into the iOS artifacts, and `h3-js` on the web, all arriving with the dependency. On Android, H3's native code is ARM only, so it does not load on an x86 or x86_64 emulator. [Platform Notes](../docs/knowledge/h3spatial/DOC-0006-platform-notes.md) has what each target needs to know.
+Every target binds Uber's own H3, all of one pinned release, and none needs setup: `com.uber:h3` on the JVM, `com.uber:h3-android` on Android, the H3 C library linked into the native artifacts (iOS, macOS, Linux and Windows), and `h3-js` on the web, all arriving with the dependency. On Android, H3's native code is ARM only, so it does not load on an x86 or x86_64 emulator. [Platform Notes](../docs/knowledge/h3spatial/DOC-0006-platform-notes.md) has what each target needs to know.
 
 ## Use
 

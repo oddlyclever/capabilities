@@ -2,7 +2,7 @@
 
 WebP encoding for Kotlin Multiplatform: lossy or lossless, with GPS position and capture time written into the file, and the same call on every target. For photos an app uploads, map images it saves, and anything else that should be small and keep where and when it was made.
 
-**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
+**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs · macOS (arm64) · Linux (x64, arm64) · Windows (x64)
 
 ## Install
 
@@ -45,6 +45,6 @@ The module ships an [Agent Skill](https://agentskills.io/specification), `com-od
 
 ## Licences
 
-libwebp's encoder source is vendored under [`native/libwebp`](native/libwebp), unmodified, from the release recorded in [`native/PROVENANCE`](native/PROVENANCE), and the Android and iOS libraries built from it are committed.
+libwebp's encoder source is vendored under [`native/libwebp`](native/libwebp), unmodified, from the release recorded in [`native/PROVENANCE`](native/PROVENANCE), and the Android and native libraries built from it are committed.
 
 libwebp is Copyright Google Inc., under a BSD 3-Clause licence with an additional patent grant; both are in [`native/libwebp`](native/libwebp) and travel in `META-INF` of every published jar as `LICENSE.libwebp` and `PATENTS.libwebp`. This library's own code is under the Apache License 2.0.

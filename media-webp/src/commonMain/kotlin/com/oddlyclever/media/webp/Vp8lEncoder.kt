@@ -6,7 +6,7 @@ package com.oddlyclever.media.webp
  * It writes the smallest valid form of the format: the subtract-green transform, then every pixel as literal
  * green, red, blue and alpha symbols through one Huffman code each. There is no spatial prediction and no backward
  * reference, so files are larger than libwebp's lossless output, but every pixel comes back exactly, and the output
- * is a WebP any decoder reads. Android and iOS use libwebp's own lossless encoder instead.
+ * is a WebP any decoder reads. Android and the native targets use libwebp's own lossless encoder instead.
  */
 internal object Vp8lEncoder {
 

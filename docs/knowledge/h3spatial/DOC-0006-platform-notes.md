@@ -8,7 +8,7 @@ Every target binds Uber's own H3, of one pinned release, and none needs setup fr
 | Target | Backing | What arrives with the dependency |
 |---|---|---|
 | Android | `com.uber:h3-android` | Uber's own Android packaging of the same Java binding the JVM uses, with `libh3-java.so` for `arm64-v8a` and `armeabi-v7a`. Consumer keep rules. No NDK or CMake. |
-| iOS | The H3 C library through cinterop | `libh3.a`, embedded in the published cinterop klib and linked automatically. |
+| iOS, macOS, Linux, Windows | The H3 C library through cinterop | `libh3.a`, embedded in the published cinterop klib and linked automatically. |
 | JVM | `com.uber:h3` | A transitive Maven dependency. |
 | JS / wasmJs | `h3-js` | A transitive npm dependency, declared in the klib's `package.json`. |
 
@@ -21,6 +21,11 @@ Why every target binds Uber's H3 rather than a shared reimplementation is in [Ub
 - **Minification is handled.** `libh3-java.so` binds to `com.uber.h3core.NativeMethods` by name, and constructs `com.uber.h3core.util.LatLng` and `com.uber.h3core.exceptions.H3Exception` from native code. `com.uber:h3-android` ships no keep rules, so this library publishes them as consumer keep rules, in [`consumer-rules.pro`](../../../h3spatial/consumer-rules.pro). Without them a minified build fails to load H3 at all, not just on one call.
 - **Loading.** The library is loaded with `H3Core.newSystemInstance()`, which calls `System.loadLibrary("h3-java")` and finds it in the AAR's `jni/` directory. `com.uber:h3`'s other loader extracts the native file from resources instead, which needs file APIs older Android versions lack.
 - **Size and minimum SDK.** The native code is about 340 KB across the two ABIs before ABI splitting, about 170 KB for each, and about 135 KB of the AAR compressed. The declared minimum SDK is 24.
+
+## macOS, Linux and Windows
+
+- **Targets.** `macosArm64`, `linuxX64`, `linuxArm64` and `mingwX64`, with the same binding and the same Kotlin as iOS, from `nativeMain`. There is no `macosX64`, which Kotlin is retiring.
+- **Built with Kotlin/Native's own toolchains.** The Linux and Windows libraries are compiled with Kotlin/Native's clang against the sysroots it links with, so they need no newer glibc or MinGW runtime than the Kotlin code beside them. The macOS library is built for macOS 12, Kotlin/Native's minimum.
 
 ## iOS
 

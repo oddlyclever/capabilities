@@ -53,6 +53,11 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
+    // Native macOS, for command-line tools and desktop apps built without a JVM. It shares iOS's code in appleMain,
+    // which is ImageIO and Core Graphics only. No Linux or Windows: neither has an image codec in the operating system,
+    // so a native build there would need one bundled, which is a decision of its own. No macosX64: Kotlin is retiring it.
+    macosArm64()
+
     sourceSets {
         commonMain {
             dependencies {

@@ -48,6 +48,10 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
+    // Native macOS, for a desktop app built without a JVM. Compose's support for it is experimental, which
+    // is why gradle.properties turns it on. No macosX64: Compose publishes nothing for it.
+    macosArm64()
+
     sourceSets {
         commonMain {
             dependencies {

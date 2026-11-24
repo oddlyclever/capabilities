@@ -12,7 +12,7 @@ plugins {
 group = libs.versions.group.get()
 version = libs.versions.versionName.get()
 
-// WebP encoding with metadata on every target. Android and iOS encode with a libwebp built into this module and
+// WebP encoding with metadata on every target. Android and the native targets encode with a libwebp built into this module and
 // committed (native/build-natives.sh); the JVM and the web encode with Skia's libwebp. Metadata is written in
 // common Kotlin, so it is the same everywhere.
 kotlin {
@@ -62,14 +62,21 @@ kotlin {
 
     fun KotlinNativeTarget.libwebpCInterop() {
         compilations.getByName("main").cinterops.create("libwebp") {
-            defFile(project.file("src/iosMain/cinterop/libwebp/libwebp.def"))
-            includeDirs(project.file("src/iosMain/cinterop/libwebp/headers"))
+            defFile(project.file("src/nativeInterop/cinterop/libwebp/libwebp.def"))
+            includeDirs(project.file("src/nativeInterop/cinterop/libwebp/headers"))
             // libwebp.a is prebuilt per target and committed, like the Android .so files.
-            extraOpts("-libraryPath", project.file("src/iosMain/cinterop/libwebp/libs/$targetName").absolutePath)
+            extraOpts("-libraryPath", project.file("src/nativeInterop/cinterop/libwebp/libs/$targetName").absolutePath)
         }
     }
     iosArm64 { libwebpCInterop() }
     iosSimulatorArm64 { libwebpCInterop() }
+    // Native desktop, for command-line tools and desktop apps built without a JVM. The same libwebp binding as iOS,
+    // built for each by native/build-natives.sh with Kotlin/Native's own toolchains; the encoder that calls it is in
+    // nativeMain, shared by every native target. No macosX64: Kotlin is retiring it.
+    macosArm64 { libwebpCInterop() }
+    linuxX64 { libwebpCInterop() }
+    linuxArm64 { libwebpCInterop() }
+    mingwX64 { libwebpCInterop() }
 
     sourceSets {
         jvmMain {

@@ -42,6 +42,13 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
+    // Native desktop, for command-line tools and desktop apps built without a JVM. The module is all common code, so they
+    // need nothing of their own. No macosX64: Kotlin is retiring it.
+    macosArm64()
+    linuxX64()
+    linuxArm64()
+    mingwX64()
+
     sourceSets {
         commonTest {
             dependencies {

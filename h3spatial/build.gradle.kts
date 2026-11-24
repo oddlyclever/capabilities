@@ -13,7 +13,7 @@ group = libs.versions.group.get()
 version = libs.versions.versionName.get()
 
 // Every target binds Uber's H3 of one pinned release: com.uber:h3 on the JVM, com.uber:h3-android on
-// Android, the vendored C through cinterop on iOS, and h3-js on JS and wasmJs. Their versions move
+// Android, the vendored C through cinterop on iOS and native desktop, and h3-js on JS and wasmJs. Their versions move
 // together — see README "Version pin".
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
@@ -60,17 +60,24 @@ kotlin {
 
     fun KotlinNativeTarget.h3CInterop() {
         compilations.getByName("main").cinterops.create("h3") {
-            defFile(project.file("src/iosMain/cinterop/h3/h3.def"))
-            includeDirs(project.file("src/iosMain/cinterop/h3"))
+            defFile(project.file("src/nativeInterop/cinterop/h3/h3.def"))
+            includeDirs(project.file("src/nativeInterop/cinterop/h3"))
             // libh3.a is prebuilt per target and committed, like the Android .so files.
             extraOpts(
                 "-libraryPath",
-                project.file("src/iosMain/cinterop/h3/libs/$targetName").absolutePath
+                project.file("src/nativeInterop/cinterop/h3/libs/$targetName").absolutePath
             )
         }
     }
     iosArm64 { h3CInterop() }
     iosSimulatorArm64 { h3CInterop() }
+    // Native desktop, for command-line tools and desktop apps built without a JVM. The same H3 binding as iOS, from
+    // a libh3.a native/build-natives.sh builds for each with Kotlin/Native's own toolchains; the code that calls it is
+    // in nativeMain, shared by every native target. No macosX64: Kotlin is retiring it.
+    macosArm64 { h3CInterop() }
+    linuxX64 { h3CInterop() }
+    linuxArm64 { h3CInterop() }
+    mingwX64 { h3CInterop() }
 
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
@@ -125,7 +132,7 @@ kotlin {
     }
 }
 
-// The published iOS artifacts embed libh3.a, which is Uber's H3 in object form, so the Apache License
+// The published native artifacts embed libh3.a, which is Uber's H3 in object form, so the Apache License
 // requires the license and Uber's NOTICE to travel with them. A klib cannot carry extra files, so both go
 // into META-INF of every jar this module publishes, including the sources jar beside each klib.
 // org.gradle.jvm.tasks.Jar, not the build-script default Jar: the Kotlin plugin registers its sources jars
@@ -161,7 +168,7 @@ mavenPublishing {
 
     pom {
         name = "h3spatial"
-        description = "Uber H3 hexagonal grid indexing for Kotlin Multiplatform behind one String-cell API: cell indexing, grid traversal and GeoJSON cell rendering on Android, iOS, JVM, JS and wasmJs."
+        description = "Uber H3 hexagonal grid indexing for Kotlin Multiplatform behind one String-cell API: cell indexing, grid traversal and GeoJSON cell rendering on Android, iOS, JVM, JS, wasmJs, macOS, Linux and Windows."
         inceptionYear = "2026"
         url = "https://github.com/oddlyclever/capabilities"
         licenses {

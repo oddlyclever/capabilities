@@ -1,19 +1,20 @@
 ---
 name: com-oddlyclever-media-webp
 description: >-
-  Encode pixels already in memory to WebP in Kotlin Multiplatform: an Android
-  Bitmap, an iOS UIImage, a JVM BufferedImage or raw RGBA bytes, lossy at a
-  quality or lossless, with libwebp built in on Android and iOS so the output
-  does not depend on the Android version or the device maker. Use instead of
-  Bitmap.compress with WEBP or WEBP_LOSSY, which varies by release and can
-  return nothing, instead of binding libwebp through JNI or a CocoaPod
-  yourself, or where iOS or Safari cannot be relied on to write WebP. Also
-  writes metadata into a WebP as EXIF: a geotag (GPS latitude, longitude, altitude), the
-  capture date and time, and the software name; adds, replaces or strips the
-  EXIF of an existing WebP from any encoder, such as a server or Skia; and
-  gives the same tags as a bare EXIF block for a JPEG or PNG. For opening a
-  photo file or URI, or an encoded JPEG or PNG already in memory, downsizing it
-  or choosing JPEG or PNG, see com.oddlyclever:media-image.
+  Encode pixels already in memory to WebP in Kotlin Multiplatform: an
+  Android Bitmap, an iOS UIImage, a JVM BufferedImage or raw RGBA bytes,
+  lossy at a quality or lossless, with libwebp built in on Android, iOS and
+  native desktop so the output does not depend on the Android version or the
+  device maker. Use instead of Bitmap.compress with WEBP or WEBP_LOSSY,
+  which varies by release and can return nothing, instead of binding libwebp
+  through JNI or a CocoaPod yourself, or where iOS or Safari cannot be
+  relied on to write WebP. Also writes metadata into a WebP as EXIF: a
+  geotag (GPS latitude, longitude, altitude), the capture date and time, and
+  the software name; adds, replaces or strips the EXIF of an existing WebP
+  from any encoder, such as a server or Skia; and gives the same tags as a
+  bare EXIF block for a JPEG or PNG. For opening a photo file or URI, or an
+  encoded JPEG or PNG already in memory, downsizing it or choosing JPEG or
+  PNG, see com.oddlyclever:media-image.
 license: Apache-2.0
 metadata:
   version: "0.0.9"
@@ -28,7 +29,7 @@ metadata:
 
 Turning an image an app already holds into a small WebP file, and getting the same encoder on every device: Android's own WebP output depends on the release and the device maker's build, iOS has no WebP encoder an app can rely on, and Safari's canvas cannot write WebP at all. It also stamps where and when an image was made into the file, as EXIF GPS and date tags, and can add, replace or remove that EXIF on a WebP that some other encoder produced, without re-encoding the image.
 
-How each target encodes: Android and iOS use the libwebp compiled into this library for both lossy and lossless. The JVM and the browser (JS and wasmJs) encode lossy with Skia's libwebp, and lossless with a small encoder written in Kotlin. The metadata is written by common Kotlin code, so it is identical everywhere.
+How each target encodes: Android, iOS and the native desktop targets (macOS, Linux and Windows) use the libwebp compiled into this library for both lossy and lossless. The JVM and the browser (JS and wasmJs) encode lossy with Skia's libwebp, and lossless with a small encoder written in Kotlin. The metadata is written by common Kotlin code, so it is identical everywhere.
 
 ## How it is meant to be used
 
@@ -71,7 +72,7 @@ For a WebP from somewhere else, `webp.withWebpMetadata(metadata)` rewrites only 
 
 **A WebP is at most 16383 pixels a side.** A larger image is refused with an `IllegalArgumentException` when the `RgbaPixels` is made, which happens inside `Bitmap.encodeToWebp` and `UIImage.encodeToWebp` too. Downsize first.
 
-**`quality` does nothing for lossless,** on any target, though it is still checked to be in 0..100. Lossless on the JVM and the browser comes from the Kotlin encoder, which has no prediction or backward references, so the same image is larger there than lossless from Android or iOS. Every pixel still comes back exactly.
+**`quality` does nothing for lossless,** on any target, though it is still checked to be in 0..100. Lossless on the JVM and the browser comes from the Kotlin encoder, which has no prediction or backward references, so the same image is larger there than lossless from Android or a native target. Every pixel still comes back exactly.
 
 **On the JVM and the web, lossy needs Skia.** On the JVM it uses Skia's native library for the machine at run time, which Skiko's `skiko-awt-runtime-<os>-<arch>` artifacts carry and a Compose desktop app already has; on Linux it needs `libGL.so.1`, `libX11.so.6` and `libEGL.so.1`. In the browser, Skia's WebAssembly must have loaded before the first lossy encode, as it has once a Compose app is showing. Lossless uses no Skia on either.
 
@@ -83,7 +84,7 @@ For a WebP from somewhere else, `webp.withWebpMetadata(metadata)` rewrites only 
 
 **`GpsLocation` validates on construction.** A latitude outside -90..90, a longitude outside -180..180, `NaN` in either, or an altitude that is not finite throws `IllegalArgumentException`. Latitude is degrees north and longitude degrees east, so the western and southern hemispheres are negative numbers, not a separate reference letter.
 
-**On iOS, a second static libwebp in the same binary can clash at link time,** for instance one carried by an image library's WebP coder. On Android this library's native code exports only its JNI entry point, and its keep rule for R8 is published with it, so a second libwebp in an Android app does not clash and minification needs nothing from the app.
+**On iOS and the other native targets, a second static libwebp in the same binary can clash at link time,** for instance one carried by an image library's WebP coder. On Android this library's native code exports only its JNI entry point, and its keep rule for R8 is published with it, so a second libwebp in an Android app does not clash and minification needs nothing from the app.
 
 ## What moved, and what it used to be called
 

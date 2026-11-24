@@ -4,7 +4,7 @@ package com.oddlyclever.h3spatial
  * The seam between [H3SpatialService]'s shared logic and each platform's own H3.
  *
  * Every target binds Uber's H3 rather than reimplementing it: the C library through cinterop on iOS,
- * `com.uber:h3` on the JVM and Android, and `h3-js` in the browser. A reimplementation risks the worst
+ * macOS, Linux and Windows, `com.uber:h3` on the JVM and Android, and `h3-js` in the browser. A reimplementation risks the worst
  * outcome for a spatial index — cells that agree *nearly* everywhere, so cross-platform comparison
  * fails only at cell edges, intermittently, in the field.
  *

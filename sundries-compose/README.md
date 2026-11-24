@@ -2,7 +2,7 @@
 
 The Compose Multiplatform parts every app ends up writing for itself: text that copies itself when tapped, modifier and test-tag helpers, colour and size conversions, window-size checks, text effects, and raw text files read with the app's own resources.
 
-**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs. `exposeTestTagsAsResourceIds` is Android only.
+**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs · macOS (arm64), where Compose's support is still experimental. Not Linux or Windows, which Compose UI does not build for. `exposeTestTagsAsResourceIds` is Android only.
 
 **Package:** `com.oddlyclever.sundries`, with text components in `com.oddlyclever.sundries.text`. That departs from this repository's rule of a package named after the module, which would give `com.oddlyclever.sundries.compose`: the shorter package was chosen because every import in an app would otherwise carry the extra word. A Compose-free `sundries` module, if one is ever added, gets a package of its own.
 

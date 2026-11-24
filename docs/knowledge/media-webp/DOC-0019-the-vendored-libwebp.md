@@ -11,22 +11,22 @@ libwebp's encoder source is vendored under [`native/libwebp`](../../../media-web
 
 Only what the build needs is kept: the library sources under `src/` and `sharpyuv/`, and the licence, patent grant and authors list that must travel with anything built from them. Upstream's own build files are removed, since the module builds with its own [`CMakeLists.txt`](../../../media-webp/CMakeLists.txt). libwebp's container libraries, mux and demux, are removed too, because metadata is written in Kotlin; see [Metadata Written in Kotlin](ADR-0011-metadata-written-in-kotlin.md). The decoder is compiled, because parts of the encoder call into it.
 
-The Android and iOS libraries built from it are committed, so a consumer needs no NDK, CMake or network access. Gradle does not build them.
+The Android and native libraries built from it are committed, so a consumer needs no NDK, CMake or network access. Gradle does not build them.
 
 ## The scripts
 
 | Script | What it does |
 |---|---|
 | [`native/update-source.sh`](../../../media-webp/native/update-source.sh) `v1.6.0` | replaces the vendored source with that upstream tag, wholesale, and rewrites `PROVENANCE` |
-| [`native/build-natives.sh`](../../../media-webp/native/build-natives.sh) | rebuilds `libwebp_jni.so` for each Android ABI and `libwebp.a` for each iOS target, and copies the headers cinterop parses |
+| [`native/build-natives.sh`](../../../media-webp/native/build-natives.sh) | rebuilds `libwebp_jni.so` for each Android ABI and `libwebp.a` for each Kotlin/Native target, and copies the headers cinterop parses |
 
 `update-source.sh` replaces each file it writes wholesale, so a local edit to the vendored source is lost on the next update.
 
-`build-natives.sh` needs macOS with Xcode, CMake, and the Android NDK. It finds the NDK through `ANDROID_NDK_HOME`, or the newest one in the Android SDK named by `ANDROID_HOME` or `ANDROID_SDK_ROOT`, and CMake through the `CMAKE` variable, the Android SDK or the `PATH`. It always builds clean, since a CMake cache remembers the path it was made at. It produces:
+`build-natives.sh` needs macOS with Xcode, CMake, the Android NDK for Android, and Kotlin/Native's toolchains in `~/.konan` for the desktop targets, which Gradle downloads the first time it builds one of them. `build-natives.sh android`, `ios` or `desktop`, or any of them together, rebuilds only those groups. It finds the NDK through `ANDROID_NDK_HOME`, or the newest one in the Android SDK named by `ANDROID_HOME` or `ANDROID_SDK_ROOT`, and CMake through the `CMAKE` variable, the Android SDK or the `PATH`. It always builds clean, since a CMake cache remembers the path it was made at. It produces:
 
 - `src/androidMain/jniLibs/<abi>/libwebp_jni.so` for `arm64-v8a`, `armeabi-v7a`, `x86_64` and `x86`, at Android platform 24, the module's minimum SDK, stripped.
-- `src/iosMain/cinterop/libwebp/libs/<target>/libwebp.a` for `iosArm64` and `iosSimulatorArm64`, with a deployment target of iOS 14.0.
-- `src/iosMain/cinterop/libwebp/headers/webp/encode.h` and `types.h`, copied from the vendored source rather than kept by hand, because cinterop parses these headers and links the library, and both must come from the same release.
+- `src/nativeInterop/cinterop/libwebp/libs/<target>/libwebp.a` for `iosArm64` and `iosSimulatorArm64`, with a deployment target of iOS 14.0, for `macosArm64` at macOS 12, Kotlin/Native's minimum, and for `linuxX64`, `linuxArm64` and `mingwX64`, compiled with Kotlin/Native's own clang against the sysroots it links with, so they need no newer glibc or MinGW runtime than the Kotlin code beside them.
+- `src/nativeInterop/cinterop/libwebp/headers/webp/encode.h` and `types.h`, copied from the vendored source rather than kept by hand, because cinterop parses these headers and links the library, and both must come from the same release.
 
 ## Updating libwebp
 

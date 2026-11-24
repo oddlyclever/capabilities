@@ -105,8 +105,9 @@ sealed class ImageProcessingException(
  * Downsizes an image and encodes it, for an upload or a file: a photo from the camera or the gallery made small
  * enough to send, in the format asked for.
  *
- * WebP is encoded by media-webp on every target, with libwebp built in on Android and iOS, so its output does not
- * depend on the device. JPEG and PNG use each platform's own encoder. Images are only ever made smaller, never larger.
+ * WebP is encoded by media-webp on every target, with libwebp built in on Android, iOS and macOS, so its output does
+ * not depend on the device. JPEG and PNG use each platform's own encoder. Images are only ever made smaller, never
+ * larger.
  *
  * A photo is stood upright: one whose EXIF says the camera was held sideways comes out the way it is shown, with its
  * width and height swapped where that turns it a quarter. The EXIF itself is not copied, so the result carries no
@@ -133,8 +134,8 @@ expect class ImageProcessor() {
      * [ImageProcessingException.DecodeFailed] on the other targets; an animated GIF keeps only its first frame on every
      * target. To keep either as it is, read the source with [readSource] and check it with [imageKindOf] first.
      *
-     * @param uri Where the image is: on Android a `content://` or `file://` URI or a path, on iOS and the JVM a
-     *   `file://` URI or a path, and on the web anything an `<img>` can load from this origin (`blob:`, `data:` or a
+     * @param uri Where the image is: on Android a `content://` or `file://` URI or a path, on iOS, macOS and the JVM
+     *   a `file://` URI or a path, and on the web anything an `<img>` can load from this origin (`blob:`, `data:` or a
      *   same-origin URL).
      * @param format The encoding target.
      * @param maxDimension Maximum edge size in pixels.
@@ -174,7 +175,7 @@ expect class ImageProcessor() {
      * deciding whether to convert it, with [imageKindOf], and then hand the same bytes to [compressImage] without
      * reading it twice.
      *
-     * The whole file is read into memory, which the `uri` form of [compressImage] avoids on Android and iOS for a large
+     * The whole file is read into memory, which the `uri` form of [compressImage] avoids on Android, iOS and macOS for a large
      * photo; read a source only when the bytes themselves are wanted.
      */
     suspend fun readSource(uri: String): Result<ByteArray>
