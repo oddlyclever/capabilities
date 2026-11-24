@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
+### Added
+
+- **`sundries-compose`**: `TextShimmer` and `Modifier.shimmer` sweep a soft band of colour across text, or anything else drawn, the way an agent's "Thinking…" line shows work under way. With nothing set, `TextShimmer` is the muted look, its text at half colour brought back to full as the band crosses; a list of colours gives a colour shimmer whose passes take each colour in turn. `ShimmerMotion` chooses a one-way `Sweep` or a back-and-forth `Bounce`, and the band follows the layout direction. Only drawing changes as it moves, so it recomposes nothing. While it runs, `TextShimmer` is an indeterminate progress bar to accessibility services.
+
 ## [0.0.9] - 2026-11-15
 
 ### Added

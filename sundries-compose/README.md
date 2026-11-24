@@ -36,6 +36,10 @@ Modifier.testTagIfNotNull(testTag, "title")
 // One link of a modifier chain, on a condition.
 Modifier.addIf(enabled) { clickable(onClick = onOpen) }
 
+// Work under way: the band sweeps across the text, muted by default, or rotating through the app's colours.
+TextShimmer("Thinking for 9s")
+TextShimmer("Thinking", colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary))
+
 // A raw text file of the app's, read with the app's own generated Res.
 val terms = rawStringResource("files/legal/terms.md", Res::readBytes)
 ```

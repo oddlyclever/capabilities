@@ -12,8 +12,9 @@ description: >-
   helpers apps keep rewriting: conditional modifiers (addIf, addIfNotNull,
   addIfNull), optional test tags and Android resource-id test tags, ripple-free
   clicks, hex colour parsing and formatting, pixel, dp and sp conversions,
-  window-width checks for multi-pane layouts, glowing text, and reading a
-  raw text file from the app's own Compose resources.
+  window-width checks for multi-pane layouts, glowing text, shimmering
+  "Thinking…" text that sweeps a band of colour across the letters, and
+  reading a raw text file from the app's own Compose resources.
 license: Apache-2.0
 metadata:
   version: "0.0.9"
@@ -65,4 +66,8 @@ Button(onClick = { copier.copy(orderId) }) {
 - **Expecting `addIfNull` to hand over the value.** It runs only when the value is null, so its lambda takes nothing; `addIfNotNull` is the one that passes the value in.
 - **Keeping `rememberIsMultiPane()` in a variable across recompositions.** It follows the window as it is resized or turned.
 - **`String.toColor` with a colour name.** It reads `#RRGGBB` and `#AARRGGBB` only, and answers `Color.Unspecified` for anything else, "red" included.
+- **A `TextShimmer` whose band does not show.** The band recolours the letters to `colors`, so a `color` as bright as the band hides it. Keep `color` dimmer, as the default half-colour does, or pass a band colour that stands out from the text.
+- **Dimming content with alpha under `Modifier.shimmer`.** The band keeps each pixel's opacity, so a half-transparent text stays half-transparent where the band crosses it. Draw the content opaque and pass the dim colour as `base`.
+- **Leaving a shimmer running after the work is done.** It runs while it is on screen; pass `active = false`, or show plain text, once the work it stands for has finished.
+- **Expecting `Modifier.shimmer` to draw over the background.** It recolours only what the content after it in the chain draws; put it before `background` to shimmer a block, after it to shimmer only the content.
 - **Expecting `rawStringResource` to find the app's files by itself.** It reads with the reader it is given; pass the app's own `Res::readBytes`. A library's `Res` reads only that library's files.

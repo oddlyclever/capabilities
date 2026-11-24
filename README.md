@@ -24,7 +24,7 @@ A module that cannot support one of these says which and why, in its own README 
 | [`platform`](platform) | What must exist once in a process: on Android, the application context and the activity in front, captured at start-up so no library has to ask for them; and `OsFamily`. |
 | [`media-image`](media-image) | Images downsized and encoded for an upload or a file, as WebP, JPEG or PNG, with the same call on every target. |
 | [`media-webp`](media-webp) | WebP encoding, lossy or lossless, with GPS position and capture time in the file; the same call on every target, with libwebp built in on Android and iOS. |
-| [`sundries-compose`](sundries-compose) | The Compose parts every app ends up writing for itself: `TextCopy`, text that copies itself, with the web fallback for plain http; modifier and test-tag helpers, colour and size conversions, window-size checks and glowing text. |
+| [`sundries-compose`](sundries-compose) | The Compose parts every app ends up writing for itself: `TextCopy`, text that copies itself, with the web fallback for plain http; modifier and test-tag helpers, colour and size conversions, window-size checks, glowing and shimmering text. |
 
 ## How the modules are shaped
 
