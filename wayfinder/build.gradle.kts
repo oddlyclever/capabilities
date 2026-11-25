@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -72,19 +71,6 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.compose.ui.test)
-            }
-        }
-    }
-
-    // Workaround for KLIB uniqueName clashes across modules in the same repo.
-    // https://youtrack.jetbrains.com/issue/KT-66568
-    metadata {
-        compilations.all {
-            val compilationName = rootProject.name
-            compileTaskProvider.configure {
-                if (this is KotlinCompileCommon) {
-                    moduleName = "${project.group}:${project.name}_$compilationName"
-                }
             }
         }
     }

@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompileCommon
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -121,24 +120,11 @@ kotlin {
             }
         }
     }
-
-    // Workaround for KLIB uniqueName clashes across modules in the same repo.
-    // https://youtrack.jetbrains.com/issue/KT-66568
-    metadata {
-        compilations.all {
-            val compilationName = rootProject.name
-            compileTaskProvider.configure {
-                if (this is KotlinCompileCommon) {
-                    moduleName = "${project.group}:${project.name}_$compilationName"
-                }
-            }
-        }
-    }
 }
 
 // Skia's WebAssembly, which the web tests load. A Compose app's build unpacks it with the app; this module uses Skia
 // without Compose, so its tests unpack it themselves, as test resources. Nothing published carries it.
-val skikoWasmRuntime: Configuration by configurations.creating
+val skikoWasmRuntime: Configuration = configurations.create("skikoWasmRuntime")
 dependencies {
     skikoWasmRuntime(libs.skiko.wasm.runtime)
 }
