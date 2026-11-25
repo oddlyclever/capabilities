@@ -22,9 +22,24 @@ jobs:
     permissions:
       checks: write
       contents: read
+    # Each repository in its own directory, so settings.gradle.kts finds map-view at ../mapview-mobile as it does on a
+    # workstation.
+    defaults:
+      run:
+        working-directory: capabilities
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          path: capabilities
+
+      # map-view is built from source until it publishes from its own repository. Its default branch, so a change
+      # there can break this build without one here.
+      - name: Check out map-view
+        uses: actions/checkout@v4
+        with:
+          repository: coderwise/mapview-mobile
+          path: mapview-mobile
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -42,4 +57,4 @@ jobs:
         uses: mikepenz/action-junit-report@v4
         if: always()
         with:
-          report_paths: '**/build/test-results/**/*.xml'
+          report_paths: 'capabilities/**/build/test-results/**/*.xml'

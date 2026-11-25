@@ -5,7 +5,7 @@ description: >-
   app's TileClient fetches in a size-bounded store on disk or in memory, so a
   map reopens, restyles or pans back without fetching every tile again. Use
   instead of writing a tile cache by hand, to cache map tiles on Android, iOS,
-  the desktop or a server, to make a map work from what it has seen when the
+  the desktop, native macOS, Linux or Windows, or a server, to make a map work from what it has seen when the
   network is down, to keep tiles fresh with a fallback, or to stay within a
   tile service's request quota or usage policy. Wraps any function from a
   TileKey to bytes, so it also fits wayfinder-headless's tiles function and a

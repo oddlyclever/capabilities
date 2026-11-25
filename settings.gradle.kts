@@ -31,6 +31,20 @@ dependencyResolutionManagement {
     }
 }
 
+// map-view, which the wayfinder modules build on, built from a sibling checkout of github.com/coderwise/mapview-mobile
+// until it publishes from that repository. A checkout of it beside this one is required to build. The versions in
+// gradle/libs.versions.toml still name the artifacts, but this build replaces them whatever their version.
+includeBuild("../mapview-mobile") {
+    name = "mapview-mobile"
+    dependencySubstitution {
+        substitute(module("com.coderwise.libs:map-view")).using(project(":map-view"))
+        substitute(module("com.coderwise.libs:map-view-core")).using(project(":map-view-core"))
+        substitute(module("com.coderwise.libs:map-view-tiles")).using(project(":map-view-tiles"))
+        substitute(module("com.coderwise.libs:map-view-tiles-raster")).using(project(":map-view-tiles-raster"))
+        substitute(module("com.coderwise.libs:map-view-tiles-vector")).using(project(":map-view-tiles-vector"))
+    }
+}
+
 // One `include(":<module>")` per module, each a standalone Kotlin Multiplatform library published as
 // `com.oddlyclever:<module>`. A module that drops a standard target says which, and why, beside its line.
 

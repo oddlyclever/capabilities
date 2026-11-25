@@ -1,6 +1,6 @@
 # wayfinder
 
-Maps for Compose Multiplatform. `WayfinderMap` is a map screen's worth of map: tiles, markers, lines, recorded tracks and the user's position, a compass, a scale bar, zoom buttons and attribution, with the camera, gestures and tile pipeline of [map-view](https://github.com/coderwise/libs-mobile) underneath. This root module is what an app uses; the other wayfinder modules each add one thing, and an app takes only the ones it needs.
+Maps for Compose Multiplatform. `WayfinderMap` is a map screen's worth of map: tiles, markers, lines, recorded tracks and the user's position, a compass, a scale bar, zoom buttons and attribution, with the camera, gestures and tile pipeline of [map-view](https://github.com/coderwise/mapview-mobile) underneath. This root module is what an app uses; the other wayfinder modules each add one thing, and an app takes only the ones it needs.
 
 **Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
 

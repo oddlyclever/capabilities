@@ -15,14 +15,15 @@ Some modules also build for native desktop, for command-line tools and desktop a
 | `h3spatial`, `jsonlogic`, `media-webp`, `platform` | yes | yes | yes |
 | `media-image` | yes | no: no image codec in the operating system | no: same |
 | `sundries-compose` | yes | no: Compose UI does not build for it | no: same |
-| `wayfinder` and every `wayfinder-*` module | no: map-view builds for no native desktop target | no: same | no: same |
+| `wayfinder-cache` | yes | yes | yes |
+| `wayfinder` and every other `wayfinder-*` module | no: aughtone's format-readable does not build for it yet | no: Compose UI does not build for it | no: same |
 
 ## Modules
 
 | Module | What it does |
 |---|---|
 | [`h3spatial`](h3spatial) | Uber's H3 hexagonal grid behind one `String`-cell API: indexing, traversal, hierarchy and GeoJSON, with the same answers on every target. |
-| [`wayfinder`](wayfinder) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/libs-mobile): the map, its state, markers, polylines, controls, recorded tracks and the user's position. The root of the wayfinder family. |
+| [`wayfinder`](wayfinder) | Maps for Compose Multiplatform on [map-view](https://github.com/coderwise/mapview-mobile): the map, its state, markers, polylines, controls, recorded tracks and the user's position. The root of the wayfinder family. |
 | [`wayfinder-vector`](wayfinder-vector) | Light and dark styles for map-view's vector tiles, and vector tiles drawn to images on GPUs that cannot draw their paths. |
 | [`wayfinder-raster`](wayfinder-raster) | Raster basemaps for wayfinder: decoded off the main thread, and faded in as they arrive. |
 | [`wayfinder-geojson`](wayfinder-geojson) | GeoJSON on a wayfinder map, from text, a URL or aughtone-types' GeoJSON model. |
@@ -78,13 +79,17 @@ includeBuild("../capabilities") {
 }
 ```
 
-The app keeps depending on the same coordinates, and Gradle builds them from your checkout. To try a local change without a composite build, publish it to your local Maven repository with `./gradlew :example:publishToMavenLocal`.
+The app keeps depending on the same coordinates, and Gradle builds them from your checkout. This build in turn builds map-view from a checkout of [mapview-mobile](https://github.com/coderwise/mapview-mobile), which has to sit beside it as `../mapview-mobile`, until map-view publishes from that repository.
+
+To try a local change without a composite build, publish it to your local Maven repository with `./gradlew :example:publishToMavenLocal`.
 
 ## Building
 
 ```bash
 ./gradlew check
 ```
+
+A checkout of [mapview-mobile](https://github.com/coderwise/mapview-mobile) must sit beside this one, as `../mapview-mobile`: the wayfinder modules build map-view from it until it publishes from that repository.
 
 `check` compiles every target and runs every module's tests. A single module is `./gradlew :<module>:check`.
 

@@ -2,7 +2,7 @@
 
 A tile cache for wayfinder maps, in front of the app's own `TileClient`: a store on disk or in memory, and four ways of sharing the work with the network. It caches the bytes the client returns, before they are decoded, so a change of style redraws without fetching again.
 
-**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs
+**Targets:** JVM · Android · iOS (arm64, simulator) · JS · wasmJs · macOS (arm64) · Linux (x64, arm64) · Windows (x64)
 
 ## Install
 

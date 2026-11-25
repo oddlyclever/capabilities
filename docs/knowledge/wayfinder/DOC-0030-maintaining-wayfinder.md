@@ -7,7 +7,7 @@ Notes for working on the module itself: what it is pinned to, what it copies, an
 
 ## map-view
 
-`mapView` in `gradle/libs.versions.toml` is the one version of map-view, currently 0.3.0. map-view's artifacts are released in lockstep, so the one version covers every artifact of it the wayfinder modules use. wayfinder follows every map-view release.
+`mapView` in `gradle/libs.versions.toml` is the one version of map-view, currently 0.4.0. map-view's artifacts are released in lockstep, so the one version covers every artifact of it the wayfinder modules use. wayfinder follows every map-view release.
 
 map-view is 0.x, and wayfinder exposes `map-view` and `map-view-tiles` as `api`, so their types are part of wayfinder's public API. A map-view release that changes them changes wayfinder's API, and the changelog entry for that release has to say so.
 

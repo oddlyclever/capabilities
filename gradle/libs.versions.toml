@@ -13,7 +13,9 @@ javaVersion = "21"
 android-minSdk = "24"
 android-compileSdk = "37"
 
-agp = "9.5.0"
+# The same as the mapview-mobile checkout's (see settings.gradle.kts): in a composite build two versions of the Android
+# plugin do not recognize each other's Android variants, and map-view's then fails to resolve for android.
+agp = "9.5.2"
 kotlin = "2.4.21"
 vanniktech = "0.37.0"
 # Provisioned repo-wide (the root applies the plugins `apply false`) so modules that need Compose can opt in.
@@ -25,18 +27,19 @@ webpack = "5.111.1"
 
 # map-view, the tiled map :wayfinder builds on. Its family is released in lockstep, so one version covers every
 # artifact of it. Wayfinder stays in step with its releases. It is 0.x and its types are part of wayfinder's public
-# API, so a release that changes them changes wayfinder's too.
-mapView = "0.3.0"
+# API, so a release that changes them changes wayfinder's too. Until map-view publishes from its new repository,
+# settings.gradle.kts builds it from a sibling checkout instead, whatever this says.
+mapView = "0.4.0"
 # :wayfinder-cache's file store, in common code over whatever file system the app hands it.
 okio = "3.18.2"
 # :wayfinder writes the scale bar's label in the reader's locale with it.
 aughtone-format = "4.3.0"
-# :wayfinder finds the reader's locale with it, and :wayfinder-geojson's model is its GeoJSON. The version
-# format-readable is built against.
-aughtone-types = "4.2.0"
+# :wayfinder finds the reader's locale with it, and :wayfinder-geojson's model is its GeoJSON. Newer than the 4.2.0
+# format-readable is built against, so the build resolves this one for both.
+aughtone-types = "4.3.0"
 # :wayfinder-geojson decodes GeoJSON text into aughtone-types' model with it. At least the version aughtone-types
-# brings (1.11.0 for 4.2.0), so the build resolves this one.
-kotlinxSerialization = "1.12.0"
+# brings (1.11.0 for 4.3.0), so the build resolves this one.
+kotlinxSerialization = "1.13.0"
 kotlinxCoroutines = "1.11.0"
 # :media-image's web target: the DOM, for <img> and <canvas>.
 kotlinxBrowser = "0.5.0"
@@ -92,7 +95,7 @@ mapview-tiles-raster = { module = "com.coderwise.libs:map-view-tiles-raster", ve
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 # :wayfinder's map state, and :wayfinder-raster and :wayfinder-vector, which decode and rasterize tiles on Dispatchers.Default.
-# The version map-view 0.3.0 is built with.
+# The version map-view 0.4.0 is built with.
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 # runTest, for the suspending functions the wayfinder modules test.
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }

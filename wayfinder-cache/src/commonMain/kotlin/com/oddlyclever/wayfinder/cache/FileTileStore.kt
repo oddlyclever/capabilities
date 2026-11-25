@@ -17,7 +17,7 @@ import okio.Path
  * all, the least recently used going first.
  *
  * Taking the [fileSystem] rather than reaching for one is what keeps this in common code: on
- * Android, iOS and the desktop it is `FileSystem.SYSTEM` over a directory the app chooses — the
+ * Android, iOS, the desktop and native macOS, Linux and Windows it is `FileSystem.SYSTEM` over a directory the app chooses — the
  * app's cache directory, so the system may reclaim it — and the browser has no file system to give
  * it, so a web build uses a [MemoryTileStore] instead.
  *

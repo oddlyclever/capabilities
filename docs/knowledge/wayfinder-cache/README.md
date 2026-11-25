@@ -10,7 +10,7 @@ What is cached is the bytes, before they are decoded. A vector basemap that chan
 
 ## Stores
 
-- **`FileTileStore(fileSystem, directory, maxBytes)`** keeps one file per tile at `source/z/x/y.tile`, up to `maxBytes` in all, 200 MB by default, dropping the least recently used first. It takes an okio `FileSystem` rather than reaching for one, which keeps it in common code: hand it `FileSystem.SYSTEM` over the app's cache directory on Android, iOS and the desktop. A tile is written beside its place and then moved there, so one being written when the process died is never read back as whole. Recency is kept in memory; after a restart, the order the files were written in stands in for it.
+- **`FileTileStore(fileSystem, directory, maxBytes)`** keeps one file per tile at `source/z/x/y.tile`, up to `maxBytes` in all, 200 MB by default, dropping the least recently used first. It takes an okio `FileSystem` rather than reaching for one, which keeps it in common code: hand it `FileSystem.SYSTEM` over the app's cache directory on Android, iOS, the desktop and native macOS, Linux and Windows. A tile is written beside its place and then moved there, so one being written when the process died is never read back as whole. Recency is kept in memory; after a restart, the order the files were written in stands in for it.
 - **`MemoryTileStore(maxBytes)`** is the same, bounded and least-recently-used, in memory, 64 MB by default. It is what a browser build uses, since there is no file system, and what tests use.
 - **`TileStore`** is the interface both implement, `get`, `put`, `remove` and `clear`, for a store of the app's own. A tile is addressed by its source and its `TileKey`, never by a hash, so two tiles can never be mistaken for one another.
 
