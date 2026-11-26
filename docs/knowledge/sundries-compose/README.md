@@ -48,11 +48,17 @@ A new page about this module alone goes here, numbered like every other document
 
 ## Voice indicator
 
-`VoiceIndicator` is a small drawn sign that a microphone is live, for the inside of a button or beside one. Given a loudness level from 0 to 1 it rests almost still in silence and moves with the voice, rising quickly and falling slowly; given `null` it moves by itself, for when an app has no measure of the sound. `VoicePattern` chooses what it draws: a `Wave` line pinned at both ends, `Bars`, `Dots`, `Rings` or a `Breathing` circle. It draws in one colour and nothing else, carries no semantics, and takes `animated = false` for an app that honours reduced motion.
+`VoiceIndicator` is a small drawn sign that a microphone is live, for the inside of a button or beside one. Given a loudness level from 0 to 1 it rests almost still in silence and moves with the voice, rising quickly and falling slowly; given `null` it moves by itself, for when an app has no measure of the sound. `VoicePattern` chooses what it draws: a `Wave` line pinned at both ends, `Bars`, `Dots`, `Rings` or a `Breathing` circle. It draws in one colour and nothing else, carries no semantics, and takes `animated = false` for an app that honours reduced motion. In a quiet room the `Wave` rolls slowly, one period across, unless `rollsWhenQuiet = false`; `PulseRing`, a separate piece, draws a ring that spreads from a round button's edge and fades, the other sign of a live microphone in silence.
 
 ```kotlin
 VoiceIndicator(level = loudness, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
 VoiceIndicator(level = null, color = accent, pattern = VoicePattern.Rings, modifier = Modifier.size(24.dp))
+
+// A ring spreading from a round button's edge while it listens, behind the button and unclipped.
+Box(contentAlignment = Alignment.Center) {
+    PulseRing(color = accent, active = listening, modifier = Modifier.size(34.dp))
+    MicrophoneButton(/* … */)
+}
 ```
 
-It knows nothing of where the level comes from: an app passes a number as often as it has one, a dozen times a second is plenty, and the indicator smooths it. A level under `gate` counts as silence, so a room's own noise does not move it. Whether the microphone is live should not rest on the indicator alone: the button around it says so in its own state and to a screen reader, and with `animated = false` the pattern is drawn once, at rest.
+It knows nothing of where the level comes from, or of its scale: an app passes a number as often as it has one, a dozen times a second is plenty, and the indicator learns the quietest and loudest it has seen and moves between them, so a soft voice at a weak microphone shows as well as a loud one. A level under `gate` counts as silence, so a room's own noise does not move it. Whether the microphone is live should not rest on the indicator alone: the button around it says so in its own state and to a screen reader, and with `animated = false` the pattern is drawn once, at rest.

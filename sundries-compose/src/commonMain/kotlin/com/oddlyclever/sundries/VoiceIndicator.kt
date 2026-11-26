@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.exp
@@ -69,6 +71,12 @@ enum class VoicePattern {
  *
  * @param level how loud the sound is now, from 0 to 1, or null to move without following anything. Values outside
  *   the range are held to it.
+ * In silence a still line is easy to miss, so by default the [VoicePattern.Wave] keeps rolling slowly while the
+ * room is quiet, one period across its width, and grows into the voice's ripple as someone speaks. Pass
+ * `rollsWhenQuiet = false` for a line that lies flat until there is a voice. [PulseRing] is the other sign for a
+ * quiet room, drawn around the button; the two are separate so an app can use either or both.
+ *
+ * @param rollsWhenQuiet whether the wave keeps rolling in silence. Other patterns ignore it.
  * @param gate how far above the quietest sound heard, as a share of the way to the loudest, still counts as
  *   silence, so the room's own unsteadiness does not move it.
  */
@@ -79,7 +87,8 @@ fun VoiceIndicator(
     modifier: Modifier = Modifier,
     pattern: VoicePattern = VoicePattern.Wave,
     animated: Boolean = true,
-    gate: Float = 0.2f,
+    rollsWhenQuiet: Boolean = true,
+    gate: Float = 0.1f,
 ) {
     val given by rememberUpdatedState(level)
     var frame by remember { mutableStateOf(VoiceFrame()) }
@@ -97,7 +106,7 @@ fun VoiceIndicator(
     Canvas(modifier = modifier) {
         val shown = if (animated) frame else VoiceFrame.still
         when (pattern) {
-            VoicePattern.Wave -> drawWave(shown, color)
+            VoicePattern.Wave -> drawWave(shown, color, rollsWhenQuiet)
             VoicePattern.Bars -> drawBars(shown, color)
             VoicePattern.Dots -> drawDots(shown, color)
             VoicePattern.Rings -> drawRings(shown, color)
@@ -162,14 +171,14 @@ internal data class VoiceFrame(val moved: Float = 0f, val turned: Float = 0f, va
 
         const val ATTACK_MILLIS = 70f
         const val DECAY_MILLIS = 180f
-        const val DRIFT_TURNS_PER_SECOND = 0.6f
+        const val DRIFT_TURNS_PER_SECOND = 0.35f
         const val FASTEST_TURNS_PER_SECOND = 2f
         const val SELF_MOVED = 0.6f
         const val QUIET_FALL_MILLIS = 400f
         const val QUIET_RISE_MILLIS = 12_000f
         const val LOUD_FALL_MILLIS = 6_000f
-        const val LEAST_SPAN = 0.25f
-        const val ROOM_SWAY = 0.08f
+        const val LEAST_SPAN = 0.12f
+        const val ROOM_SWAY = 0.1f
 
         // Every pattern's motion repeats within this many turns, so wrapping here shows no jump.
         const val WRAP_TURNS = 840f
@@ -188,22 +197,45 @@ internal fun gated(level: Float, gate: Float): Float {
  * height it is drawn in; positive is down.
  *
  * It is a sine of [cycles] across the width, under an envelope that is nothing at both ends and whole in the middle,
- * so the ends stay where they are and the swell is in the middle. [amplitude] is its greatest reach.
+ * so the ends stay where they are and the swell is in the middle. The envelope is a plain arch and not its square,
+ * so the swell is broad and the peaks near the ends are not lost. [amplitude] is its greatest reach.
  */
 internal fun wavePoint(across: Float, turned: Float, amplitude: Float, cycles: Float): Float {
-    val bell = sin(PI.toFloat() * across).let { it * it }
+    val bell = sin(PI.toFloat() * across)
     return amplitude * bell * sin(2f * PI.toFloat() * (cycles * across - turned))
 }
 
-/** The wave's reach, as a share of the height: almost flat at rest, a little over a quarter when fully moved. */
-internal fun waveAmplitude(moved: Float): Float = WAVE_REST + (WAVE_FULL - WAVE_REST) * moved.coerceIn(0f, 1f)
+/**
+ * The wave's reach, as a share of the height: almost flat at rest and nearly to the edge when fully moved. It is
+ * meant to be seen and not to be read as a measure, so a moderate voice is drawn well over half way: the curve
+ * lifts the middle of the range and leaves the bottom low, so a room's own sound stays nearly flat.
+ */
+internal fun waveAmplitude(moved: Float): Float {
+    val held = moved.coerceIn(0f, 1f)
+    return WAVE_REST + (WAVE_FULL - WAVE_REST) * (1f - (1f - held) * (1f - held))
+}
 
 private const val WAVE_REST = 0.03f
-private const val WAVE_FULL = 0.27f
+private const val WAVE_FULL = 0.46f
 private const val WAVE_CYCLES = 2.25f
 
-private fun DrawScope.drawWave(frame: VoiceFrame, color: Color) {
-    val amplitude = waveAmplitude(frame.moved)
+/** The quiet roll's reach, as a share of the height: clearly moving, about a third of a voice's. */
+private const val ROLL_REACH = 0.13f
+private const val ROLL_CYCLES = 1f
+
+/**
+ * The wave's reach and how many cycles it has across its width, for a frame [moved] this much: with [rolls], a slow
+ * roll of one period in silence that grows into the voice's ripple, the two blended so there is no jump between
+ * them; without, the voice's ripple alone, almost flat in silence.
+ */
+internal fun waveShape(moved: Float, rolls: Boolean): Pair<Float, Float> {
+    val held = moved.coerceIn(0f, 1f)
+    if (!rolls) return waveAmplitude(held) to WAVE_CYCLES
+    return (ROLL_REACH + (waveAmplitude(held) - ROLL_REACH) * held) to (ROLL_CYCLES + (WAVE_CYCLES - ROLL_CYCLES) * held)
+}
+
+private fun DrawScope.drawWave(frame: VoiceFrame, color: Color, rolls: Boolean) {
+    val (amplitude, cycles) = waveShape(frame.moved, rolls)
     val steps = 40
     fun line(turned: Float, reach: Float, cycles: Float) = Path().apply {
         for (step in 0..steps) {
@@ -214,8 +246,8 @@ private fun DrawScope.drawWave(frame: VoiceFrame, color: Color) {
         }
     }
     // The fainter line is a harmonic drifting the other way, so the two braid as sound does and do not travel together.
-    drawPath(line(-frame.turned * 0.7f + 0.3f, amplitude * 0.7f, WAVE_CYCLES * 1.5f), color.copy(alpha = color.alpha * 0.38f), style = Stroke(size.minDimension / 16f, cap = StrokeCap.Round))
-    drawPath(line(frame.turned, amplitude, WAVE_CYCLES), color, style = Stroke(size.minDimension / 12f, cap = StrokeCap.Round))
+    drawPath(line(-frame.turned * 0.7f + 0.3f, amplitude * 0.7f, cycles * 1.5f), color.copy(alpha = color.alpha * 0.38f), style = Stroke(size.minDimension / 16f, cap = StrokeCap.Round))
+    drawPath(line(frame.turned, amplitude, cycles), color, style = Stroke(size.minDimension / 12f, cap = StrokeCap.Round))
 }
 
 /** Each bar: how tall it gets, of the whole height; how many times it beats in a turn; and where in a beat it starts. */
@@ -272,4 +304,50 @@ private fun DrawScope.drawBreathing(frame: VoiceFrame, color: Color) {
     val swell = 0.45f + 0.45f * (0.35f * breath + 0.65f * frame.moved)
     drawCircle(color.copy(alpha = color.alpha * 0.25f), reach * swell)
     drawCircle(color, reach * swell, style = Stroke(size.minDimension / 14f))
+}
+
+/**
+ * A ring that spreads outward from the edge of what it is laid over and fades, again and again, as from something
+ * sounding: the sign that a microphone is live, for a quiet room where a voice indicator has nothing to show. It
+ * is meant to sit behind a round button the same size, in a `Box` with it, and draws past its own bounds, so
+ * nothing between it and the window may clip it.
+ *
+ * It runs while [active] and draws nothing otherwise. As with [VoiceIndicator], reduced motion is the app's to
+ * honour, by passing `active = false`.
+ *
+ * @param spread how far the ring spreads past the edge, as a share of the radius.
+ */
+@Composable
+fun PulseRing(
+    color: Color,
+    active: Boolean,
+    modifier: Modifier = Modifier,
+    periodMillis: Int = 2_600,
+    spread: Float = 0.3f,
+    width: Dp = 1.5.dp,
+) {
+    require(periodMillis > 0) { "periodMillis must be positive, was $periodMillis" }
+    var phase by remember { mutableStateOf(0f) }
+    if (active) {
+        LaunchedEffect(periodMillis) {
+            val start = withFrameMillis { it }
+            while (true) withFrameMillis { now -> phase = pulsePhase(now - start, periodMillis) }
+        }
+    }
+    Canvas(modifier = modifier) {
+        if (!active) return@Canvas
+        val (scale, alpha) = pulseRing(phase, spread)
+        drawCircle(color.copy(alpha = color.alpha * alpha), size.minDimension / 2f * scale, style = Stroke(width.toPx()))
+    }
+}
+
+/** How far through a pulse of [periodMillis] it is after [elapsedMillis], from 0 to just under 1. */
+internal fun pulsePhase(elapsedMillis: Long, periodMillis: Int): Float = (elapsedMillis.mod(periodMillis.toLong())).toFloat() / periodMillis
+
+/** The ring at [phase] through a pulse: its radius as a share of the edge's, and how strongly it is drawn. */
+internal fun pulseRing(phase: Float, spread: Float): Pair<Float, Float> {
+    val held = phase.coerceIn(0f, 1f)
+    // It eases out as it spreads, and fades as it goes, so it leaves the edge firmly and vanishes softly.
+    val eased = 1f - (1f - held) * (1f - held)
+    return (1f + spread * eased) to (0.6f * (1f - held))
 }

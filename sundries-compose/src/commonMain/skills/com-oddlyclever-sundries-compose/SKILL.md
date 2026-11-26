@@ -100,7 +100,7 @@ VoiceIndicator(level = loudness, color = MaterialTheme.colorScheme.primary, modi
 VoiceIndicator(level = null, color = MaterialTheme.colorScheme.primary, pattern = VoicePattern.Bars, modifier = Modifier.size(20.dp))
 ```
 
-`VoicePattern` is `Wave` (the default), `Bars`, `Dots`, `Rings` or `Breathing`. It carries no semantics, so the button around it says that it is listening, and an app that honours reduced motion passes `animated = false`.
+`VoicePattern` is `Wave` (the default), `Bars`, `Dots`, `Rings` or `Breathing`. It carries no semantics, so the button around it says that it is listening, and an app that honours reduced motion passes `animated = false`. The level need not be fitted to any scale: the indicator learns the quietest and loudest it is given. In silence the wave keeps rolling slowly (`rollsWhenQuiet`, on by default), and `PulseRing`, laid behind a round button in a `Box`, adds a ring spreading from its edge while `active`.
 
 ## Mistakes that compile
 

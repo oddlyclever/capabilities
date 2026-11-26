@@ -41,11 +41,18 @@ class VoiceIndicatorFrameTest {
         var frame = settledIn(0.38f)
         // As measured in a quiet room: the level wanders over about an eighth of the range.
         repeat(240) { step -> frame = frame.advancedBy(16, 0.38f + 0.13f * ((step * 7) % 10) / 10f, 0.2f) }
-        assertTrue(frame.moved < 0.05f, "a room wavering by an eighth moved it ${frame.moved}")
+        assertTrue(frame.moved < 0.1f, "a room wavering by an eighth moved it ${frame.moved}")
+        assertTrue(waveAmplitude(frame.moved) < 0.1f, "a wavering room swung the wave to ${waveAmplitude(frame.moved)}")
         assertEquals(0f, gated(0.2f, 0.2f))
         assertEquals(1f, gated(1f, 0.2f))
         assertEquals(1f, gated(7f, 0.2f), "a level over the range was not held to it")
         assertEquals(0f, gated(-3f, 0.2f), "a level under the range was not held to it")
+    }
+
+    @Test
+    fun aQuietVoiceJustOverTheRoomIsSeenClearly() {
+        val voice = after(1_000, 0.5f, from = settledIn(0.38f)).moved
+        assertTrue(waveAmplitude(voice) > 0.3f, "a voice just over the room swung the wave only ${waveAmplitude(voice)}")
     }
 
     @Test
@@ -83,7 +90,7 @@ class VoiceIndicatorFrameTest {
         val room = settledIn(0.3f)
         val drifting = after(1_000, 0.3f, from = room).turned - room.turned
         val driven = after(1_000, 0.8f, from = room).turned - room.turned
-        assertTrue(drifting in 0.5f..0.7f, "drifted $drifting turns in a second of silence")
+        assertTrue(drifting in 0.3f..0.45f, "drifted $drifting turns in a second of silence")
         assertTrue(driven > drifting && driven <= 2.05f, "turned $driven in a second of loud speech")
     }
 
@@ -127,5 +134,34 @@ class VoiceIndicatorFrameTest {
     fun theMiddleBarIsTheTallest() {
         val still = VoiceFrame(moved = 0f)
         assertTrue(barHeight(2, still) > barHeight(0, still) && barHeight(2, still) > barHeight(4, still))
+    }
+
+    @Test
+    fun inSilenceTheWaveRollsOnePeriodAndGrowsIntoTheVoicesRipple() {
+        val (quietReach, quietCycles) = waveShape(0f, rolls = true)
+        assertTrue(quietReach in 0.1f..0.2f, "rolling in silence it reaches $quietReach")
+        assertEquals(1f, quietCycles, "rolling in silence it has $quietCycles cycles")
+        val (loudReach, loudCycles) = waveShape(1f, rolls = true)
+        assertEquals(waveAmplitude(1f), loudReach, "fully moved it reaches $loudReach")
+        assertEquals(2.25f, loudCycles)
+        // No jump: a little more voice is a little more wave.
+        val (nearReach, _) = waveShape(0.02f, rolls = true)
+        assertTrue(abs(nearReach - quietReach) < 0.02f, "a breath of voice jumped the reach from $quietReach to $nearReach")
+    }
+
+    @Test
+    fun withoutRollingTheWaveLiesAlmostFlatInSilence() {
+        assertTrue(waveShape(0f, rolls = false).first <= 0.04f, "without rolling it reaches ${waveShape(0f, rolls = false).first}")
+    }
+
+    @Test
+    fun theRingSpreadsFromTheEdgeAndFades() {
+        val (startScale, startAlpha) = pulseRing(0f, 0.3f)
+        val (endScale, endAlpha) = pulseRing(0.999f, 0.3f)
+        assertEquals(1f, startScale, "the ring started at $startScale of the edge")
+        assertTrue(endScale in 1.29f..1.3f, "the ring ended at $endScale of the edge")
+        assertTrue(startAlpha > 0.5f && endAlpha < 0.01f, "the ring was drawn at $startAlpha and ended at $endAlpha")
+        assertEquals(0.5f, pulsePhase(1_300, 2_600))
+        assertEquals(0f, pulsePhase(2_600, 2_600), "a whole period did not start the pulse again")
     }
 }
