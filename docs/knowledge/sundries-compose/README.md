@@ -45,3 +45,14 @@ Each platform's clipboard:
 `Modifier.shimmer` is the same band on anything drawn: an icon, a placeholder, a whole row. The band recolours only the pixels the content drew, so it follows the letters or the icon's shape, never the box around them. A band never changes how opaque a pixel is, so content dimmed with its own alpha would stay faint inside the band; `base` is the way to dim it instead, recolouring everything the band does not reach, which is how `TextShimmer` gets its muted look. It is half the content's width by default (`band`), crosses in `sweepMillis` and then leaves the content plain for `pauseMillis`. `ShimmerMotion.Sweep` enters at the start edge and leaves at the end edge, right to left in a right-to-left layout; `ShimmerMotion.Bounce` goes and returns, slowing into each edge like a scanner. Only drawing changes as the band moves, so nothing recomposes or measures. Compose Multiplatform has no reduced-motion setting on every target, so an app that honours one passes `active = false` there, which also ends the shimmer when the work is done.
 
 A new page about this module alone goes here, numbered like every other document in the knowledge base. Knowledge that spans several modules goes in the shared sections instead.
+
+## Voice indicator
+
+`VoiceIndicator` is a small drawn sign that a microphone is live, for the inside of a button or beside one. Given a loudness level from 0 to 1 it rests almost still in silence and moves with the voice, rising quickly and falling slowly; given `null` it moves by itself, for when an app has no measure of the sound. `VoicePattern` chooses what it draws: a `Wave` line pinned at both ends, `Bars`, `Dots`, `Rings` or a `Breathing` circle. It draws in one colour and nothing else, carries no semantics, and takes `animated = false` for an app that honours reduced motion.
+
+```kotlin
+VoiceIndicator(level = loudness, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+VoiceIndicator(level = null, color = accent, pattern = VoicePattern.Rings, modifier = Modifier.size(24.dp))
+```
+
+It knows nothing of where the level comes from: an app passes a number as often as it has one, a dozen times a second is plenty, and the indicator smooths it. A level under `gate` counts as silence, so a room's own noise does not move it. Whether the microphone is live should not rest on the indicator alone: the button around it says so in its own state and to a screen reader, and with `animated = false` the pattern is drawn once, at rest.

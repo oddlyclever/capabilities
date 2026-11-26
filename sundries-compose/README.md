@@ -40,6 +40,10 @@ Modifier.addIf(enabled) { clickable(onClick = onOpen) }
 TextShimmer("Thinking for 9s")
 TextShimmer("Thinking", colors = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary))
 
+// A live microphone: a wave line that lies almost flat in silence and moves with the voice. With no level, it moves by itself.
+VoiceIndicator(level = loudness, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+VoiceIndicator(level = null, color = MaterialTheme.colorScheme.primary, pattern = VoicePattern.Rings, modifier = Modifier.size(24.dp))
+
 // A raw text file of the app's, read with the app's own generated Res.
 val terms = rawStringResource("files/legal/terms.md", Res::readBytes)
 ```

@@ -90,6 +90,18 @@ Box(
 
 `sweepMillis`, `pauseMillis` and `band` (a fraction of the width) tune the timing and the band. Only drawing changes as the band moves, so it costs no recomposition.
 
+A live microphone is shown with `VoiceIndicator`, not with a hand-drawn animation: a small drawing for the inside of a button, in one colour. Pass it the loudness as a number from 0 to 1 and it rests almost still in silence and moves with the voice; pass `null` where the app has no measure of the sound and it moves by itself.
+
+```kotlin
+import com.oddlyclever.sundries.VoiceIndicator
+import com.oddlyclever.sundries.VoicePattern
+
+VoiceIndicator(level = loudness, color = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+VoiceIndicator(level = null, color = MaterialTheme.colorScheme.primary, pattern = VoicePattern.Bars, modifier = Modifier.size(20.dp))
+```
+
+`VoicePattern` is `Wave` (the default), `Bars`, `Dots`, `Rings` or `Breathing`. It carries no semantics, so the button around it says that it is listening, and an app that honours reduced motion passes `animated = false`.
+
 ## Mistakes that compile
 
 - **Leaving `strings` at its default where the label matters.** The defaults say only "Copy" and "Copied", in English. A screen reader user hears nothing else, so pass `CopyStrings` that say what is copied, in the app's language.
